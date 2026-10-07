@@ -1,0 +1,36 @@
+# Dependencies
+node_modules/
+.venv/
+env/
+venv/
+
+# Production build artifacts
+dist/
+build/
+
+# Database files
+*.sqlite
+*.sqlite3
+*.db
+*.db-shm
+*.db-wal
+
+# Environment variables & secrets
+.env
+.env.*
+!.env.example
+
+# Python cache & testing
+__pycache__/
+*.py[cod]
+*$py.class
+.pytest_cache/
+
+# Superpowers temporary
+.superpowers/sdd/
+
+# Operating system / IDE artifacts
+.DS_Store
+Thumbs.db
+.vscode/
+.idea/

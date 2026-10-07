@@ -1,0 +1,14 @@
+node_modules/
+dist/
+*.sqlite
+*.sqlite3
+*.db
+*.db-shm
+*.db-wal
+.DS_Store
+.env
+.superpowers/sdd/
+.venv/
+__pycache__/
+*.pyc
+.pytest_cache/

@@ -1,0 +1,16 @@
+{
+  "name": "eventflow",
+  "version": "1.0.0",
+  "private": true,
+  "description": "EventFlow: Smart Event Coordination Platform for College Events",
+  "scripts": {
+    "dev": "concurrently -n \"SERVER,CLIENT\" -c \"blue,magenta\" \"npm run server\" \"npm run client\"",
+    "server": ".venv\\Scripts\\python server/run.py",
+    "client": "npm --prefix client run dev",
+    "build": "npm --prefix client run build",
+    "test": ".venv\\Scripts\\pytest server/tests"
+  },
+  "devDependencies": {
+    "concurrently": "^8.2.2"
+  }
+}

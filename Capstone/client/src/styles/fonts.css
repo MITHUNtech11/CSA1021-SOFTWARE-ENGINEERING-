@@ -1,0 +1,22 @@
+/* Akira Expanded Display Font Definition with fallback */
+@font-face {
+  font-family: 'Akira';
+  src: local('Akira Expanded'), local('Akira-Expanded'), local('AkiraExpanded-SuperBold');
+  font-weight: 800 900;
+  font-style: normal;
+  font-display: swap;
+}
+
+.font-display {
+  font-family: 'Akira', 'Poppins', -apple-system, BlinkMacSystemFont, sans-serif;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+}
+
+.font-heading {
+  font-family: 'Poppins', -apple-system, BlinkMacSystemFont, sans-serif;
+}
+
+.font-sans {
+  font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+}
