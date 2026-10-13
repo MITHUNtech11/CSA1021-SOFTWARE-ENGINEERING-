@@ -21,7 +21,7 @@ export default function EventFilters({
   totalCount
 }) {
   return (
-    <div className="bg-white rounded-2xl p-4 sm:p-5 border border-slate-200/80 shadow-sm space-y-4">
+    <div className="bg-white rounded-3xl p-5 sm:p-6 border border-slate-200/80 shadow-sm space-y-4">
       
       {/* Search Bar & Status Filter */}
       <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-3">
@@ -34,7 +34,7 @@ export default function EventFilters({
             value={search}
             onChange={(e) => setSearch(e.target.value)}
             placeholder="Search by event title, venue, coordinator, or keywords..."
-            className="w-full pl-10 pr-9 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-sm font-sans focus:outline-none focus:ring-2 focus:ring-brand-500/20 focus:border-brand-500 transition-all text-slate-800 placeholder:text-slate-400"
+            className="w-full pl-10 pr-9 py-2.5 bg-slate-50 border border-slate-200 rounded-2xl text-xs sm:text-sm font-normal focus:outline-none focus:ring-2 focus:ring-brand-500/20 focus:border-brand-500 transition-all text-slate-800 placeholder:text-slate-400"
           />
           {search && (
             <button
@@ -48,7 +48,7 @@ export default function EventFilters({
 
         {/* Status Dropdown */}
         <div className="flex items-center gap-2 shrink-0">
-          <div className="flex items-center gap-1.5 px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl text-xs font-heading font-medium text-slate-700">
+          <div className="flex items-center gap-1.5 px-3.5 py-2.5 bg-slate-50 border border-slate-200 rounded-2xl text-xs font-medium text-slate-700">
             <SlidersHorizontal className="w-3.5 h-3.5 text-slate-400" />
             <span>Status:</span>
             <select
@@ -76,13 +76,13 @@ export default function EventFilters({
               <button
                 key={cat}
                 onClick={() => setSelectedCategory(cat)}
-                className={`px-3 py-1.5 rounded-xl text-xs font-heading font-medium transition-all duration-150 ${
+                className={`px-3.5 py-1.5 rounded-xl text-xs font-medium transition-all duration-150 ${
                   isActive
-                    ? 'bg-brand-600 text-white shadow-sm shadow-brand-600/30 ring-2 ring-brand-600/20'
+                    ? 'bg-gradient-to-r from-brand-600 to-indigo-600 text-white shadow-sm shadow-brand-600/30 ring-2 ring-brand-600/20 font-semibold'
                     : 'bg-slate-100/80 hover:bg-slate-200 text-slate-600 hover:text-slate-900'
                 }`}
               >
-                {cat === 'All' && <Sparkles className="w-3 h-3 inline mr-1" />}
+                {cat === 'All' && <Sparkles className="w-3 h-3 inline mr-1 text-amber-300" />}
                 {cat}
               </button>
             );

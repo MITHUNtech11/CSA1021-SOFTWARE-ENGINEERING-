@@ -11,7 +11,7 @@ export default function EventDetailModal({ event, isOpen, onClose, onRegister })
   const sessions = event.sessions || [];
 
   return (
-    <div className="fixed inset-0 z-50 overflow-y-auto bg-slate-950/70 backdrop-blur-sm flex items-center justify-center p-3 sm:p-4 animate-in fade-in duration-200">
+    <div className="fixed inset-0 z-50 overflow-y-auto bg-slate-950/75 backdrop-blur-md flex items-center justify-center p-3 sm:p-4 animate-in fade-in duration-200">
       <div 
         className="bg-white rounded-3xl max-w-3xl w-full overflow-hidden shadow-2xl border border-slate-200/80 my-8 flex flex-col max-h-[90vh]"
         onClick={(e) => e.stopPropagation()}
@@ -36,10 +36,10 @@ export default function EventDetailModal({ event, isOpen, onClose, onRegister })
 
           {/* Banner Overlays */}
           <div className="absolute bottom-5 left-5 right-5 space-y-2">
-            <span className="inline-block px-3 py-1 rounded-lg text-xs font-heading font-bold uppercase tracking-wider bg-brand-600/90 text-white backdrop-blur-md border border-brand-400/40 shadow-sm">
+            <span className="inline-block px-3 py-1 rounded-xl text-xs font-bold uppercase tracking-wider bg-brand-600/90 text-white backdrop-blur-md border border-brand-400/40 shadow-sm">
               {event.category}
             </span>
-            <h2 className="font-heading font-extrabold text-2xl sm:text-3xl text-white tracking-tight drop-shadow-md">
+            <h2 className="font-extrabold text-2xl sm:text-3xl text-white tracking-tight drop-shadow-md">
               {event.title}
             </h2>
           </div>
@@ -52,7 +52,7 @@ export default function EventDetailModal({ event, isOpen, onClose, onRegister })
           <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
             <div className="p-3.5 rounded-2xl bg-slate-50 border border-slate-200/80">
               <span className="text-[11px] font-medium text-slate-500 uppercase tracking-wider block">Event Date</span>
-              <div className="flex items-center gap-1.5 mt-1 font-heading font-semibold text-slate-800 text-xs sm:text-sm">
+              <div className="flex items-center gap-1.5 mt-1 font-semibold text-slate-800 text-xs sm:text-sm">
                 <Calendar className="w-4 h-4 text-brand-600 shrink-0" />
                 <span>{event.date}</span>
               </div>
@@ -60,7 +60,7 @@ export default function EventDetailModal({ event, isOpen, onClose, onRegister })
 
             <div className="p-3.5 rounded-2xl bg-slate-50 border border-slate-200/80">
               <span className="text-[11px] font-medium text-slate-500 uppercase tracking-wider block">Timings</span>
-              <div className="flex items-center gap-1.5 mt-1 font-heading font-semibold text-slate-800 text-xs sm:text-sm">
+              <div className="flex items-center gap-1.5 mt-1 font-semibold text-slate-800 text-xs sm:text-sm">
                 <Clock className="w-4 h-4 text-brand-600 shrink-0" />
                 <span className="truncate">{event.start_time}</span>
               </div>
@@ -68,7 +68,7 @@ export default function EventDetailModal({ event, isOpen, onClose, onRegister })
 
             <div className="p-3.5 rounded-2xl bg-slate-50 border border-slate-200/80">
               <span className="text-[11px] font-medium text-slate-500 uppercase tracking-wider block">Primary Venue</span>
-              <div className="flex items-center gap-1.5 mt-1 font-heading font-semibold text-slate-800 text-xs sm:text-sm">
+              <div className="flex items-center gap-1.5 mt-1 font-semibold text-slate-800 text-xs sm:text-sm">
                 <MapPin className="w-4 h-4 text-brand-600 shrink-0" />
                 <span className="truncate">{event.venue}</span>
               </div>
@@ -76,7 +76,7 @@ export default function EventDetailModal({ event, isOpen, onClose, onRegister })
 
             <div className="p-3.5 rounded-2xl bg-slate-50 border border-slate-200/80">
               <span className="text-[11px] font-medium text-slate-500 uppercase tracking-wider block">Registration</span>
-              <div className="flex items-center gap-1.5 mt-1 font-heading font-semibold text-slate-800 text-xs sm:text-sm">
+              <div className="flex items-center gap-1.5 mt-1 font-semibold text-slate-800 text-xs sm:text-sm">
                 <Users className="w-4 h-4 text-brand-600 shrink-0" />
                 <span>{registered}/{capacity}</span>
               </div>
@@ -85,8 +85,8 @@ export default function EventDetailModal({ event, isOpen, onClose, onRegister })
 
           {/* Description */}
           <div>
-            <h4 className="font-heading font-bold text-slate-900 text-base mb-2">About This Event</h4>
-            <p className="text-slate-600 text-sm leading-relaxed whitespace-pre-line font-sans">
+            <h4 className="font-bold text-slate-900 text-base mb-2">About This Event</h4>
+            <p className="text-slate-600 text-sm leading-relaxed whitespace-pre-line font-normal">
               {event.description}
             </p>
           </div>
@@ -99,8 +99,8 @@ export default function EventDetailModal({ event, isOpen, onClose, onRegister })
                   <Layers className="w-4 h-4" />
                 </div>
                 <div>
-                  <h4 className="font-heading font-bold text-slate-900 text-base">Rounds & Schedule Breakdown</h4>
-                  <p className="text-xs text-slate-500">Official timeline and designated room venues</p>
+                  <h4 className="font-bold text-slate-900 text-base">Rounds & Schedule Breakdown</h4>
+                  <p className="text-xs text-slate-500 font-normal">Official timeline and designated room venues</p>
                 </div>
               </div>
 
@@ -118,7 +118,7 @@ export default function EventDetailModal({ event, isOpen, onClose, onRegister })
 
                     <div className="p-4 rounded-2xl bg-slate-50 border border-slate-200/70 hover:border-brand-300 hover:shadow-sm transition-all space-y-2">
                       <div className="flex flex-wrap items-center justify-between gap-2">
-                        <span className="font-heading font-bold text-sm text-slate-900">
+                        <span className="font-bold text-sm text-slate-900">
                           {session.round_name}
                         </span>
 
@@ -136,7 +136,7 @@ export default function EventDetailModal({ event, isOpen, onClose, onRegister })
                       </div>
 
                       {session.description && (
-                        <p className="text-xs text-slate-600 leading-relaxed font-sans">
+                        <p className="text-xs text-slate-600 leading-relaxed font-normal">
                           {session.description}
                         </p>
                       )}
@@ -145,7 +145,7 @@ export default function EventDetailModal({ event, isOpen, onClose, onRegister })
                 ))}
               </div>
             ) : (
-              <div className="p-5 rounded-2xl bg-slate-50 border border-dashed border-slate-200 text-center text-xs text-slate-500">
+              <div className="p-5 rounded-2xl bg-slate-50 border border-dashed border-slate-200 text-center text-xs text-slate-500 font-normal">
                 Schedule session timeline will be announced closer to the event date.
               </div>
             )}
@@ -155,8 +155,8 @@ export default function EventDetailModal({ event, isOpen, onClose, onRegister })
           <div className="p-4 rounded-2xl bg-gradient-to-r from-slate-50 to-indigo-50/30 border border-slate-200/80 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
             <div>
               <span className="text-[11px] font-medium uppercase tracking-wider text-slate-500">Faculty / Student Coordinator</span>
-              <p className="font-heading font-bold text-sm text-slate-800 mt-0.5">{event.coordinator_name}</p>
-              <p className="text-xs text-slate-500 font-sans">{event.organizer_name ? `${event.organizer_name} (${event.organizer_department || 'Campus'})` : 'Campus Organizing Committee'}</p>
+              <p className="font-bold text-sm text-slate-800 mt-0.5">{event.coordinator_name}</p>
+              <p className="text-xs text-slate-500 font-normal">{event.organizer_name ? `${event.organizer_name} (${event.organizer_department || 'Campus'})` : 'Campus Organizing Committee'}</p>
             </div>
 
             <div className="flex items-center gap-3 text-xs">
@@ -176,13 +176,13 @@ export default function EventDetailModal({ event, isOpen, onClose, onRegister })
         <div className="p-5 sm:p-6 bg-slate-50 border-t border-slate-200/80 flex items-center justify-between gap-4 shrink-0">
           <div>
             <span className="text-xs text-slate-500 block">Registration Deadline</span>
-            <span className="font-heading font-semibold text-slate-800 text-xs sm:text-sm">{event.registration_deadline}</span>
+            <span className="font-semibold text-slate-800 text-xs sm:text-sm">{event.registration_deadline}</span>
           </div>
 
           <div className="flex items-center gap-3">
             <button
               onClick={onClose}
-              className="px-4 py-2.5 rounded-xl text-xs sm:text-sm font-heading font-medium text-slate-600 hover:bg-slate-200 transition-colors"
+              className="px-4 py-2.5 rounded-xl text-xs sm:text-sm font-medium text-slate-600 hover:bg-slate-200 transition-colors"
             >
               Close
             </button>
@@ -193,10 +193,10 @@ export default function EventDetailModal({ event, isOpen, onClose, onRegister })
                 onRegister(event);
               }}
               disabled={isFull}
-              className={`px-5 py-2.5 rounded-xl text-xs sm:text-sm font-heading font-semibold transition-all flex items-center gap-1.5 shadow-md ${
+              className={`px-5 py-2.5 rounded-xl text-xs sm:text-sm font-semibold transition-all flex items-center gap-1.5 shadow-md ${
                 isFull
                   ? 'bg-slate-200 text-slate-400 cursor-not-allowed'
-                  : 'bg-brand-600 hover:bg-brand-700 text-white shadow-brand-600/30'
+                  : 'bg-gradient-to-r from-brand-600 to-indigo-600 hover:from-brand-700 hover:to-indigo-700 text-white shadow-brand-600/30'
               }`}
             >
               <span>{isFull ? 'Event Full' : 'Register Now'}</span>

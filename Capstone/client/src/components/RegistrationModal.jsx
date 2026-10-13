@@ -54,14 +54,14 @@ export default function RegistrationModal({ event, isOpen, onClose, onRegistrati
   };
 
   return (
-    <div className="fixed inset-0 z-50 overflow-y-auto bg-slate-950/70 backdrop-blur-sm flex items-center justify-center p-3 sm:p-4 animate-in fade-in duration-200">
+    <div className="fixed inset-0 z-50 overflow-y-auto bg-slate-950/75 backdrop-blur-md flex items-center justify-center p-3 sm:p-4 animate-in fade-in duration-200">
       <div 
         className="bg-white rounded-3xl max-w-lg w-full overflow-hidden shadow-2xl border border-slate-200/80 my-8 flex flex-col"
         onClick={(e) => e.stopPropagation()}
       >
         
         {/* Modal Header */}
-        <div className="p-6 bg-gradient-to-r from-navy-900 to-indigo-950 text-white relative">
+        <div className="p-6 bg-gradient-to-r from-navy-900 via-navy-950 to-indigo-950 text-white relative">
           <button
             onClick={onClose}
             className="absolute top-4 right-4 w-8 h-8 rounded-full bg-white/10 hover:bg-white/20 text-white flex items-center justify-center transition-colors"
@@ -69,15 +69,15 @@ export default function RegistrationModal({ event, isOpen, onClose, onRegistrati
             <X className="w-4 h-4" />
           </button>
 
-          <span className="inline-block px-2.5 py-0.5 rounded-md text-[10px] font-heading font-bold uppercase tracking-wider bg-brand-500/30 text-brand-300 border border-brand-500/40 mb-2">
+          <span className="inline-block px-2.5 py-0.5 rounded-md text-[10px] font-bold uppercase tracking-wider bg-brand-500/30 text-brand-300 border border-brand-500/40 mb-2">
             Attendee Registration
           </span>
 
-          <h3 className="font-heading font-bold text-xl sm:text-2xl text-white">
+          <h3 className="font-bold text-xl sm:text-2xl text-white tracking-tight">
             {event.title}
           </h3>
 
-          <div className="flex items-center gap-3 text-xs text-slate-300 mt-2">
+          <div className="flex items-center gap-3 text-xs text-slate-300 mt-2 font-normal">
             <span>📅 {event.date}</span>
             <span>📍 {event.venue}</span>
           </div>
@@ -87,7 +87,7 @@ export default function RegistrationModal({ event, isOpen, onClose, onRegistrati
         <form onSubmit={handleSubmit} className="p-6 sm:p-8 space-y-4">
           
           {error && (
-            <div className="p-3.5 rounded-xl bg-rose-50 border border-rose-200 text-rose-700 text-xs flex items-start gap-2 animate-in fade-in">
+            <div className="p-3.5 rounded-2xl bg-rose-50 border border-rose-200 text-rose-700 text-xs flex items-start gap-2 animate-in fade-in">
               <AlertCircle className="w-4 h-4 text-rose-600 shrink-0 mt-0.5" />
               <span>{error}</span>
             </div>
@@ -95,7 +95,7 @@ export default function RegistrationModal({ event, isOpen, onClose, onRegistrati
 
           {/* Full Name */}
           <div>
-            <label className="block text-xs font-heading font-semibold text-slate-700 mb-1.5">
+            <label className="block text-xs font-semibold text-slate-700 mb-1.5">
               Full Name *
             </label>
             <div className="relative">
@@ -106,7 +106,7 @@ export default function RegistrationModal({ event, isOpen, onClose, onRegistrati
                 value={formData.participant_name}
                 onChange={(e) => setFormData({ ...formData, participant_name: e.target.value })}
                 placeholder="e.g. Aditya Nair"
-                className="w-full pl-10 pr-3.5 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-sm font-sans text-slate-800 focus:outline-none focus:ring-2 focus:ring-brand-500/20 focus:border-brand-500"
+                className="w-full pl-10 pr-3.5 py-2.5 bg-slate-50 border border-slate-200 rounded-2xl text-sm font-normal text-slate-800 focus:outline-none focus:ring-2 focus:ring-brand-500/20 focus:border-brand-500 transition-all"
               />
             </div>
           </div>
@@ -114,7 +114,7 @@ export default function RegistrationModal({ event, isOpen, onClose, onRegistrati
           {/* Email & Phone Grid */}
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-3.5">
             <div>
-              <label className="block text-xs font-heading font-semibold text-slate-700 mb-1.5">
+              <label className="block text-xs font-semibold text-slate-700 mb-1.5">
                 College Email *
               </label>
               <div className="relative">
@@ -125,13 +125,13 @@ export default function RegistrationModal({ event, isOpen, onClose, onRegistrati
                   value={formData.email}
                   onChange={(e) => setFormData({ ...formData, email: e.target.value })}
                   placeholder="student@college.edu"
-                  className="w-full pl-10 pr-3.5 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-sm font-sans text-slate-800 focus:outline-none focus:ring-2 focus:ring-brand-500/20 focus:border-brand-500"
+                  className="w-full pl-10 pr-3.5 py-2.5 bg-slate-50 border border-slate-200 rounded-2xl text-sm font-normal text-slate-800 focus:outline-none focus:ring-2 focus:ring-brand-500/20 focus:border-brand-500 transition-all"
                 />
               </div>
             </div>
 
             <div>
-              <label className="block text-xs font-heading font-semibold text-slate-700 mb-1.5">
+              <label className="block text-xs font-semibold text-slate-700 mb-1.5">
                 Phone Number *
               </label>
               <div className="relative">
@@ -142,7 +142,7 @@ export default function RegistrationModal({ event, isOpen, onClose, onRegistrati
                   value={formData.phone}
                   onChange={(e) => setFormData({ ...formData, phone: e.target.value })}
                   placeholder="+91 98765 43210"
-                  className="w-full pl-10 pr-3.5 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-sm font-sans text-slate-800 focus:outline-none focus:ring-2 focus:ring-brand-500/20 focus:border-brand-500"
+                  className="w-full pl-10 pr-3.5 py-2.5 bg-slate-50 border border-slate-200 rounded-2xl text-sm font-normal text-slate-800 focus:outline-none focus:ring-2 focus:ring-brand-500/20 focus:border-brand-500 transition-all"
                 />
               </div>
             </div>
@@ -150,7 +150,7 @@ export default function RegistrationModal({ event, isOpen, onClose, onRegistrati
 
           {/* College / Institution */}
           <div>
-            <label className="block text-xs font-heading font-semibold text-slate-700 mb-1.5">
+            <label className="block text-xs font-semibold text-slate-700 mb-1.5">
               College / University *
             </label>
             <div className="relative">
@@ -161,7 +161,7 @@ export default function RegistrationModal({ event, isOpen, onClose, onRegistrati
                 value={formData.college}
                 onChange={(e) => setFormData({ ...formData, college: e.target.value })}
                 placeholder="e.g. Campus University of Technology"
-                className="w-full pl-10 pr-3.5 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-sm font-sans text-slate-800 focus:outline-none focus:ring-2 focus:ring-brand-500/20 focus:border-brand-500"
+                className="w-full pl-10 pr-3.5 py-2.5 bg-slate-50 border border-slate-200 rounded-2xl text-sm font-normal text-slate-800 focus:outline-none focus:ring-2 focus:ring-brand-500/20 focus:border-brand-500 transition-all"
               />
             </div>
           </div>
@@ -169,14 +169,14 @@ export default function RegistrationModal({ event, isOpen, onClose, onRegistrati
           {/* Department & Year Grid */}
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-3.5">
             <div>
-              <label className="block text-xs font-heading font-semibold text-slate-700 mb-1.5">
+              <label className="block text-xs font-semibold text-slate-700 mb-1.5">
                 Department *
               </label>
               <div className="relative">
                 <select
                   value={formData.department}
                   onChange={(e) => setFormData({ ...formData, department: e.target.value })}
-                  className="w-full px-3.5 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-xs sm:text-sm font-sans text-slate-800 focus:outline-none focus:ring-2 focus:ring-brand-500/20 focus:border-brand-500 cursor-pointer"
+                  className="w-full px-3.5 py-2.5 bg-slate-50 border border-slate-200 rounded-2xl text-xs sm:text-sm font-normal text-slate-800 focus:outline-none focus:ring-2 focus:ring-brand-500/20 focus:border-brand-500 cursor-pointer"
                 >
                   {DEPARTMENTS.map((dept) => (
                     <option key={dept} value={dept}>{dept}</option>
@@ -186,14 +186,14 @@ export default function RegistrationModal({ event, isOpen, onClose, onRegistrati
             </div>
 
             <div>
-              <label className="block text-xs font-heading font-semibold text-slate-700 mb-1.5">
+              <label className="block text-xs font-semibold text-slate-700 mb-1.5">
                 Year of Study *
               </label>
               <div className="relative">
                 <select
                   value={formData.year_of_study}
                   onChange={(e) => setFormData({ ...formData, year_of_study: e.target.value })}
-                  className="w-full px-3.5 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-xs sm:text-sm font-sans text-slate-800 focus:outline-none focus:ring-2 focus:ring-brand-500/20 focus:border-brand-500 cursor-pointer"
+                  className="w-full px-3.5 py-2.5 bg-slate-50 border border-slate-200 rounded-2xl text-xs sm:text-sm font-normal text-slate-800 focus:outline-none focus:ring-2 focus:ring-brand-500/20 focus:border-brand-500 cursor-pointer"
                 >
                   {YEARS.map((yr) => (
                     <option key={yr} value={yr}>{yr}</option>
@@ -204,7 +204,7 @@ export default function RegistrationModal({ event, isOpen, onClose, onRegistrati
           </div>
 
           {/* Notice info */}
-          <p className="text-[11px] text-slate-500 pt-1">
+          <p className="text-[11px] text-slate-500 pt-1 font-normal">
             By registering, a unique digital QR pass will be issued immediately for access at the venue entrance.
           </p>
 
@@ -213,7 +213,7 @@ export default function RegistrationModal({ event, isOpen, onClose, onRegistrati
             <button
               type="button"
               onClick={onClose}
-              className="px-4 py-2.5 rounded-xl text-xs sm:text-sm font-heading font-medium text-slate-600 hover:bg-slate-100 transition-colors"
+              className="px-4 py-2.5 rounded-xl text-xs sm:text-sm font-medium text-slate-600 hover:bg-slate-100 transition-colors"
             >
               Cancel
             </button>
@@ -221,7 +221,7 @@ export default function RegistrationModal({ event, isOpen, onClose, onRegistrati
             <button
               type="submit"
               disabled={loading}
-              className="px-5 py-2.5 rounded-xl text-xs sm:text-sm font-heading font-semibold bg-brand-600 hover:bg-brand-700 text-white shadow-md shadow-brand-600/30 transition-all flex items-center gap-2 disabled:opacity-75"
+              className="px-5 py-2.5 rounded-2xl text-xs sm:text-sm font-semibold bg-gradient-to-r from-brand-600 to-indigo-600 hover:from-brand-700 hover:to-indigo-700 text-white shadow-md shadow-brand-600/30 transition-all flex items-center gap-2 disabled:opacity-75"
             >
               {loading ? (
                 <>

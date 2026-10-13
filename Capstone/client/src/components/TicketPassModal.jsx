@@ -21,11 +21,11 @@ export default function TicketPassModal({ ticket, isOpen, onClose }) {
         
         {/* Top Celebration Message */}
         <div className="text-center mb-4 space-y-1">
-          <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-emerald-500/20 text-emerald-300 border border-emerald-500/30 text-xs font-heading font-semibold shadow-lg">
+          <div className="inline-flex items-center gap-1.5 px-3.5 py-1 rounded-full bg-emerald-500/20 text-emerald-300 border border-emerald-500/30 text-xs font-semibold shadow-lg">
             <CheckCircle className="w-3.5 h-3.5 text-emerald-400" />
             <span>Registration Confirmed!</span>
           </div>
-          <p className="text-xs text-slate-300">Your verified campus boarding ticket is ready.</p>
+          <p className="text-xs text-slate-300 font-normal">Your verified campus boarding ticket is ready.</p>
         </div>
 
         {/* Physical Boarding Pass Card */}
@@ -44,7 +44,7 @@ export default function TicketPassModal({ ticket, isOpen, onClose }) {
             </button>
 
             <div className="flex items-center justify-between mb-3">
-              <span className="font-display text-xs tracking-widest text-indigo-300 uppercase">
+              <span className="font-extrabold text-xs tracking-widest text-indigo-300 uppercase">
                 EVENTFLOW PASS
               </span>
               <span className="text-[10px] uppercase font-mono tracking-wider px-2 py-0.5 rounded-full bg-emerald-500/20 text-emerald-300 border border-emerald-500/30">
@@ -52,11 +52,11 @@ export default function TicketPassModal({ ticket, isOpen, onClose }) {
               </span>
             </div>
 
-            <h3 className="font-heading font-bold text-xl text-white leading-tight">
+            <h3 className="font-bold text-xl text-white leading-tight tracking-tight">
               {ticket.event_title || ticket.title}
             </h3>
 
-            <div className="mt-3 flex items-center gap-3 text-xs text-slate-300">
+            <div className="mt-3 flex items-center gap-3 text-xs text-slate-300 font-normal">
               <span className="flex items-center gap-1">
                 <Calendar className="w-3.5 h-3.5 text-brand-400" />
                 {ticket.event_date || ticket.date}
@@ -82,22 +82,22 @@ export default function TicketPassModal({ ticket, isOpen, onClose }) {
             <div className="grid grid-cols-2 gap-3 text-left">
               <div>
                 <span className="text-[10px] font-medium uppercase tracking-wider text-slate-400 block">Attendee Name</span>
-                <span className="font-heading font-bold text-slate-800 text-sm">{ticket.participant_name}</span>
+                <span className="font-bold text-slate-800 text-sm">{ticket.participant_name}</span>
               </div>
 
               <div>
                 <span className="text-[10px] font-medium uppercase tracking-wider text-slate-400 block">Department</span>
-                <span className="font-heading font-medium text-slate-800 text-xs truncate block">{ticket.department}</span>
+                <span className="font-medium text-slate-800 text-xs truncate block">{ticket.department}</span>
               </div>
 
               <div>
                 <span className="text-[10px] font-medium uppercase tracking-wider text-slate-400 block">Institution</span>
-                <span className="font-sans text-slate-700 text-xs truncate block">{ticket.college}</span>
+                <span className="font-normal text-slate-700 text-xs truncate block">{ticket.college}</span>
               </div>
 
               <div>
                 <span className="text-[10px] font-medium uppercase tracking-wider text-slate-400 block">Year of Study</span>
-                <span className="font-sans text-slate-700 text-xs">{ticket.year_of_study || 'Student'}</span>
+                <span className="font-normal text-slate-700 text-xs">{ticket.year_of_study || 'Student'}</span>
               </div>
             </div>
 
@@ -105,7 +105,7 @@ export default function TicketPassModal({ ticket, isOpen, onClose }) {
             <div className="flex flex-col items-center justify-center p-4 bg-slate-50 rounded-2xl border border-slate-200/80">
               <div 
                 dangerouslySetInnerHTML={{ __html: qrSvgString }} 
-                className="w-40 h-40 flex items-center justify-center bg-white p-2 rounded-xl border border-slate-200 shadow-sm"
+                className="w-40 h-40 flex items-center justify-center bg-white p-2 rounded-2xl border border-slate-200 shadow-sm"
               />
 
               <div className="mt-3 text-center">
@@ -116,7 +116,7 @@ export default function TicketPassModal({ ticket, isOpen, onClose }) {
               </div>
             </div>
 
-            <div className="flex items-center justify-center gap-1.5 text-[11px] text-slate-500 text-center">
+            <div className="flex items-center justify-center gap-1.5 text-[11px] text-slate-500 text-center font-normal">
               <ShieldCheck className="w-3.5 h-3.5 text-brand-600" />
               <span>Present this pass or barcode for rapid check-in at the venue.</span>
             </div>
@@ -127,14 +127,14 @@ export default function TicketPassModal({ ticket, isOpen, onClose }) {
           <div className="p-4 bg-slate-50 border-t border-slate-100 flex items-center justify-between gap-3 print:hidden">
             <button
               onClick={onClose}
-              className="px-4 py-2 rounded-xl text-xs font-heading font-medium text-slate-600 hover:bg-slate-200 transition-colors"
+              className="px-4 py-2 rounded-xl text-xs font-medium text-slate-600 hover:bg-slate-200 transition-colors"
             >
               Done
             </button>
 
             <button
               onClick={handlePrint}
-              className="px-4 py-2 rounded-xl text-xs font-heading font-semibold bg-brand-600 hover:bg-brand-700 text-white shadow-sm flex items-center gap-1.5 transition-all"
+              className="px-4 py-2 rounded-xl text-xs font-semibold bg-gradient-to-r from-brand-600 to-indigo-600 hover:from-brand-700 hover:to-indigo-700 text-white shadow-sm flex items-center gap-1.5 transition-all"
             >
               <Printer className="w-3.5 h-3.5" />
               <span>Print / Save Pass</span>
