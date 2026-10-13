@@ -5,93 +5,112 @@
 [![React](https://img.shields.io/badge/React-18.3-61DAFB.svg)](https://react.dev/)
 [![Vite](https://img.shields.io/badge/Vite-6.1-646CFF.svg)](https://vitejs.dev/)
 [![Tailwind CSS](https://img.shields.io/badge/Tailwind_CSS-3.4-38B2AC.svg)](https://tailwindcss.com/)
-[![SQLite](https://img.shields.io/badge/SQLite-3-003B57.svg)](https://www.sqlite.org/)
+[![Supabase](https://img.shields.io/badge/Supabase-Cloud%20Postgres-3ECF8E.svg)](https://supabase.com/)
+[![Typography](https://img.shields.io/badge/Typography-Poppins%20(300--900)-indigo.svg)](https://fonts.google.com/specimen/Poppins)
 [![Tests](https://img.shields.io/badge/Pytest-28%20Passed-brightgreen.svg)](server/tests)
 
-**EventFlow** is an end-to-end, full-stack digital event coordination and management ecosystem engineered specifically for university campuses. It bridges the operational divide between student event organizers, academic departments, and attendees by streamlining event discovery, automated multi-round registration, digital QR ticketing, interactive venue navigation, live campus broadcasts, and real-time administrative analytics.
+**EventFlow** is an enterprise-grade, full-stack digital campus event coordination and operational platform engineered for university ecosystems. It unites student organizers, academic departments, and attendees into a unified digital workspace—streamlining event discovery, multi-round schedule navigation, digital QR ticketing, rapid check-in verification, priority emergency broadcasts, and real-time analytics.
+
+EventFlow features a resilient **dual-mode architecture** powered by **Supabase Cloud PostgreSQL** with Row-Level Security (RLS) policies alongside an automated, seamless fallback to a local **FastAPI + SQLite** backend engine. The user interface is crafted with a complete 6-tier **Poppins typography hierarchy** (weights 300 to 900), modern glassmorphism, vivid gradients, and fluid micro-interactions.
 
 ---
 
 ## 📌 Problem Statement
 
-### 1. Context & Background
-University campuses host a myriad of extracurricular and co-curricular activities every semester—including national hackathons, technical symposiums, research workshops, guest lectures, cultural fests, and athletic tournaments. These events involve hundreds to thousands of student participants across multiple departments, venues, and time slots.
+### 1. Context & Campus Operations
+Modern university campuses host dozens of extracurricular and co-curricular programs each semester—ranging from 36-hour hackathons and technical symposiums to research workshops, guest lectures, cultural galas, and athletic tournaments. These events coordinate thousands of students, faculty mentors, and venues across academic departments.
 
-### 2. The Core Problem & Challenges
-Despite the volume and importance of campus events, traditional coordination mechanisms remain severely fragmented, inefficient, and manual:
-- **Disjointed Discovery & Missed Opportunities**: Event notifications are typically scattered across disparate WhatsApp groups, Instagram stories, physical notice boards, and unstructured mass emails. Students frequently miss registration deadlines or overlap conflicting schedules.
-- **Manual, Cumbersome Registration**: Organizers rely on generic Google Forms that do not support automated capacity capping, real-time ticket generation, or validation against duplicate entries.
-- **Physical Ticket Inefficiencies & Long Queues**: Paper passes or PDF screenshots cause bottlenecks at venue check-in counters. Verifying registrant eligibility manually is time-consuming and error-prone.
-- **Multi-Round / Multi-Session Tracking Difficulties**: Technical hackathons and multi-day conferences often feature multiple rounds (e.g., screening quizzes, prototype demos, final presentations) hosted across various campus rooms and labs. Participants struggle to track when and where they need to report.
-- **Lack of Unified Real-Time Communication**: In the event of emergency schedule changes, venue shifts, or round delays, organizers lack an instantaneous broadcast channel targeted to specific event attendees or the campus community.
-- **Absent Administrative Analytics**: Department heads and faculty coordinators lack unified visibility into participant turnout, department-wise participation ratios, capacity utilization, and attendance validation without laborious manual spreadsheet reconciliation.
+### 2. Operational Challenges
+Traditional campus event coordination is fraught with structural inefficiencies:
+- **Disjointed Discovery & Scheduling Conflicts**: Announcements are scattered across transient social media stories, messaging chats, and physical notice boards. Students miss registration deadlines or double-book overlapping schedules.
+- **Manual, Uncapped Registration**: Standard Google Forms lack real-time capacity capping, duplicate prevention, and automated credential generation.
+- **Check-In Bottlenecks & Long Queues**: Paper passes and unverified screenshots cause delays at auditorium entrances.
+- **Multi-Round / Multi-Room Session Tracking**: Multi-track hackathons and multi-day symposia feature distinct rounds (preliminary screening, mentoring, semifinals, final pitching) held across varied campus halls. Attendees frequently lose track of reporting venues.
+- **Fragmented Emergency Communication**: When rooms change or round timings shift, organizers lack an instantaneous bulletin broadcast directly on the participant portal.
+- **Absent Executive Analytics**: Faculty leads lack real-time visibility into attendance rates, department engagement distributions, and capacity utilization.
 
 ### 3. The Solution: EventFlow
-**EventFlow** solves these challenges by providing a centralized, resilient web platform featuring:
-1. **Public Participant Portal**: A categorized, searchable event hub with real-time seat availability, multi-round agenda visualization, instant registration, and downloadable digital QR passes.
-2. **Organizer Command Center**: A comprehensive administrative dashboard featuring dynamic event and round builders, attendee roster management with 1-click CSV export, priority broadcast notifications, and a simulated QR check-in verification scanner.
-3. **High-Performance Architecture**: Powered by a Python FastAPI asynchronous backend, lightweight SQLite relational database with WAL mode and self-healing schema migration, and a React + Vite frontend styled with Tailwind CSS.
+EventFlow solves these operational challenges through:
+1. **Public Participant Portal**: Searchable event catalog with category filters, dynamic capacity indicators, interactive multi-round session timelines, and instant verifiable QR ticket generation.
+2. **Digital Pass Management**: "My Passes" portal for participants to retrieve and display their digital QR credentials with one click.
+3. **Organizer & Admin SaaS Dashboard**: Centralized command center for event and multi-round creation, attendee roster management, 1-click UTF-8 CSV exports, priority broadcasts, and a simulated optical QR check-in scanner.
+4. **Cloud Database with Resilient Failover**: Direct Supabase Cloud PostgreSQL integration via `@supabase/supabase-js` with RLS security policies, coupled with transparent local fallback to FastAPI + SQLite.
 
 ---
 
-## 🚀 Key Features
+## 🎨 Poppins Typography & Modern Design System
 
-### 🧑‍🎓 Public Participant Portal
-- **Centralized Event Discovery**: Search and filter events by keyword, category (*Technical*, *Hackathon*, *Cultural*, *Sports*, *Workshop*, *Seminar*), and status (*Upcoming*, *Ongoing*).
-- **Interactive Multi-Round Timeline**: Dynamic breakdown of event rounds and workshop sessions displaying room allocations, start/end times, and round descriptions.
-- **Automated Digital QR Passes**: Instant verifiable SVG/Canvas QR ticket generation (`EVF-2026-XXXX`) containing participant and event metadata upon successful registration.
-- **"My Tickets" Portal**: Quick retrieval of all active and past registered passes by entering student email.
-- **Real-Time Capacity Guards**: Live capacity meters displaying remaining seats; prevents over-registration once full.
+EventFlow incorporates a cohesive, calibrated **Poppins typography scale** across all UI surfaces:
 
-### 🛠️ Organizer & Admin Dashboard
-- **Executive Analytics Overview**: High-level KPIs tracking total events, active registrations, checked-in attendees, remaining capacity, department distributions, and category breakdowns.
-- **Event Lifecycle Management**: Full CRUD operations for creating, updating, and archiving events with custom banners, coordinators, and multi-round sessions.
-- **Attendee Roster & 1-Click CSV Export**: Comprehensive registrant table with search, attendance state toggles (`Registered` ↔ `Checked In`), and instant UTF-8 CSV roster download.
-- **QR Check-In Scanner Simulation**: Fast ticket verification interface that validates ticket codes and records timestamps automatically.
-- **Campus Broadcast Center**: Push campus-wide announcements or event-specific notifications categorized by priority (*Info*, *Update*, *Urgent*).
+| Weight Tier | Token | Usage & Scope |
+|---|---|---|
+| **Light** (`300`) | `font-light` | Timestamps, room codes, subtle metadata badges, secondary help text. |
+| **Regular** (`400`) | `font-normal` | Body copy, event summaries, broadcast descriptions, input placeholder copy. |
+| **Medium** (`500`) | `font-medium` | Form labels, table cells, navigation pills, secondary action triggers. |
+| **SemiBold** (`600`) | `font-semibold` | Event card titles, modal subheaders, metric numbers, status tags, round badges. |
+| **Bold** (`700`) | `font-bold` | Section headings, dialog titles, table headers, primary action CTAs. |
+| **ExtraBold / Black** (`800`/`900`) | `font-extrabold` | Brand identity ("EVENTFLOW"), hero banners, QR ticket headers, KPI counters. |
+
+### Aesthetic Polish & Micro-Interactions
+- **Glassmorphic Surfaces**: Translucent dialogs and cards using `backdrop-blur-md bg-white/95` and hairline borders (`border-slate-200/90`).
+- **Brand Gradients**: Vivid indigo-violet gradients (`bg-gradient-to-r from-brand-600 via-indigo-600 to-indigo-700`) on hero headers, primary buttons, and ticket passes.
+- **Hover Transitions**: Elevated card lifts (`hover:-translate-y-1 hover:shadow-xl transition-all duration-300`) and active button spring feedback (`active:scale-95`).
+- **Dynamic Capacity Gauges**: Real-time visual progress bars shifting dynamically from brand blue-violet to warning rose as capacity reaches 90%+.
 
 ---
 
-## 🏗️ System Architecture & Tech Stack
+## ☁️ Supabase Cloud Database Architecture
+
+EventFlow is architected with a **Dual-Mode Data Layer** allowing zero-configuration local development while offering full cloud production readiness:
 
 ```
 +-----------------------------------------------------------------------------------+
 |                        Client Application (React + Vite)                         |
 |                                                                                   |
-|  - Framework: React 18 (Vite 6)                                                   |
-|  - UI & Styling: Tailwind CSS v3, Lucide React Icons                             |
-|  - Typography: Akira Expanded (Brand/Logo), Poppins (Headings), Inter (Data/Body) |
-|  - Modules: QR Canvas Generator, Schedule Timeline, CSV Exporter, Chart Engine   |
-|  - Portals: Participant Portal <---> Organizer & Admin Dashboard (Top Switcher)   |
+|  - Typography: Complete Poppins Hierarchy (Weights 300 to 900)                   |
+|  - UI Shell: Participant Portal <---> Organizer & Admin Dashboard                |
 +----------------------------------------+------------------------------------------+
                                          |
-                                         | HTTP REST API via Vite Proxy (:5000)
                                          v
-+----------------------------------------+------------------------------------------+
-|                     FastAPI REST API Server (Python 3.11+)                        |
-|                                                                                   |
-|  - Framework: FastAPI + Uvicorn (Asynchronous REST API)                           |
-|  - Validation: Pydantic v2 Models & Schema Serialization                          |
-|  - Database: SQLite 3 with WAL Mode, Foreign Keys & Row-Dict Factory              |
-|  - Lifespan Engine: Automated schema initialization & rich demo seeding on boot   |
-|  - Routers: /api/events, /api/registrations, /api/attendance, /api/stats, etc.   |
 +-----------------------------------------------------------------------------------+
+|                  Unified Data Service Layer (client/src/services/api.js)          |
+|                                                                                   |
+|  Check: isSupabaseConfigured() via VITE_SUPABASE_URL & VITE_SUPABASE_ANON_KEY     |
++----------------------------------------+------------------------------------------+
+                   |                                                    |
+         [YES: Supabase Configured]                            [NO: Fallback Mode]
+                   |                                                    |
+                   v                                                    v
++--------------------------------------+             +------------------------------+
+|        @supabase/supabase-js         |             |      Vite Proxy -> FastAPI   |
+|        PostgreSQL Cloud Database     |             |      Local SQLite Backend    |
+|  - Row Level Security (RLS) Active   |             |      http://localhost:5000   |
+|  - Real-Time Queries & Mutations     |             +------------------------------+
++--------------------------------------+
 ```
 
-### Component Stack
-| Layer | Technologies |
-|---|---|
-| **Frontend** | React 18, Vite 6, Tailwind CSS 3, Lucide React, Canvas QR Engine |
-| **Backend** | Python 3.11+, FastAPI, Uvicorn, Pydantic v2 |
-| **Database** | SQLite 3 (`server/eventflow.db` with WAL mode & Foreign Keys enabled) |
-| **Testing** | Pytest 9+, HTTPX TestClient (28 integration & unit tests) |
-| **Tooling** | Concurrently, PostCSS, Autoprefixer |
+### Supabase Setup Instructions
+To connect EventFlow directly to your Supabase Cloud project:
+
+1. **Create a Supabase Project**: Sign up at [supabase.com](https://supabase.com) and create a new project.
+2. **Execute Schema & Seed Script**:
+   - Open the **SQL Editor** in your Supabase dashboard.
+   - Paste the contents of [`Capstone/supabase/schema.sql`](supabase/schema.sql) and run it.
+   - This creates all 6 core tables (`organizers`, `events`, `event_sessions`, `registrations`, `attendance`, `announcements`), enables Row-Level Security (RLS) policies, establishes trigger functions for automated capacity counters, and inserts rich realistic seed data.
+3. **Configure Environment Variables**:
+   - In `Capstone/client/`, create a `.env` file based on `.env.example`:
+     ```env
+     VITE_SUPABASE_URL=https://your-project.supabase.co
+     VITE_SUPABASE_ANON_KEY=your-anon-public-key
+     ```
+4. **Boot Client**:
+   - Run `npm --prefix client run dev`.
+   - The top navigation bar will automatically display the **"Supabase Cloud"** status badge with an active green beacon indicator.
+   - If `.env` is omitted or keys are blank, EventFlow automatically falls back to the local FastAPI + SQLite backend without errors.
 
 ---
 
-## 🗄️ Database Schema & Entities
-
-The SQLite database schema enforces relational integrity with cascading deletes:
+## 🗄️ Database Entities & Relational Schema
 
 ```
 organizers (1) ───< events (N)
@@ -102,11 +121,11 @@ registrations (1) ─── (1) attendance
 ```
 
 ### Table Specifications
-- **`organizers`**: Manages club heads and faculty coordinators (`id`, `name`, `email`, `department`, `role`, `avatar_url`, `created_at`).
+- **`organizers`**: Club heads and faculty coordinators (`id`, `name`, `email`, `department`, `role`, `avatar_url`, `created_at`).
 - **`events`**: Core event records (`id`, `organizer_id`, `title`, `description`, `category`, `venue`, `date`, `start_time`, `end_time`, `registration_deadline`, `capacity`, `registered_count`, `banner_url`, `coordinator_name`, `coordinator_contact`, `status`, `created_at`).
 - **`event_sessions`**: Sequential rounds and workshop sessions (`id`, `event_id`, `round_name`, `venue_room`, `start_time`, `end_time`, `description`, `order_index`).
 - **`registrations`**: Attendee registrations (`id`, `event_id`, `ticket_code`, `participant_name`, `email`, `phone`, `college`, `department`, `year_of_study`, `registered_at`).
-- **`attendance`**: Verification and check-in audit (`id`, `registration_id`, `event_id`, `status`, `check_in_time`).
+- **`attendance`**: Verification and check-in records (`id`, `registration_id`, `event_id`, `status`, `check_in_time`).
 - **`announcements`**: Event or campus broadcasts (`id`, `event_id`, `title`, `message`, `priority`, `published_by`, `created_at`).
 
 ---
@@ -129,7 +148,7 @@ All REST API endpoints are prefixed with `/api` and return standardized JSON pay
 - `GET /api/events/{id}/registrations/export` - Download attendee roster as a UTF-8 CSV attachment.
 
 ### Attendance Verification (`/api/attendance`)
-- `POST /api/attendance/verify` - Validate a ticket code and optionally check in the attendee.
+- `POST /api/attendance/verify` - Validate a ticket code and check in the attendee.
 - `PATCH /api/registrations/{id}/attendance` - Toggle attendance status (`registered` ↔ `checked_in`).
 
 ### Announcements (`/api/announcements`)
@@ -152,7 +171,7 @@ Capstone/
 ├── client/                     # Frontend Single Page Application (React + Vite)
 │   ├── src/
 │   │   ├── components/         # Reusable UI widgets & modals
-│   │   │   ├── admin/          # Admin dashboard & management components
+│   │   │   ├── admin/          # Organizer SaaS dashboard components
 │   │   │   │   ├── AdminLayout.jsx
 │   │   │   │   ├── AnalyticsOverview.jsx
 │   │   │   │   ├── AnnouncementBroadcast.jsx
@@ -169,14 +188,18 @@ Capstone/
 │   │   │   ├── ParticipantPortal.jsx
 │   │   │   ├── RegistrationModal.jsx
 │   │   │   └── TicketPassModal.jsx
-│   │   ├── services/           # API integration layer (Axios/Fetch wrapper)
+│   │   ├── services/           # Unified API Layer & Supabase Client
+│   │   │   ├── api.js          # Dual-mode API query engine
+│   │   │   └── supabaseClient.js # Supabase SDK initialization
 │   │   ├── styles/             # Typography and custom styling definitions
+│   │   │   └── fonts.css       # Poppins hierarchy & weight utility classes
 │   │   ├── utils/              # Client-side QR generation & CSV export helpers
 │   │   ├── App.jsx             # Top-level portal controller & state router
-│   │   ├── index.css           # Tailwind directives & theme configuration
+│   │   ├── index.css           # Tailwind directives & Poppins default font rules
 │   │   └── main.jsx            # React root mount
+│   ├── .env.example            # Supabase credentials template
 │   ├── package.json
-│   ├── tailwind.config.js
+│   ├── tailwind.config.js      # Complete Poppins weights 300-900 configured
 │   └── vite.config.js
 ├── server/                     # Backend REST API Server (Python FastAPI)
 │   ├── routers/                # Modular APIRouters
@@ -185,7 +208,7 @@ Capstone/
 │   │   ├── events.py           # Event CRUD and session management
 │   │   ├── registrations.py    # Registration handling & CSV streaming
 │   │   └── stats.py            # Aggregated analytics and reporting
-│   ├── tests/                  # Pytest automated test suite
+│   ├── tests/                  # Pytest automated test suite (28 Tests)
 │   │   ├── conftest.py
 │   │   ├── test_api.py         # Full end-to-end integration flows
 │   │   ├── test_attendance.py
@@ -201,6 +224,9 @@ Capstone/
 │   ├── run.py                  # Uvicorn launcher script
 │   ├── schemas.py              # Pydantic v2 data models
 │   └── seed_data.py            # Initial dataset (events, rounds, attendees)
+├── supabase/                   # Supabase Cloud Database Assets
+│   ├── schema.sql              # PostgreSQL DDL, RLS policies, trigger counters & seeds
+│   └── README.md               # Supabase setup & deployment guide
 ├── docs/                       # Project specifications and implementation plans
 ├── package.json                # Root orchestration scripts
 └── README.md                   # Capstone project documentation
@@ -245,8 +271,14 @@ npm install
 cd ..
 ```
 
-### Step 4: Run the Full Application Concurrently
-From the `Capstone/` root directory, launch both backend and frontend with a single command:
+*(Optional)* To enable Supabase Cloud mode:
+```bash
+cp client/.env.example client/.env
+# Open client/.env and insert your VITE_SUPABASE_URL and VITE_SUPABASE_ANON_KEY
+```
+
+### Step 4: Run the Application Concurrently
+From the `Capstone/` root directory:
 ```bash
 npm run dev
 ```
@@ -256,21 +288,19 @@ This concurrently boots:
 - **Interactive Swagger Docs**: `http://localhost:5000/docs`
 - **Frontend Web App**: `http://localhost:5173`
 
-> **Note**: Database schema initialization and sample event seeding occur automatically upon the first backend launch.
-
 ---
 
 ## 🧪 Testing & Verification
 
-The project includes an automated test suite with **28 tests** covering all API endpoints, database constraints, registration validation, and analytics calculations.
+EventFlow includes an automated Pytest test suite with **28 tests** covering all API endpoints, database constraints, registration validation, and analytics calculations, along with full client build validation.
 
-To execute the test suite:
+To run tests and build verification:
 ```bash
-# Using root npm command
-npm test
-
-# Or directly with pytest
+# Execute backend test suite
 .venv\Scripts\pytest server/tests -v
+
+# Execute frontend production build
+npm --prefix client run build
 ```
 
 ### Test Coverage Highlights
@@ -280,6 +310,7 @@ npm test
 - ✅ **Registrations Router**: Successful registration, duplicate registration rejection (409 Conflict), capacity overflow protection (400 Bad Request), and UTF-8 CSV roster export.
 - ✅ **Attendance Router**: Ticket verification (`EVF-2026-XXXX`), idempotent check-in timestamps, invalid code rejection.
 - ✅ **Stats & Announcements**: Department breakdowns, category aggregations, zero-division resilience, and broadcast management.
+- ✅ **Frontend Build**: 100% clean Vite production bundle with zero JSX or styling syntax errors.
 
 ---
 
