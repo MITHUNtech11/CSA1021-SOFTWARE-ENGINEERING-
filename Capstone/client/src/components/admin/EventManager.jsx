@@ -9,9 +9,7 @@ import {
   Users, 
   Layers, 
   RefreshCw, 
-  AlertCircle,
-  ExternalLink,
-  ChevronRight
+  AlertCircle 
 } from 'lucide-react';
 import { api } from '../../services/api.js';
 import EventFormModal from './EventFormModal.jsx';
@@ -80,17 +78,17 @@ export default function EventManager({ onManageRegistrations }) {
       {/* Top Action Bar */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div>
-          <h2 className="font-heading font-extrabold text-2xl text-slate-900 tracking-tight">
+          <h2 className="font-heading font-extrabold text-2xl sm:text-3xl text-slate-900 tracking-tight">
             Event Management Directory
           </h2>
-          <p className="text-xs text-slate-500 font-sans mt-0.5">
+          <p className="text-xs sm:text-sm text-slate-500 font-normal mt-0.5">
             Create, update schedules, assign rooms, and track capacity limits.
           </p>
         </div>
 
         <button
           onClick={handleCreate}
-          className="self-start sm:self-auto flex items-center gap-2 px-4 py-2.5 rounded-xl bg-brand-600 hover:bg-brand-700 text-white text-xs font-heading font-semibold shadow-md shadow-brand-600/30 transition-all"
+          className="self-start sm:self-auto flex items-center gap-2 px-4 py-2.5 rounded-xl bg-gradient-to-r from-brand-600 to-indigo-600 hover:from-brand-500 hover:to-indigo-500 text-white text-xs sm:text-sm font-heading font-semibold shadow-md shadow-brand-500/25 transition-all active:scale-95"
         >
           <Plus className="w-4 h-4" />
           <span>Create New Event</span>
@@ -98,7 +96,7 @@ export default function EventManager({ onManageRegistrations }) {
       </div>
 
       {/* Search and Filters */}
-      <div className="bg-white p-4 rounded-2xl border border-slate-200/90 shadow-sm flex flex-col sm:flex-row items-center justify-between gap-3">
+      <div className="bg-white/95 backdrop-blur-md p-4 rounded-2xl border border-slate-200/90 shadow-sm flex flex-col sm:flex-row items-center justify-between gap-3">
         <div className="relative w-full sm:w-80">
           <Search className="w-4 h-4 text-slate-400 absolute left-3.5 top-1/2 -translate-y-1/2" />
           <input
@@ -106,7 +104,7 @@ export default function EventManager({ onManageRegistrations }) {
             value={search}
             onChange={(e) => setSearch(e.target.value)}
             placeholder="Search events by title or venue..."
-            className="w-full pl-10 pr-3.5 py-2 bg-slate-50 border border-slate-200 rounded-xl text-xs sm:text-sm font-sans focus:outline-none focus:ring-2 focus:ring-brand-500/20 focus:border-brand-500"
+            className="w-full pl-10 pr-3.5 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-xs sm:text-sm font-normal text-slate-800 placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-brand-500/20 focus:border-brand-500 transition-all"
           />
         </div>
 
@@ -114,7 +112,7 @@ export default function EventManager({ onManageRegistrations }) {
           <select
             value={categoryFilter}
             onChange={(e) => setCategoryFilter(e.target.value)}
-            className="px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl text-xs font-heading font-medium text-slate-700 focus:outline-none cursor-pointer"
+            className="px-3.5 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-xs font-heading font-medium text-slate-700 focus:outline-none cursor-pointer"
           >
             <option value="All">All Categories</option>
             <option value="Hackathon">Hackathon</option>
@@ -127,7 +125,7 @@ export default function EventManager({ onManageRegistrations }) {
 
           <button
             onClick={loadEvents}
-            className="p-2 rounded-xl bg-slate-50 hover:bg-slate-100 border border-slate-200 text-slate-600 transition-colors"
+            className="p-2.5 rounded-xl bg-slate-50 hover:bg-slate-100 border border-slate-200 text-slate-600 transition-colors"
             title="Refresh events table"
           >
             <RefreshCw className="w-4 h-4" />
@@ -136,23 +134,23 @@ export default function EventManager({ onManageRegistrations }) {
       </div>
 
       {/* Events Table Container */}
-      <div className="bg-white rounded-2xl border border-slate-200/90 shadow-sm overflow-hidden">
+      <div className="bg-white/95 backdrop-blur-md rounded-3xl border border-slate-200/90 shadow-sm overflow-hidden">
         {loading ? (
           <div className="p-12 flex flex-col items-center justify-center gap-3 text-slate-500">
             <RefreshCw className="w-6 h-6 text-brand-600 animate-spin" />
-            <p className="text-xs font-heading font-medium">Loading event catalog...</p>
+            <p className="text-xs font-heading font-semibold text-slate-700">Loading event catalog...</p>
           </div>
         ) : events.length === 0 ? (
           <div className="p-12 text-center space-y-2">
             <Calendar className="w-10 h-10 text-slate-300 mx-auto" />
             <h4 className="font-heading font-bold text-slate-700 text-sm">No events found</h4>
-            <p className="text-xs text-slate-400">Click "Create New Event" above to publish your first campus event.</p>
+            <p className="text-xs text-slate-400 font-light">Click "Create New Event" above to publish your first campus event.</p>
           </div>
         ) : (
           <div className="overflow-x-auto">
             <table className="w-full text-left border-collapse text-xs">
               <thead>
-                <tr className="bg-slate-50 border-b border-slate-200 text-slate-500 font-heading font-semibold uppercase tracking-wider text-[11px]">
+                <tr className="bg-slate-50/90 border-b border-slate-200 text-slate-500 font-heading font-semibold uppercase tracking-wider text-[11px]">
                   <th className="py-3.5 px-4">Event Details</th>
                   <th className="py-3.5 px-4">Date & Venue</th>
                   <th className="py-3.5 px-4">Rounds</th>
@@ -176,7 +174,7 @@ export default function EventManager({ onManageRegistrations }) {
                           <img
                             src={evt.banner_url || 'https://images.unsplash.com/photo-1540575467063-178a50c2df87?w=100'}
                             alt={evt.title}
-                            className="w-10 h-10 rounded-xl object-cover shrink-0 border border-slate-200"
+                            className="w-11 h-11 rounded-2xl object-cover shrink-0 border border-slate-200 shadow-sm"
                           />
                           <div>
                             <span className="font-heading font-bold text-slate-900 text-xs sm:text-sm block">
@@ -186,7 +184,7 @@ export default function EventManager({ onManageRegistrations }) {
                               <span className="px-2 py-0.5 rounded-md text-[10px] font-bold font-heading uppercase bg-indigo-50 text-brand-700 border border-indigo-200/60">
                                 {evt.category}
                               </span>
-                              <span className="text-[11px] text-slate-500">
+                              <span className="text-[11px] text-slate-500 font-light">
                                 Coordinator: {evt.coordinator_name}
                               </span>
                             </div>
@@ -196,13 +194,13 @@ export default function EventManager({ onManageRegistrations }) {
 
                       {/* Date & Venue */}
                       <td className="py-4 px-4 text-slate-600">
-                        <div className="font-medium text-slate-800">{evt.date}</div>
-                        <div className="text-[11px] text-slate-500 truncate max-w-xs">{evt.venue}</div>
+                        <div className="font-medium text-slate-800 text-xs">{evt.date}</div>
+                        <div className="text-[11px] text-slate-500 font-normal truncate max-w-xs">{evt.venue}</div>
                       </td>
 
                       {/* Rounds */}
                       <td className="py-4 px-4">
-                        <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-lg text-xs font-medium bg-slate-100 text-slate-700 border border-slate-200">
+                        <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-xl text-xs font-medium bg-slate-100 text-slate-700 border border-slate-200/80">
                           <Layers className="w-3.5 h-3.5 text-indigo-500" />
                           <span>{evt.sessions_count || 1} Phases</span>
                         </span>
@@ -213,11 +211,13 @@ export default function EventManager({ onManageRegistrations }) {
                         <div className="w-32 space-y-1">
                           <div className="flex items-center justify-between text-[11px]">
                             <span className="font-semibold text-slate-800">{registered}/{capacity}</span>
-                            <span className="text-slate-400">{pct}%</span>
+                            <span className="text-slate-400 font-light">{pct}%</span>
                           </div>
-                          <div className="w-full h-1.5 bg-slate-100 rounded-full overflow-hidden">
+                          <div className="w-full h-2 bg-slate-100 rounded-full overflow-hidden p-0.5 border border-slate-200/40">
                             <div
-                              className={`h-full rounded-full ${pct >= 90 ? 'bg-rose-500' : 'bg-brand-500'}`}
+                              className={`h-full rounded-full transition-all duration-500 ${
+                                pct >= 90 ? 'bg-rose-500' : 'bg-gradient-to-r from-brand-600 to-indigo-500'
+                              }`}
                               style={{ width: `${pct}%` }}
                             />
                           </div>
@@ -228,10 +228,10 @@ export default function EventManager({ onManageRegistrations }) {
                       <td className="py-4 px-4">
                         <span className={`inline-block px-2.5 py-1 rounded-full text-[10px] font-heading font-bold uppercase tracking-wider ${
                           evt.status === 'upcoming'
-                            ? 'bg-blue-50 text-blue-700 border border-blue-200'
+                            ? 'bg-blue-50 text-blue-700 border border-blue-200/80'
                             : evt.status === 'ongoing'
-                            ? 'bg-emerald-50 text-emerald-700 border border-emerald-200 animate-pulse'
-                            : 'bg-slate-100 text-slate-600 border border-slate-200'
+                            ? 'bg-emerald-50 text-emerald-700 border border-emerald-200/80 animate-pulse'
+                            : 'bg-slate-100 text-slate-600 border border-slate-200/80'
                         }`}>
                           {evt.status}
                         </span>
@@ -242,7 +242,7 @@ export default function EventManager({ onManageRegistrations }) {
                         <div className="flex items-center justify-end gap-1.5">
                           <button
                             onClick={() => onManageRegistrations?.(evt.id)}
-                            className="p-1.5 rounded-lg bg-slate-100 hover:bg-brand-50 hover:text-brand-600 text-slate-600 transition-colors"
+                            className="p-2 rounded-xl bg-slate-100 hover:bg-brand-50 hover:text-brand-600 text-slate-600 transition-all active:scale-95"
                             title="Manage registrations & attendance"
                           >
                             <Users className="w-4 h-4" />
@@ -250,7 +250,7 @@ export default function EventManager({ onManageRegistrations }) {
 
                           <button
                             onClick={() => handleEdit(evt.id)}
-                            className="p-1.5 rounded-lg bg-slate-100 hover:bg-slate-200 text-slate-600 transition-colors"
+                            className="p-2 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-600 transition-all active:scale-95"
                             title="Edit event details"
                           >
                             <Edit className="w-4 h-4" />
@@ -258,7 +258,7 @@ export default function EventManager({ onManageRegistrations }) {
 
                           <button
                             onClick={() => handleDelete(evt.id, evt.title)}
-                            className="p-1.5 rounded-lg bg-rose-50 hover:bg-rose-100 text-rose-600 transition-colors"
+                            className="p-2 rounded-xl bg-rose-50 hover:bg-rose-100 text-rose-600 transition-all active:scale-95"
                             title="Delete event"
                           >
                             <Trash2 className="w-4 h-4" />

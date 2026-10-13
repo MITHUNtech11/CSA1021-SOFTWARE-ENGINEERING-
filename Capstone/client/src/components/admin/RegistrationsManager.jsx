@@ -5,12 +5,8 @@ import {
   Download, 
   CheckCircle2, 
   Clock, 
-  Filter, 
   RefreshCw, 
-  UserCheck, 
-  Building,
-  GraduationCap,
-  Calendar
+  UserCheck 
 } from 'lucide-react';
 import { api } from '../../services/api.js';
 import { downloadCsvFromRows } from '../../utils/csvExport.js';
@@ -112,17 +108,17 @@ export default function RegistrationsManager({ initialEventId = null }) {
       {/* Header & Export Actions */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div>
-          <h2 className="font-heading font-extrabold text-2xl text-slate-900 tracking-tight">
+          <h2 className="font-heading font-extrabold text-2xl sm:text-3xl text-slate-900 tracking-tight">
             Attendee Registrations & Attendance Roster
           </h2>
-          <p className="text-xs text-slate-500 font-sans mt-0.5">
+          <p className="text-xs sm:text-sm text-slate-500 font-normal mt-0.5">
             Manage registrations, toggle real-time check-in status, and export official attendee records to CSV.
           </p>
         </div>
 
         <button
           onClick={handleExportCsv}
-          className="self-start sm:self-auto flex items-center gap-2 px-4 py-2.5 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-heading font-semibold shadow-md shadow-emerald-600/25 transition-all"
+          className="self-start sm:self-auto flex items-center gap-2 px-4 py-2.5 rounded-xl bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-500 hover:to-teal-500 text-white text-xs sm:text-sm font-heading font-semibold shadow-md shadow-emerald-600/25 transition-all active:scale-95"
         >
           <Download className="w-4 h-4" />
           <span>Export Attendee CSV</span>
@@ -131,45 +127,45 @@ export default function RegistrationsManager({ initialEventId = null }) {
 
       {/* KPI Ticker Bar */}
       <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-        <div className="bg-white p-4 rounded-2xl border border-slate-200/90 shadow-sm flex items-center justify-between">
+        <div className="bg-white/95 backdrop-blur-md p-5 rounded-2xl border border-slate-200/90 shadow-sm flex items-center justify-between hover:shadow-md transition-shadow">
           <div>
-            <span className="text-xs font-medium text-slate-500 block">Total In Roster</span>
-            <span className="font-heading font-bold text-2xl text-slate-900 mt-1 block">
+            <span className="text-xs font-heading font-semibold text-slate-500 uppercase tracking-wider block">Total In Roster</span>
+            <span className="font-heading font-extrabold text-2xl sm:text-3xl text-slate-900 mt-1 block">
               {filteredRegistrations.length}
             </span>
           </div>
-          <div className="w-9 h-9 rounded-xl bg-indigo-50 text-indigo-600 flex items-center justify-center font-bold">
+          <div className="w-10 h-10 rounded-2xl bg-indigo-50 text-indigo-600 flex items-center justify-center font-bold shadow-sm">
             <Users className="w-5 h-5" />
           </div>
         </div>
 
-        <div className="bg-white p-4 rounded-2xl border border-slate-200/90 shadow-sm flex items-center justify-between">
+        <div className="bg-white/95 backdrop-blur-md p-5 rounded-2xl border border-slate-200/90 shadow-sm flex items-center justify-between hover:shadow-md transition-shadow">
           <div>
-            <span className="text-xs font-medium text-slate-500 block">Live Checked-In</span>
-            <span className="font-heading font-bold text-2xl text-emerald-700 mt-1 block">
+            <span className="text-xs font-heading font-semibold text-slate-500 uppercase tracking-wider block">Live Checked-In</span>
+            <span className="font-heading font-extrabold text-2xl sm:text-3xl text-emerald-700 mt-1 block">
               {checkedInCount}
             </span>
           </div>
-          <div className="w-9 h-9 rounded-xl bg-emerald-50 text-emerald-600 flex items-center justify-center font-bold">
+          <div className="w-10 h-10 rounded-2xl bg-emerald-50 text-emerald-600 flex items-center justify-center font-bold shadow-sm">
             <CheckCircle2 className="w-5 h-5" />
           </div>
         </div>
 
-        <div className="bg-white p-4 rounded-2xl border border-slate-200/90 shadow-sm flex items-center justify-between">
+        <div className="bg-white/95 backdrop-blur-md p-5 rounded-2xl border border-slate-200/90 shadow-sm flex items-center justify-between hover:shadow-md transition-shadow">
           <div>
-            <span className="text-xs font-medium text-slate-500 block">Attendance Rate</span>
-            <span className="font-heading font-bold text-2xl text-brand-600 mt-1 block">
+            <span className="text-xs font-heading font-semibold text-slate-500 uppercase tracking-wider block">Attendance Rate</span>
+            <span className="font-heading font-extrabold text-2xl sm:text-3xl text-brand-600 mt-1 block">
               {attendanceRate}%
             </span>
           </div>
-          <div className="w-9 h-9 rounded-xl bg-brand-50 text-brand-600 flex items-center justify-center font-bold">
+          <div className="w-10 h-10 rounded-2xl bg-brand-50 text-brand-600 flex items-center justify-center font-bold shadow-sm">
             <UserCheck className="w-5 h-5" />
           </div>
         </div>
       </div>
 
       {/* Filters Bar */}
-      <div className="bg-white p-4 rounded-2xl border border-slate-200/90 shadow-sm flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-3">
+      <div className="bg-white/95 backdrop-blur-md p-4 rounded-2xl border border-slate-200/90 shadow-sm flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-3">
         
         {/* Search */}
         <div className="relative flex-1">
@@ -179,7 +175,7 @@ export default function RegistrationsManager({ initialEventId = null }) {
             value={search}
             onChange={(e) => setSearch(e.target.value)}
             placeholder="Search by participant name, email, department, or ticket code..."
-            className="w-full pl-10 pr-3.5 py-2 bg-slate-50 border border-slate-200 rounded-xl text-xs sm:text-sm font-sans focus:outline-none focus:ring-2 focus:ring-brand-500/20 focus:border-brand-500"
+            className="w-full pl-10 pr-3.5 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-xs sm:text-sm font-normal text-slate-800 placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-brand-500/20 focus:border-brand-500 transition-all"
           />
         </div>
 
@@ -188,7 +184,7 @@ export default function RegistrationsManager({ initialEventId = null }) {
           <select
             value={selectedEventId}
             onChange={(e) => setSelectedEventId(e.target.value)}
-            className="px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl text-xs font-heading font-medium text-slate-700 focus:outline-none cursor-pointer max-w-xs truncate"
+            className="px-3.5 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-xs font-heading font-medium text-slate-700 focus:outline-none cursor-pointer max-w-xs truncate"
           >
             <option value="All">All Events</option>
             {events.map((evt) => (
@@ -200,7 +196,7 @@ export default function RegistrationsManager({ initialEventId = null }) {
           <select
             value={statusFilter}
             onChange={(e) => setStatusFilter(e.target.value)}
-            className="px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl text-xs font-heading font-medium text-slate-700 focus:outline-none cursor-pointer"
+            className="px-3.5 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-xs font-heading font-medium text-slate-700 focus:outline-none cursor-pointer"
           >
             <option value="All">All Statuses</option>
             <option value="registered">Registered Only</option>
@@ -209,7 +205,7 @@ export default function RegistrationsManager({ initialEventId = null }) {
 
           <button
             onClick={loadRegistrations}
-            className="p-2 rounded-xl bg-slate-50 hover:bg-slate-100 border border-slate-200 text-slate-600 transition-colors"
+            className="p-2.5 rounded-xl bg-slate-50 hover:bg-slate-100 border border-slate-200 text-slate-600 transition-colors"
             title="Refresh registrations"
           >
             <RefreshCw className="w-4 h-4" />
@@ -219,23 +215,23 @@ export default function RegistrationsManager({ initialEventId = null }) {
       </div>
 
       {/* Attendee Roster Table */}
-      <div className="bg-white rounded-2xl border border-slate-200/90 shadow-sm overflow-hidden">
+      <div className="bg-white/95 backdrop-blur-md rounded-3xl border border-slate-200/90 shadow-sm overflow-hidden">
         {loading ? (
           <div className="p-12 flex flex-col items-center justify-center gap-3 text-slate-500">
             <RefreshCw className="w-6 h-6 text-brand-600 animate-spin" />
-            <p className="text-xs font-heading font-medium">Loading attendee directory...</p>
+            <p className="text-xs font-heading font-semibold text-slate-700">Loading attendee directory...</p>
           </div>
         ) : filteredRegistrations.length === 0 ? (
           <div className="p-12 text-center space-y-2">
             <Users className="w-10 h-10 text-slate-300 mx-auto" />
             <h4 className="font-heading font-bold text-slate-700 text-sm">No registrations found</h4>
-            <p className="text-xs text-slate-400">Try clearing the search or choosing a different event.</p>
+            <p className="text-xs text-slate-400 font-light">Try clearing the search or choosing a different event.</p>
           </div>
         ) : (
           <div className="overflow-x-auto">
             <table className="w-full text-left border-collapse text-xs">
               <thead>
-                <tr className="bg-slate-50 border-b border-slate-200 text-slate-500 font-heading font-semibold uppercase tracking-wider text-[11px]">
+                <tr className="bg-slate-50/90 border-b border-slate-200 text-slate-500 font-heading font-semibold uppercase tracking-wider text-[11px]">
                   <th className="py-3.5 px-4">Ticket Pass Code</th>
                   <th className="py-3.5 px-4">Attendee Name & Email</th>
                   <th className="py-3.5 px-4">College & Department</th>
@@ -254,7 +250,7 @@ export default function RegistrationsManager({ initialEventId = null }) {
                       
                       {/* Ticket Code */}
                       <td className="py-4 px-4">
-                        <span className="font-mono font-bold text-xs px-2.5 py-1 rounded-lg bg-slate-100 text-slate-800 border border-slate-200 tracking-wider">
+                        <span className="font-mono font-bold text-xs px-2.5 py-1 rounded-xl bg-slate-100 text-slate-800 border border-slate-200/80 tracking-wider shadow-sm">
                           {reg.ticket_code}
                         </span>
                       </td>
@@ -264,7 +260,7 @@ export default function RegistrationsManager({ initialEventId = null }) {
                         <span className="font-heading font-bold text-slate-900 text-xs sm:text-sm block">
                           {reg.participant_name}
                         </span>
-                        <div className="text-[11px] text-slate-500 mt-0.5">
+                        <div className="text-[11px] text-slate-500 font-light mt-0.5">
                           {reg.email} • {reg.phone}
                         </div>
                       </td>
@@ -272,7 +268,7 @@ export default function RegistrationsManager({ initialEventId = null }) {
                       {/* College & Department */}
                       <td className="py-4 px-4">
                         <div className="font-medium text-slate-800 text-xs truncate max-w-xs">{reg.department}</div>
-                        <div className="text-[11px] text-slate-500 truncate max-w-xs">{reg.college} ({reg.year_of_study})</div>
+                        <div className="text-[11px] text-slate-500 font-light truncate max-w-xs">{reg.college} ({reg.year_of_study})</div>
                       </td>
 
                       {/* Event */}
@@ -283,12 +279,12 @@ export default function RegistrationsManager({ initialEventId = null }) {
                       {/* Status */}
                       <td className="py-4 px-4">
                         {isCheckedIn ? (
-                          <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-[10px] font-heading font-bold uppercase tracking-wider bg-emerald-100 text-emerald-800 border border-emerald-200">
+                          <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-[10px] font-heading font-bold uppercase tracking-wider bg-emerald-50 text-emerald-700 border border-emerald-200">
                             <CheckCircle2 className="w-3 h-3 text-emerald-600" />
                             Checked In
                           </span>
                         ) : (
-                          <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-[10px] font-heading font-bold uppercase tracking-wider bg-indigo-100 text-indigo-700 border border-indigo-200">
+                          <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-[10px] font-heading font-bold uppercase tracking-wider bg-indigo-50 text-brand-700 border border-indigo-200/70">
                             <Clock className="w-3 h-3 text-indigo-500" />
                             Registered
                           </span>
@@ -300,10 +296,10 @@ export default function RegistrationsManager({ initialEventId = null }) {
                         <button
                           onClick={() => handleToggleAttendance(reg.id, reg.attendance_status)}
                           disabled={isBusy}
-                          className={`px-3 py-1.5 rounded-xl text-xs font-heading font-semibold transition-all inline-flex items-center gap-1.5 shadow-sm ${
+                          className={`px-3.5 py-1.5 rounded-xl text-xs font-heading font-semibold transition-all inline-flex items-center gap-1.5 shadow-sm active:scale-95 ${
                             isCheckedIn
                               ? 'bg-slate-100 hover:bg-slate-200 text-slate-700 border border-slate-200'
-                              : 'bg-emerald-600 hover:bg-emerald-700 text-white shadow-emerald-600/20'
+                              : 'bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-500 hover:to-teal-500 text-white shadow-emerald-600/20'
                           }`}
                         >
                           {isCheckedIn ? (

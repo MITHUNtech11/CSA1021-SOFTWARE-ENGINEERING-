@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Megaphone, AlertTriangle, Bell, Info, Trash2, Send, RefreshCw, CheckCircle, Plus } from 'lucide-react';
+import { Megaphone, Trash2, Send, RefreshCw, Loader2 } from 'lucide-react';
 import { api } from '../../services/api.js';
 
 export default function AnnouncementBroadcast() {
@@ -80,25 +80,25 @@ export default function AnnouncementBroadcast() {
       
       {/* Title */}
       <div>
-        <h2 className="font-heading font-extrabold text-2xl text-slate-900 tracking-tight">
+        <h2 className="font-heading font-extrabold text-2xl sm:text-3xl text-slate-900 tracking-tight">
           Announcement & Broadcast Center
         </h2>
-        <p className="text-xs text-slate-500 font-sans mt-0.5">
+        <p className="text-xs sm:text-sm text-slate-500 font-normal mt-0.5">
           Push real-time urgent updates, room changes, and campus bulletins directly to the attendee interface.
         </p>
       </div>
 
       {/* Broadcast Creation Card */}
-      <div className="bg-white rounded-3xl p-6 sm:p-8 border border-slate-200/90 shadow-sm space-y-5">
+      <div className="bg-white/95 backdrop-blur-md rounded-3xl p-6 sm:p-8 border border-slate-200/90 shadow-sm space-y-5">
         <div className="flex items-center gap-2 border-b border-slate-100 pb-3">
-          <div className="w-8 h-8 rounded-xl bg-brand-50 text-brand-600 flex items-center justify-center font-bold">
+          <div className="w-9 h-9 rounded-2xl bg-brand-50 text-brand-600 flex items-center justify-center font-bold shadow-sm">
             <Megaphone className="w-4 h-4" />
           </div>
           <div>
-            <h3 className="font-heading font-bold text-base text-slate-900">
+            <h3 className="font-heading font-bold text-base sm:text-lg text-slate-900 tracking-tight">
               Compose Live Campus Broadcast
             </h3>
-            <p className="text-xs text-slate-500">Notice will appear in real time across the portal ticker</p>
+            <p className="text-xs text-slate-500 font-light">Notice will appear in real time across the portal ticker</p>
           </div>
         </div>
 
@@ -149,7 +149,7 @@ export default function AnnouncementBroadcast() {
                 required
                 value={formData.published_by}
                 onChange={(e) => setFormData({ ...formData, published_by: e.target.value })}
-                className="w-full px-3.5 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-xs sm:text-sm font-sans text-slate-800 focus:outline-none focus:ring-2 focus:ring-brand-500/20 focus:border-brand-500"
+                className="w-full px-3.5 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-xs sm:text-sm font-normal text-slate-800 focus:outline-none focus:ring-2 focus:ring-brand-500/20 focus:border-brand-500 transition-all"
               />
             </div>
 
@@ -166,7 +166,7 @@ export default function AnnouncementBroadcast() {
               value={formData.title}
               onChange={(e) => setFormData({ ...formData, title: e.target.value })}
               placeholder="e.g. Hackathon Final Pitch Room Relocated to Innovation Wing"
-              className="w-full px-3.5 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-sm font-sans text-slate-800 focus:outline-none focus:ring-2 focus:ring-brand-500/20 focus:border-brand-500"
+              className="w-full px-3.5 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-sm font-normal text-slate-800 placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-brand-500/20 focus:border-brand-500 transition-all"
             />
           </div>
 
@@ -181,7 +181,7 @@ export default function AnnouncementBroadcast() {
               value={formData.message}
               onChange={(e) => setFormData({ ...formData, message: e.target.value })}
               placeholder="Provide clear instructions for attendees..."
-              className="w-full px-3.5 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-sm font-sans text-slate-800 focus:outline-none focus:ring-2 focus:ring-brand-500/20 focus:border-brand-500"
+              className="w-full px-3.5 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-sm font-normal text-slate-800 placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-brand-500/20 focus:border-brand-500 transition-all"
             />
           </div>
 
@@ -190,9 +190,9 @@ export default function AnnouncementBroadcast() {
             <button
               type="submit"
               disabled={submitting}
-              className="px-6 py-2.5 rounded-xl bg-brand-600 hover:bg-brand-700 text-white text-xs sm:text-sm font-heading font-semibold shadow-md shadow-brand-600/30 transition-all flex items-center gap-2"
+              className="px-6 py-2.5 rounded-xl bg-gradient-to-r from-brand-600 to-indigo-600 hover:from-brand-500 hover:to-indigo-500 text-white text-xs sm:text-sm font-heading font-semibold shadow-md shadow-brand-500/25 transition-all flex items-center gap-2 disabled:opacity-75 active:scale-95"
             >
-              <Send className="w-4 h-4" />
+              {submitting ? <Loader2 className="w-4 h-4 animate-spin" /> : <Send className="w-4 h-4" />}
               <span>Broadcast Announcement Now</span>
             </button>
           </div>
@@ -201,14 +201,14 @@ export default function AnnouncementBroadcast() {
       </div>
 
       {/* Existing Announcements List */}
-      <div className="bg-white rounded-3xl p-6 sm:p-8 border border-slate-200/90 shadow-sm space-y-4">
+      <div className="bg-white/95 backdrop-blur-md rounded-3xl p-6 sm:p-8 border border-slate-200/90 shadow-sm space-y-4">
         <div className="flex items-center justify-between border-b border-slate-100 pb-3">
-          <h3 className="font-heading font-bold text-base text-slate-900">
+          <h3 className="font-heading font-bold text-base sm:text-lg text-slate-900 tracking-tight">
             Active Broadcast Feed ({announcements.length})
           </h3>
           <button
             onClick={loadData}
-            className="p-1.5 rounded-lg bg-slate-100 hover:bg-slate-200 text-slate-600"
+            className="p-2 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-600 transition-colors"
             title="Refresh announcements"
           >
             <RefreshCw className="w-4 h-4" />
@@ -216,27 +216,27 @@ export default function AnnouncementBroadcast() {
         </div>
 
         {announcements.length === 0 ? (
-          <p className="text-xs text-slate-500 text-center py-6">No announcements published yet.</p>
+          <p className="text-xs text-slate-500 text-center py-6 font-light">No announcements published yet.</p>
         ) : (
           <div className="space-y-3">
             {announcements.map((anc) => (
               <div
                 key={anc.id}
-                className="p-4 rounded-2xl bg-slate-50 border border-slate-200/80 hover:border-brand-300 transition-all flex flex-col sm:flex-row sm:items-center justify-between gap-3 group"
+                className="p-4 sm:p-5 rounded-2xl bg-slate-50/80 border border-slate-200/80 hover:border-brand-300/80 hover:shadow-md transition-all flex flex-col sm:flex-row sm:items-center justify-between gap-3 group"
               >
-                <div className="space-y-1">
+                <div className="space-y-1.5">
                   <div className="flex items-center gap-2">
-                    <span className={`px-2 py-0.5 rounded-md text-[10px] font-bold uppercase tracking-wider ${
+                    <span className={`px-2.5 py-0.5 rounded-full text-[10px] font-bold uppercase tracking-wider ${
                       anc.priority === 'urgent'
-                        ? 'bg-rose-100 text-rose-700 border border-rose-200'
+                        ? 'bg-rose-50 text-rose-700 border border-rose-200'
                         : anc.priority === 'update'
-                        ? 'bg-amber-100 text-amber-800 border border-amber-200'
-                        : 'bg-brand-100 text-brand-700 border border-brand-200'
+                        ? 'bg-amber-50 text-amber-800 border border-amber-200'
+                        : 'bg-brand-50 text-brand-700 border border-brand-200'
                     }`}>
                       {anc.priority}
                     </span>
 
-                    <span className="font-heading font-bold text-sm text-slate-900">
+                    <span className="font-heading font-bold text-sm sm:text-base text-slate-900">
                       {anc.title}
                     </span>
 
@@ -247,18 +247,18 @@ export default function AnnouncementBroadcast() {
                     )}
                   </div>
 
-                  <p className="text-xs text-slate-600 font-sans leading-relaxed">
+                  <p className="text-xs text-slate-600 font-normal leading-relaxed">
                     {anc.message}
                   </p>
 
-                  <div className="text-[10px] text-slate-400 font-mono">
+                  <div className="text-[10px] text-slate-400 font-mono font-light">
                     By {anc.published_by} • {new Date(anc.created_at).toLocaleString()}
                   </div>
                 </div>
 
                 <button
                   onClick={() => handleDelete(anc.id)}
-                  className="self-end sm:self-auto p-2 rounded-xl bg-white hover:bg-rose-50 text-slate-400 hover:text-rose-600 border border-slate-200 transition-colors"
+                  className="self-end sm:self-auto p-2.5 rounded-xl bg-white hover:bg-rose-50 text-slate-400 hover:text-rose-600 border border-slate-200 transition-colors active:scale-95 shadow-sm"
                   title="Delete announcement"
                 >
                   <Trash2 className="w-4 h-4" />

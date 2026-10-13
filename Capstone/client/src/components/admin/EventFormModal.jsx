@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { X, Plus, Trash2, Calendar, Clock, MapPin, Users, Phone, Layers, Loader2, AlertCircle } from 'lucide-react';
+import { X, Plus, Trash2, Calendar, Clock, MapPin, Users, Layers, Loader2, AlertCircle } from 'lucide-react';
 import { api } from '../../services/api.js';
 
 const CATEGORIES = ['Hackathon', 'Technical', 'Cultural', 'Sports', 'Workshop', 'Seminar'];
@@ -60,7 +60,6 @@ export default function EventFormModal({ isOpen, onClose, onEventSaved, initialE
         ]
       });
     } else {
-      // Reset
       setFormData({
         title: '',
         description: '',
@@ -147,40 +146,41 @@ export default function EventFormModal({ isOpen, onClose, onEventSaved, initialE
   };
 
   return (
-    <div className="fixed inset-0 z-50 overflow-y-auto bg-slate-950/70 backdrop-blur-sm flex items-center justify-center p-3 sm:p-4 animate-in fade-in duration-200">
+    <div className="fixed inset-0 z-50 overflow-y-auto bg-navy-950/80 backdrop-blur-md flex items-center justify-center p-3 sm:p-4 animate-in fade-in duration-200">
       <div 
-        className="bg-white rounded-3xl max-w-3xl w-full overflow-hidden shadow-2xl border border-slate-200/80 my-8 flex flex-col max-h-[92vh]"
+        className="bg-white/95 backdrop-blur-xl rounded-3xl max-w-3xl w-full overflow-hidden shadow-2xl border border-slate-200/90 my-8 flex flex-col max-h-[92vh]"
         onClick={(e) => e.stopPropagation()}
       >
         
         {/* Header */}
-        <div className="p-6 bg-gradient-to-r from-navy-900 to-indigo-950 text-white relative shrink-0">
+        <div className="p-6 bg-gradient-to-r from-navy-900 via-indigo-950 to-navy-900 text-white relative shrink-0 border-b border-indigo-900/30">
           <button
             onClick={onClose}
-            className="absolute top-4 right-4 w-8 h-8 rounded-full bg-white/10 hover:bg-white/20 text-white flex items-center justify-center transition-colors"
+            className="absolute top-4 right-4 w-8 h-8 rounded-full bg-white/10 hover:bg-white/20 text-white flex items-center justify-center transition-all hover:scale-105 active:scale-95"
+            title="Close modal"
           >
             <X className="w-4 h-4" />
           </button>
 
-          <span className="inline-block px-2.5 py-0.5 rounded-md text-[10px] font-heading font-bold uppercase tracking-wider bg-brand-500/30 text-brand-300 border border-brand-500/40 mb-1.5">
+          <span className="inline-block px-2.5 py-0.5 rounded-full text-[10px] font-heading font-bold uppercase tracking-wider bg-brand-500/25 text-brand-300 border border-brand-500/40 mb-1.5">
             {isEdit ? 'Update Event Details' : 'New Event Creator'}
           </span>
 
-          <h3 className="font-heading font-bold text-xl sm:text-2xl text-white">
+          <h3 className="font-heading font-extrabold text-xl sm:text-2xl text-white tracking-tight">
             {isEdit ? `Edit: ${initialEvent.title}` : 'Publish Campus Event & Schedule'}
           </h3>
-          <p className="text-xs text-slate-300">
+          <p className="text-xs text-slate-300 font-light tracking-wide">
             Define event details, participant capacity limits, and multi-round room schedule sessions.
           </p>
         </div>
 
         {/* Form Body */}
-        <form onSubmit={handleSubmit} className="p-6 sm:p-8 overflow-y-auto space-y-6 flex-1">
+        <form onSubmit={handleSubmit} className="p-6 sm:p-8 overflow-y-auto space-y-6 flex-1 bg-slate-50/40">
           
           {error && (
             <div className="p-3.5 rounded-xl bg-rose-50 border border-rose-200 text-rose-700 text-xs flex items-center gap-2">
               <AlertCircle className="w-4 h-4 text-rose-600 shrink-0" />
-              <span>{error}</span>
+              <span className="font-medium">{error}</span>
             </div>
           )}
 
@@ -196,7 +196,7 @@ export default function EventFormModal({ isOpen, onClose, onEventSaved, initialE
                 value={formData.title}
                 onChange={(e) => setFormData({ ...formData, title: e.target.value })}
                 placeholder="e.g. Autonomous Robotics Arena 2026"
-                className="w-full px-3.5 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-sm font-sans text-slate-800 focus:outline-none focus:ring-2 focus:ring-brand-500/20 focus:border-brand-500"
+                className="w-full px-3.5 py-2.5 bg-white border border-slate-200 rounded-xl text-sm font-normal text-slate-800 placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-brand-500/20 focus:border-brand-500 transition-all"
               />
             </div>
 
@@ -207,7 +207,7 @@ export default function EventFormModal({ isOpen, onClose, onEventSaved, initialE
               <select
                 value={formData.category}
                 onChange={(e) => setFormData({ ...formData, category: e.target.value })}
-                className="w-full px-3.5 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-xs sm:text-sm font-sans text-slate-800 focus:outline-none focus:ring-2 focus:ring-brand-500/20 focus:border-brand-500"
+                className="w-full px-3.5 py-2.5 bg-white border border-slate-200 rounded-xl text-xs sm:text-sm font-sans text-slate-800 focus:outline-none focus:ring-2 focus:ring-brand-500/20 focus:border-brand-500 cursor-pointer"
               >
                 {CATEGORIES.map((c) => (
                   <option key={c} value={c}>{c}</option>
@@ -227,7 +227,7 @@ export default function EventFormModal({ isOpen, onClose, onEventSaved, initialE
               value={formData.description}
               onChange={(e) => setFormData({ ...formData, description: e.target.value })}
               placeholder="Provide a comprehensive summary of the event, eligibility, objectives, and judging criteria..."
-              className="w-full px-3.5 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-sm font-sans text-slate-800 focus:outline-none focus:ring-2 focus:ring-brand-500/20 focus:border-brand-500"
+              className="w-full px-3.5 py-2.5 bg-white border border-slate-200 rounded-xl text-sm font-normal text-slate-800 placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-brand-500/20 focus:border-brand-500 transition-all"
             />
           </div>
 
@@ -245,7 +245,7 @@ export default function EventFormModal({ isOpen, onClose, onEventSaved, initialE
                   value={formData.venue}
                   onChange={(e) => setFormData({ ...formData, venue: e.target.value })}
                   placeholder="e.g. Main Convention Center Hall A"
-                  className="w-full pl-10 pr-3.5 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-sm font-sans text-slate-800 focus:outline-none focus:ring-2 focus:ring-brand-500/20 focus:border-brand-500"
+                  className="w-full pl-10 pr-3.5 py-2.5 bg-white border border-slate-200 rounded-xl text-sm font-normal text-slate-800 placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-brand-500/20 focus:border-brand-500 transition-all"
                 />
               </div>
             </div>
@@ -263,7 +263,7 @@ export default function EventFormModal({ isOpen, onClose, onEventSaved, initialE
                   required
                   value={formData.capacity}
                   onChange={(e) => setFormData({ ...formData, capacity: parseInt(e.target.value, 10) || 100 })}
-                  className="w-full pl-10 pr-3.5 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-sm font-sans text-slate-800 focus:outline-none focus:ring-2 focus:ring-brand-500/20 focus:border-brand-500"
+                  className="w-full pl-10 pr-3.5 py-2.5 bg-white border border-slate-200 rounded-xl text-sm font-normal text-slate-800 focus:outline-none focus:ring-2 focus:ring-brand-500/20 focus:border-brand-500 transition-all"
                 />
               </div>
             </div>
@@ -280,7 +280,7 @@ export default function EventFormModal({ isOpen, onClose, onEventSaved, initialE
                 required
                 value={formData.date}
                 onChange={(e) => setFormData({ ...formData, date: e.target.value })}
-                className="w-full px-3.5 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-xs sm:text-sm font-sans text-slate-800 focus:outline-none focus:ring-2 focus:ring-brand-500/20 focus:border-brand-500"
+                className="w-full px-3.5 py-2.5 bg-white border border-slate-200 rounded-xl text-xs sm:text-sm font-sans text-slate-800 focus:outline-none focus:ring-2 focus:ring-brand-500/20 focus:border-brand-500"
               />
             </div>
 
@@ -294,14 +294,14 @@ export default function EventFormModal({ isOpen, onClose, onEventSaved, initialE
                   value={formData.start_time}
                   onChange={(e) => setFormData({ ...formData, start_time: e.target.value })}
                   placeholder="09:00 AM"
-                  className="w-full px-2 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-xs text-center font-sans text-slate-800 focus:outline-none focus:ring-2 focus:ring-brand-500/20"
+                  className="w-full px-2 py-2.5 bg-white border border-slate-200 rounded-xl text-xs text-center font-normal text-slate-800 focus:outline-none focus:ring-2 focus:ring-brand-500/20"
                 />
                 <input
                   type="text"
                   value={formData.end_time}
                   onChange={(e) => setFormData({ ...formData, end_time: e.target.value })}
                   placeholder="05:00 PM"
-                  className="w-full px-2 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-xs text-center font-sans text-slate-800 focus:outline-none focus:ring-2 focus:ring-brand-500/20"
+                  className="w-full px-2 py-2.5 bg-white border border-slate-200 rounded-xl text-xs text-center font-normal text-slate-800 focus:outline-none focus:ring-2 focus:ring-brand-500/20"
                 />
               </div>
             </div>
@@ -315,7 +315,7 @@ export default function EventFormModal({ isOpen, onClose, onEventSaved, initialE
                 required
                 value={formData.registration_deadline}
                 onChange={(e) => setFormData({ ...formData, registration_deadline: e.target.value })}
-                className="w-full px-3.5 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-xs sm:text-sm font-sans text-slate-800 focus:outline-none focus:ring-2 focus:ring-brand-500/20 focus:border-brand-500"
+                className="w-full px-3.5 py-2.5 bg-white border border-slate-200 rounded-xl text-xs sm:text-sm font-sans text-slate-800 focus:outline-none focus:ring-2 focus:ring-brand-500/20 focus:border-brand-500"
               />
             </div>
           </div>
@@ -331,7 +331,7 @@ export default function EventFormModal({ isOpen, onClose, onEventSaved, initialE
                 required
                 value={formData.coordinator_name}
                 onChange={(e) => setFormData({ ...formData, coordinator_name: e.target.value })}
-                className="w-full px-3.5 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-sm font-sans text-slate-800 focus:outline-none focus:ring-2 focus:ring-brand-500/20 focus:border-brand-500"
+                className="w-full px-3.5 py-2.5 bg-white border border-slate-200 rounded-xl text-sm font-normal text-slate-800 placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-brand-500/20 focus:border-brand-500 transition-all"
               />
             </div>
 
@@ -344,26 +344,26 @@ export default function EventFormModal({ isOpen, onClose, onEventSaved, initialE
                 required
                 value={formData.coordinator_contact}
                 onChange={(e) => setFormData({ ...formData, coordinator_contact: e.target.value })}
-                className="w-full px-3.5 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-sm font-sans text-slate-800 focus:outline-none focus:ring-2 focus:ring-brand-500/20 focus:border-brand-500"
+                className="w-full px-3.5 py-2.5 bg-white border border-slate-200 rounded-xl text-sm font-normal text-slate-800 placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-brand-500/20 focus:border-brand-500 transition-all"
               />
             </div>
           </div>
 
           {/* Dynamic Multi-Round Session Builder */}
-          <div className="p-4 sm:p-5 rounded-2xl bg-indigo-50/40 border border-indigo-100 space-y-4">
+          <div className="p-5 sm:p-6 rounded-2xl bg-indigo-50/40 border border-indigo-100/80 space-y-4">
             <div className="flex items-center justify-between">
               <div>
-                <h4 className="font-heading font-bold text-sm text-slate-900 flex items-center gap-1.5">
+                <h4 className="font-heading font-bold text-sm sm:text-base text-slate-900 flex items-center gap-1.5">
                   <Layers className="w-4 h-4 text-brand-600" />
                   <span>Rounds & Schedule Sessions</span>
                 </h4>
-                <p className="text-[11px] text-slate-500">Add multiple rounds, breakout tracks, and room assignments</p>
+                <p className="text-[11px] text-slate-500 font-light">Add multiple rounds, breakout tracks, and room assignments</p>
               </div>
 
               <button
                 type="button"
                 onClick={handleAddSession}
-                className="flex items-center gap-1 px-3 py-1.5 rounded-xl bg-brand-600 hover:bg-brand-700 text-white text-xs font-heading font-semibold transition-colors shadow-sm"
+                className="flex items-center gap-1.5 px-3.5 py-1.5 rounded-xl bg-gradient-to-r from-brand-600 to-indigo-600 hover:from-brand-500 hover:to-indigo-500 text-white text-xs font-heading font-semibold transition-all shadow-sm active:scale-95"
               >
                 <Plus className="w-3.5 h-3.5" />
                 <span>Add Round</span>
@@ -372,7 +372,7 @@ export default function EventFormModal({ isOpen, onClose, onEventSaved, initialE
 
             <div className="space-y-3">
               {formData.sessions.map((session, idx) => (
-                <div key={idx} className="p-3.5 rounded-xl bg-white border border-slate-200 shadow-sm space-y-3 relative group">
+                <div key={idx} className="p-4 rounded-2xl bg-white border border-slate-200/90 shadow-sm space-y-3 relative group">
                   <div className="flex items-center justify-between gap-2">
                     <span className="text-xs font-heading font-bold text-brand-600">
                       Phase #{idx + 1}
@@ -382,7 +382,7 @@ export default function EventFormModal({ isOpen, onClose, onEventSaved, initialE
                       <button
                         type="button"
                         onClick={() => handleRemoveSession(idx)}
-                        className="text-slate-400 hover:text-rose-600 p-1"
+                        className="text-slate-400 hover:text-rose-600 p-1 rounded-lg hover:bg-rose-50 transition-colors"
                         title="Remove round"
                       >
                         <Trash2 className="w-4 h-4" />
@@ -397,7 +397,7 @@ export default function EventFormModal({ isOpen, onClose, onEventSaved, initialE
                       placeholder="Round Name (e.g. Round 2: Hackathon Sprint)"
                       value={session.round_name}
                       onChange={(e) => handleSessionChange(idx, 'round_name', e.target.value)}
-                      className="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-lg text-xs font-heading font-medium text-slate-800"
+                      className="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl text-xs font-heading font-medium text-slate-800 focus:outline-none focus:ring-2 focus:ring-brand-500/20 focus:border-brand-500"
                     />
 
                     <input
@@ -406,7 +406,7 @@ export default function EventFormModal({ isOpen, onClose, onEventSaved, initialE
                       placeholder="Room / Venue (e.g. Innovation Lab 301)"
                       value={session.venue_room}
                       onChange={(e) => handleSessionChange(idx, 'venue_room', e.target.value)}
-                      className="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-lg text-xs font-sans text-slate-800"
+                      className="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl text-xs font-normal text-slate-800 focus:outline-none focus:ring-2 focus:ring-brand-500/20 focus:border-brand-500"
                     />
                   </div>
 
@@ -416,14 +416,14 @@ export default function EventFormModal({ isOpen, onClose, onEventSaved, initialE
                       placeholder="Start Time (e.g. 10:00 AM)"
                       value={session.start_time}
                       onChange={(e) => handleSessionChange(idx, 'start_time', e.target.value)}
-                      className="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-lg text-xs font-sans text-slate-800"
+                      className="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl text-xs font-normal text-slate-800 focus:outline-none focus:ring-2 focus:ring-brand-500/20 focus:border-brand-500"
                     />
                     <input
                       type="text"
                       placeholder="End Time (e.g. 02:00 PM)"
                       value={session.end_time}
                       onChange={(e) => handleSessionChange(idx, 'end_time', e.target.value)}
-                      className="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-lg text-xs font-sans text-slate-800"
+                      className="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl text-xs font-normal text-slate-800 focus:outline-none focus:ring-2 focus:ring-brand-500/20 focus:border-brand-500"
                     />
                   </div>
                 </div>
@@ -436,7 +436,7 @@ export default function EventFormModal({ isOpen, onClose, onEventSaved, initialE
             <button
               type="button"
               onClick={onClose}
-              className="px-4 py-2.5 rounded-xl text-xs sm:text-sm font-heading font-medium text-slate-600 hover:bg-slate-100 transition-colors"
+              className="px-4 py-2.5 rounded-xl text-xs sm:text-sm font-heading font-semibold text-slate-600 hover:text-slate-800 hover:bg-slate-100 transition-colors"
             >
               Cancel
             </button>
@@ -444,7 +444,7 @@ export default function EventFormModal({ isOpen, onClose, onEventSaved, initialE
             <button
               type="submit"
               disabled={loading}
-              className="px-6 py-2.5 rounded-xl text-xs sm:text-sm font-heading font-semibold bg-brand-600 hover:bg-brand-700 text-white shadow-md shadow-brand-600/30 transition-all flex items-center gap-2 disabled:opacity-75"
+              className="px-6 py-2.5 rounded-xl text-xs sm:text-sm font-heading font-semibold bg-gradient-to-r from-brand-600 to-indigo-600 hover:from-brand-500 hover:to-indigo-500 text-white shadow-md shadow-brand-500/25 transition-all flex items-center gap-2 disabled:opacity-75 active:scale-95"
             >
               {loading && <Loader2 className="w-4 h-4 animate-spin" />}
               <span>{isEdit ? 'Save Changes' : 'Create & Publish Event'}</span>
