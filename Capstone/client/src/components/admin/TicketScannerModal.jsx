@@ -126,66 +126,69 @@ export default function TicketScannerModal() {
           </div>
         )}
 
-        {scanResult && scanResult.verified && (
-          <div className="p-6 sm:p-7 rounded-3xl bg-gradient-to-br from-emerald-50 via-teal-50 to-emerald-100/50 border-2 border-emerald-400 text-emerald-950 space-y-4 shadow-xl animate-in zoom-in-95 duration-200">
-            
-            <div className="flex items-center justify-between border-b border-emerald-200/80 pb-3">
-              <div className="flex items-center gap-2.5">
-                <div className="w-10 h-10 rounded-2xl bg-emerald-600 text-white flex items-center justify-center font-bold shadow-md shadow-emerald-600/30">
-                  <CheckCircle2 className="w-5 h-5" />
+        {scanResult && scanResult.verified && (() => {
+          const reg = scanResult.registration || scanResult;
+          return (
+            <div className="p-6 sm:p-7 rounded-3xl bg-gradient-to-br from-emerald-50 via-teal-50 to-emerald-100/50 border-2 border-emerald-400 text-emerald-950 space-y-4 shadow-xl animate-in zoom-in-95 duration-200">
+              
+              <div className="flex items-center justify-between border-b border-emerald-200/80 pb-3">
+                <div className="flex items-center gap-2.5">
+                  <div className="w-10 h-10 rounded-2xl bg-emerald-600 text-white flex items-center justify-center font-bold shadow-md shadow-emerald-600/30">
+                    <CheckCircle2 className="w-5 h-5" />
+                  </div>
+                  <div>
+                    <span className="font-heading font-extrabold text-base sm:text-lg text-emerald-900 block">
+                      {scanResult.message || 'Ticket Verified & Checked In!'}
+                    </span>
+                    <span className="text-[11px] text-emerald-700 font-normal">
+                      {scanResult.already_checked_in ? 'Attendee was already checked in earlier' : 'First-time check-in recorded successfully'}
+                    </span>
+                  </div>
                 </div>
-                <div>
-                  <span className="font-heading font-extrabold text-base sm:text-lg text-emerald-900 block">
-                    {scanResult.message}
+
+                <span className="font-mono font-bold text-xs px-2.5 py-1 rounded-xl bg-emerald-600 text-white shadow-sm">
+                  VALID TICKET
+                </span>
+              </div>
+
+              {/* Attendee Details Card */}
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 text-xs font-sans">
+                <div className="p-4 rounded-2xl bg-white/90 backdrop-blur-sm border border-emerald-200/80 shadow-sm">
+                  <span className="text-[10px] font-semibold uppercase tracking-wider text-emerald-700 block">Attendee Name</span>
+                  <span className="font-heading font-bold text-sm text-slate-900 block mt-0.5">
+                    {reg.participant_name}
                   </span>
-                  <span className="text-[11px] text-emerald-700 font-normal">
-                    {scanResult.already_checked_in ? 'Attendee was already checked in earlier' : 'First-time check-in recorded successfully'}
+                  <span className="text-slate-600 text-[11px] block mt-0.5 font-normal">
+                    {reg.department}
+                  </span>
+                  <span className="text-slate-500 text-[10px] block font-light">
+                    {reg.college} {reg.year_of_study ? `(${reg.year_of_study})` : ''}
+                  </span>
+                </div>
+
+                <div className="p-4 rounded-2xl bg-white/90 backdrop-blur-sm border border-emerald-200/80 shadow-sm">
+                  <span className="text-[10px] font-semibold uppercase tracking-wider text-emerald-700 block">Event & Venue</span>
+                  <span className="font-heading font-bold text-sm text-slate-900 block mt-0.5">
+                    {reg.event_title}
+                  </span>
+                  <span className="text-slate-600 text-[11px] block mt-0.5 font-normal">
+                    📍 {reg.event_venue}
+                  </span>
+                  <span className="text-slate-500 text-[10px] block font-light">
+                    📅 {reg.event_date || 'Today'} {reg.event_start_time ? `(${reg.event_start_time})` : ''}
                   </span>
                 </div>
               </div>
 
-              <span className="font-mono font-bold text-xs px-2.5 py-1 rounded-xl bg-emerald-600 text-white shadow-sm">
-                VALID TICKET
-              </span>
-            </div>
-
-            {/* Attendee Details Card */}
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 text-xs font-sans">
-              <div className="p-4 rounded-2xl bg-white/90 backdrop-blur-sm border border-emerald-200/80 shadow-sm">
-                <span className="text-[10px] font-semibold uppercase tracking-wider text-emerald-700 block">Attendee Name</span>
-                <span className="font-heading font-bold text-sm text-slate-900 block mt-0.5">
-                  {scanResult.registration.participant_name}
-                </span>
-                <span className="text-slate-600 text-[11px] block mt-0.5 font-normal">
-                  {scanResult.registration.department}
-                </span>
-                <span className="text-slate-500 text-[10px] block font-light">
-                  {scanResult.registration.college} ({scanResult.registration.year_of_study})
-                </span>
+              {/* Timestamp */}
+              <div className="flex items-center justify-between text-[11px] text-emerald-800 pt-1 font-mono">
+                <span>Ticket ID: <strong>{reg.ticket_code}</strong></span>
+                <span>Check-in Timestamp: {reg.check_in_time ? new Date(reg.check_in_time).toLocaleTimeString() : new Date().toLocaleTimeString()}</span>
               </div>
 
-              <div className="p-4 rounded-2xl bg-white/90 backdrop-blur-sm border border-emerald-200/80 shadow-sm">
-                <span className="text-[10px] font-semibold uppercase tracking-wider text-emerald-700 block">Event & Venue</span>
-                <span className="font-heading font-bold text-sm text-slate-900 block mt-0.5">
-                  {scanResult.registration.event_title}
-                </span>
-                <span className="text-slate-600 text-[11px] block mt-0.5 font-normal">
-                  📍 {scanResult.registration.event_venue}
-                </span>
-                <span className="text-slate-500 text-[10px] block font-light">
-                  📅 {scanResult.registration.event_date} ({scanResult.registration.event_start_time})
-                </span>
-              </div>
             </div>
-
-            {/* Timestamp */}
-            <div className="flex items-center justify-between text-[11px] text-emerald-800 pt-1 font-mono">
-              <span>Ticket ID: <strong>{scanResult.registration.ticket_code}</strong></span>
-              <span>Check-in Timestamp: {new Date().toLocaleTimeString()}</span>
-            </div>
-
-          </div>
-        )}
+          );
+        })()}
 
       </div>
 

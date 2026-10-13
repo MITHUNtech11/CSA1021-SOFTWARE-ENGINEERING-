@@ -9,6 +9,7 @@ import {
   UserCheck 
 } from 'lucide-react';
 import { api } from '../../services/api.js';
+import { isSupabaseConfigured } from '../../services/supabaseClient.js';
 import { downloadCsvFromRows } from '../../utils/csvExport.js';
 
 export default function RegistrationsManager({ initialEventId = null }) {
@@ -73,25 +74,28 @@ export default function RegistrationsManager({ initialEventId = null }) {
   };
 
   const handleExportCsv = () => {
-    if (selectedEventId && selectedEventId !== 'All') {
-      // Trigger native endpoint download
+    if (!isSupabaseConfigured() && selectedEventId && selectedEventId !== 'All') {
+      // Trigger native FastAPI endpoint download in local backend mode
       window.open(`/api/events/${selectedEventId}/registrations/export`, '_blank');
-    } else {
-      // Export current filtered rows
-      const headers = ['Ticket Code', 'Participant Name', 'Email', 'Phone', 'College', 'Department', 'Year', 'Event', 'Attendance Status'];
-      const rows = filteredRegistrations.map((r) => [
-        r.ticket_code,
-        r.participant_name,
-        r.email,
-        r.phone,
-        r.college,
-        r.department,
-        r.year_of_study,
-        r.event_title || 'N/A',
-        r.attendance_status || 'registered'
-      ]);
-      downloadCsvFromRows('eventflow-all-registrations', headers, rows);
+      return;
     }
+    // Export current filtered rows with safe client-side UTF-8 BOM download
+    const headers = ['Ticket Code', 'Participant Name', 'Email', 'Phone', 'College', 'Department', 'Year', 'Event', 'Attendance Status'];
+    const rows = filteredRegistrations.map((r) => [
+      r.ticket_code,
+      r.participant_name,
+      r.email,
+      r.phone,
+      r.college,
+      r.department,
+      r.year_of_study,
+      r.event_title || 'N/A',
+      r.attendance_status || 'registered'
+    ]);
+    const filename = selectedEventId && selectedEventId !== 'All' 
+      ? `eventflow-attendees-${selectedEventId}` 
+      : 'eventflow-all-registrations';
+    downloadCsvFromRows(filename, headers, rows);
   };
 
   const filteredRegistrations = registrations.filter((r) => {

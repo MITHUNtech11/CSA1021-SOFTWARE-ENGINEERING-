@@ -176,8 +176,10 @@ CREATE POLICY "Public read announcements" ON announcements FOR SELECT USING (tru
 -- Allow public inserts and reads for event registrations & attendance
 CREATE POLICY "Public read registrations" ON registrations FOR SELECT USING (true);
 CREATE POLICY "Public insert registrations" ON registrations FOR INSERT WITH CHECK (true);
+CREATE POLICY "Public manage registrations" ON registrations FOR ALL USING (true) WITH CHECK (true);
 CREATE POLICY "Public read attendance" ON attendance FOR SELECT USING (true);
 CREATE POLICY "Public update attendance" ON attendance FOR UPDATE USING (true);
+CREATE POLICY "Public manage attendance" ON attendance FOR ALL USING (true) WITH CHECK (true);
 
 -- Allow full administrative actions via anon/authenticated clients for demo
 CREATE POLICY "Public manage events" ON events FOR ALL USING (true) WITH CHECK (true);
@@ -298,16 +300,18 @@ INSERT INTO event_sessions (event_id, round_name, venue_room, start_time, end_ti
 
 -- 5.4 Seed Registrations (Triggers will auto-create attendance and increment registered_count)
 INSERT INTO registrations (id, event_id, ticket_code, participant_name, email, phone, college, department, year_of_study) VALUES
-('90000001-0000-0000-0000-000000000001', 'aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa', 'EVF-2026-HACK1', 'Aditya Verma', 'aditya.verma@college.edu', '+91 98765 00001', 'Tech Institute of Science', 'Computer Science & Engineering', '3rd Year'),
-('90000002-0000-0000-0000-000000000002', 'aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa', 'EVF-2026-HACK2', 'Rhea Sen', 'rhea.sen@college.edu', '+91 98765 00002', 'National College of Engineering', 'Information Technology', '2nd Year'),
-('90000003-0000-0000-0000-000000000003', 'aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa', 'EVF-2026-HACK3', 'Manoj Kumar', 'manoj.k@college.edu', '+91 98765 00003', 'State University', 'Electronics & Communication', '4th Year'),
-('90000004-0000-0000-0000-000000000004', 'bbbbbbbb-bbbb-bbbb-bbbb-bbbbbbbbbbbb', 'EVF-2026-ROBO1', 'Siddharth Rao', 'sid.rao@college.edu', '+91 98765 00004', 'Tech Institute of Science', 'Mechanical Engineering', '3rd Year'),
-('90000005-0000-0000-0000-000000000005', 'cccccccc-cccc-cccc-cccc-cccccccccccc', 'EVF-2026-WS001', 'Ananya Gupta', 'ananya.g@college.edu', '+91 98765 00005', 'National College of Engineering', 'Computer Science & Engineering', '2nd Year');
+('90000001-0000-0000-0000-000000000001', 'aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa', 'EVF-2026-X801', 'Aditya Nair', 'aditya.nair@college.edu', '+91 98451 12345', 'National Institute of Technology', 'Computer Science & Engineering', '3rd Year'),
+('90000002-0000-0000-0000-000000000002', 'aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa', 'EVF-2026-X802', 'Meera Krishnan', 'meera.k@college.edu', '+91 98452 23456', 'National Institute of Technology', 'Information Technology', '4th Year'),
+('90000003-0000-0000-0000-000000000003', 'aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa', 'EVF-2026-X803', 'Karthik Raja', 'karthik.r@college.edu', '+91 98453 34567', 'PSG College of Technology', 'Electronics & Communication', '2nd Year'),
+('90000004-0000-0000-0000-000000000004', 'bbbbbbbb-bbbb-bbbb-bbbb-bbbbbbbbbbbb', 'EVF-2026-X804', 'Siddharth Menon', 'sid.menon@college.edu', '+91 98454 45678', 'College of Engineering Guindy', 'Mechanical Engineering', '3rd Year'),
+('90000005-0000-0000-0000-000000000005', 'bbbbbbbb-bbbb-bbbb-bbbb-bbbbbbbbbbbb', 'EVF-2026-X805', 'Tanvi Saxena', 'tanvi.s@college.edu', '+91 98455 56789', 'Vellore Institute of Technology', 'Mechatronics', '4th Year'),
+('90000006-0000-0000-0000-000000000006', 'dddddddd-dddd-dddd-dddd-dddddddddddd', 'EVF-2026-X806', 'Ananya Roy', 'ananya.roy@college.edu', '+91 98456 67890', 'St. Xavier’s College', 'Media Studies', '2nd Year'),
+('90000007-0000-0000-0000-000000000007', 'cccccccc-cccc-cccc-cccc-cccccccccccc', 'EVF-2026-X807', 'Rahul Varma', 'rahul.varma@college.edu', '+91 98765 43210', 'TechTrove University', 'Computer Science & Engineering', '1st Year');
 
 -- 5.5 Update Attendance Check-in for Demo
 UPDATE attendance
 SET status = 'checked_in', check_in_time = NOW()
-WHERE registration_id = '90000001-0000-0000-0000-000000000001';
+WHERE registration_id IN ('90000001-0000-0000-0000-000000000001', '90000003-0000-0000-0000-000000000003', '90000005-0000-0000-0000-000000000005');
 
 -- 5.6 Seed Announcements
 INSERT INTO announcements (id, event_id, title, message, priority, published_by) VALUES

@@ -12,6 +12,12 @@ function generateTicketCode() {
   return `EVF-2026-${rand}`;
 }
 
+// Helper to safely extract 1-to-1 or 1-to-many attendance relation from Supabase
+function getAttendanceRecord(attendance) {
+  if (Array.isArray(attendance)) return attendance[0] || {};
+  return attendance || {};
+}
+
 async function handleResponse(response) {
   if (!response.ok) {
     let errorMsg = `HTTP ${response.status} ${response.statusText}`;
@@ -41,7 +47,7 @@ export const api = {
         .select(`
           *,
           organizers (name, department),
-          event_sessions (count)
+          event_sessions (id)
         `)
         .order('date', { ascending: true });
 
@@ -62,7 +68,7 @@ export const api = {
         ...event,
         organizer_name: event.organizers?.name || 'Campus Organizer',
         organizer_department: event.organizers?.department || 'University',
-        sessions_count: event.event_sessions?.[0]?.count || 0
+        sessions_count: Array.isArray(event.event_sessions) ? event.event_sessions.length : (event.sessions_count || 0)
       }));
     }
 
@@ -206,16 +212,16 @@ export const api = {
   // ---------------------------------------------------------------------------
   async registerForEvent(eventId, participantData) {
     if (isSupabaseConfigured()) {
-      // 1. Fetch event capacity & deadline
+      // 1. Fetch event capacity & deadline & venue/timing
       const { data: event, error: evtErr } = await supabase
         .from('events')
-        .select('capacity, registered_count, registration_deadline, title')
+        .select('capacity, registered_count, registration_deadline, title, date, venue, start_time, end_time')
         .eq('id', eventId)
         .single();
 
       if (evtErr || !event) throw new Error('Event not found');
 
-      if (event.registered_count >= event.capacity) {
+      if ((event.registered_count || 0) >= (event.capacity || 100)) {
         throw new Error('Event registration is full');
       }
 
@@ -232,7 +238,7 @@ export const api = {
         .from('registrations')
         .select('id, ticket_code')
         .eq('event_id', eventId)
-        .eq('email', participantData.email)
+        .ilike('email', (participantData.email || '').trim())
         .maybeSingle();
 
       if (existing) {
@@ -250,24 +256,40 @@ export const api = {
         .insert([{
           event_id: eventId,
           ticket_code: ticketCode,
-          participant_name: participantData.participant_name,
-          email: participantData.email,
-          phone: participantData.phone,
-          college: participantData.college,
-          department: participantData.department,
-          year_of_study: participantData.year_of_study
+          participant_name: participantData.participant_name.trim(),
+          email: participantData.email.trim(),
+          phone: participantData.phone.trim(),
+          college: participantData.college ? participantData.college.trim() : 'TechTrove University',
+          department: participantData.department.trim(),
+          year_of_study: participantData.year_of_study || '1st Year'
         }])
         .select()
         .single();
 
-      if (regErr) throw new Error(regErr.message);
+      if (regErr) {
+        if (regErr.code === '23505' || regErr.message?.includes('unique_event_registration')) {
+          const conflictErr = new Error('You have already registered for this event');
+          conflictErr.status = 409;
+          throw conflictErr;
+        }
+        throw new Error(regErr.message);
+      }
 
       return {
+        message: 'Registration successful!',
         id: reg.id,
         ticket_code: ticketCode,
+        event_id: eventId,
+        event_title: event.title,
+        event_date: event.date,
+        event_time: `${event.start_time} - ${event.end_time}`,
+        event_venue: event.venue,
         participant_name: reg.participant_name,
         email: reg.email,
-        event_title: event.title,
+        phone: reg.phone,
+        department: reg.department,
+        college: reg.college,
+        year_of_study: reg.year_of_study,
         registered_at: reg.registered_at
       };
     }
@@ -286,34 +308,37 @@ export const api = {
         .from('registrations')
         .select(`
           *,
-          events (id, title, date, start_time, venue, category, banner_url),
+          events (id, title, date, start_time, end_time, venue, category, banner_url),
           attendance (status, check_in_time)
         `)
-        .eq('email', email)
+        .ilike('email', (email || '').trim())
         .order('registered_at', { ascending: false });
 
       if (error) throw new Error(error.message);
 
-      return (data || []).map(r => ({
-        id: r.id,
-        ticket_code: r.ticket_code,
-        participant_name: r.participant_name,
-        email: r.email,
-        phone: r.phone,
-        college: r.college,
-        department: r.department,
-        year_of_study: r.year_of_study,
-        registered_at: r.registered_at,
-        event_id: r.events?.id,
-        event_title: r.events?.title,
-        event_date: r.events?.date,
-        event_time: r.events?.start_time,
-        event_venue: r.events?.venue,
-        event_category: r.events?.category,
-        banner_url: r.events?.banner_url,
-        attendance_status: r.attendance?.[0]?.status || 'registered',
-        check_in_time: r.attendance?.[0]?.check_in_time
-      }));
+      return (data || []).map(r => {
+        const att = getAttendanceRecord(r.attendance);
+        return {
+          id: r.id,
+          ticket_code: r.ticket_code,
+          participant_name: r.participant_name,
+          email: r.email,
+          phone: r.phone,
+          college: r.college,
+          department: r.department,
+          year_of_study: r.year_of_study,
+          registered_at: r.registered_at,
+          event_id: r.events?.id,
+          event_title: r.events?.title,
+          event_date: r.events?.date,
+          event_time: r.events ? `${r.events.start_time} - ${r.events.end_time || ''}` : '',
+          event_venue: r.events?.venue,
+          event_category: r.events?.category,
+          banner_url: r.events?.banner_url,
+          attendance_status: att.status || 'registered',
+          check_in_time: att.check_in_time
+        };
+      });
     }
 
     const res = await fetch(`${BASE_URL}/registrations/my?email=${encodeURIComponent(email)}`);
@@ -341,21 +366,24 @@ export const api = {
       const { data, error } = await query;
       if (error) throw new Error(error.message);
 
-      return (data || []).map(r => ({
-        id: r.id,
-        event_id: r.event_id,
-        event_title: r.events?.title,
-        ticket_code: r.ticket_code,
-        participant_name: r.participant_name,
-        email: r.email,
-        phone: r.phone,
-        college: r.college,
-        department: r.department,
-        year_of_study: r.year_of_study,
-        registered_at: r.registered_at,
-        attendance_status: r.attendance?.[0]?.status || 'registered',
-        check_in_time: r.attendance?.[0]?.check_in_time
-      }));
+      return (data || []).map(r => {
+        const att = getAttendanceRecord(r.attendance);
+        return {
+          id: r.id,
+          event_id: r.event_id,
+          event_title: r.events?.title,
+          ticket_code: r.ticket_code,
+          participant_name: r.participant_name,
+          email: r.email,
+          phone: r.phone,
+          college: r.college,
+          department: r.department,
+          year_of_study: r.year_of_study,
+          registered_at: r.registered_at,
+          attendance_status: att.status || 'registered',
+          check_in_time: att.check_in_time
+        };
+      });
     }
 
     const searchParams = new URLSearchParams();
@@ -398,10 +426,10 @@ export const api = {
         .from('registrations')
         .select(`
           *,
-          events (id, title, date, venue),
+          events (id, title, date, venue, start_time, end_time, category),
           attendance (id, status, check_in_time)
         `)
-        .eq('ticket_code', ticketCode.trim())
+        .ilike('ticket_code', ticketCode.trim())
         .maybeSingle();
 
       if (regErr || !reg) {
@@ -410,11 +438,12 @@ export const api = {
         throw err;
       }
 
-      // Auto check-in if registered
-      let currentStatus = reg.attendance?.[0]?.status || 'registered';
-      let checkInTime = reg.attendance?.[0]?.check_in_time;
+      const attRecord = getAttendanceRecord(reg.attendance);
+      const alreadyCheckedIn = attRecord.status === 'checked_in';
+      let currentStatus = attRecord.status || 'registered';
+      let checkInTime = attRecord.check_in_time;
 
-      if (currentStatus !== 'checked_in') {
+      if (!alreadyCheckedIn) {
         checkInTime = new Date().toISOString();
         currentStatus = 'checked_in';
         await supabase
@@ -423,8 +452,31 @@ export const api = {
           .eq('registration_id', reg.id);
       }
 
+      const regData = {
+        id: reg.id,
+        ticket_code: reg.ticket_code,
+        participant_name: reg.participant_name,
+        email: reg.email,
+        phone: reg.phone,
+        college: reg.college,
+        department: reg.department,
+        year_of_study: reg.year_of_study,
+        event_title: reg.events?.title,
+        event_venue: reg.events?.venue,
+        event_date: reg.events?.date,
+        event_start_time: reg.events?.start_time,
+        event_end_time: reg.events?.end_time,
+        event_category: reg.events?.category,
+        attendance_status: currentStatus,
+        check_in_time: checkInTime
+      };
+
       return {
         verified: true,
+        message: currentStatus === 'checked_in' ? 'Ticket Verified & Checked In!' : 'Valid Ticket Verified',
+        already_checked_in: alreadyCheckedIn,
+        registration: regData,
+        // Flat aliases for backwards compatibility
         ticket_code: reg.ticket_code,
         participant_name: reg.participant_name,
         email: reg.email,
@@ -452,7 +504,10 @@ export const api = {
     if (isSupabaseConfigured()) {
       let query = supabase
         .from('announcements')
-        .select('*')
+        .select(`
+          *,
+          events (title)
+        `)
         .order('created_at', { ascending: false });
 
       if (eventId) {
@@ -461,7 +516,22 @@ export const api = {
 
       const { data, error } = await query;
       if (error) throw new Error(error.message);
-      return data || [];
+
+      const list = (data || []).map(a => ({
+        ...a,
+        event_title: a.events?.title || a.event_title || null
+      }));
+
+      // Sort by priority (urgent -> update -> info) then created_at
+      const priorityOrder = { urgent: 1, update: 2, info: 3 };
+      list.sort((a, b) => {
+        const pA = priorityOrder[a.priority] || 4;
+        const pB = priorityOrder[b.priority] || 4;
+        if (pA !== pB) return pA - pB;
+        return new Date(b.created_at) - new Date(a.created_at);
+      });
+
+      return list;
     }
 
     const url = eventId ? `${BASE_URL}/announcements?event_id=${eventId}` : `${BASE_URL}/announcements`;
@@ -524,17 +594,22 @@ export const api = {
       const completedEvents = allEvents.filter(e => e.status === 'completed').length;
       const totalCapacity = allEvents.reduce((acc, e) => acc + (e.capacity || 0), 0);
       const totalRegistrations = totalRegs || 0;
+      const checkedIn = checkedInCount || 0;
 
-      const capacityUtil = totalCapacity > 0 ? Math.round((totalRegistrations / totalCapacity) * 100) : 0;
+      const capacityUtil = totalCapacity > 0 ? Math.min(100, Math.round((totalRegistrations / totalCapacity) * 100)) : 0;
+      const attendanceRate = totalRegistrations > 0 ? Math.round((checkedIn / totalRegistrations) * 100) : 0;
 
       return {
         total_events: totalEvents,
         active_events: activeEvents,
         completed_events: completedEvents,
+        total_capacity: totalCapacity,
         total_registrations: totalRegistrations,
-        checked_in_count: checkedInCount || 0,
+        checked_in_count: checkedIn,
         unique_participants: totalRegistrations,
+        capacity_utilization_rate: capacityUtil,
         overall_capacity_utilization: capacityUtil,
+        attendance_rate: attendanceRate,
         total_announcements: announcementsCount || 0
       };
     }
@@ -560,13 +635,25 @@ export const api = {
 
   async fetchCategoryStats() {
     if (isSupabaseConfigured()) {
-      const { data } = await supabase.from('events').select('category, registered_count');
+      const { data } = await supabase.from('events').select('category, registered_count, capacity');
       const counts = {};
       (data || []).forEach(e => {
         const cat = e.category || 'General';
-        if (!counts[cat]) counts[cat] = { category: cat, events_count: 0, registrations_count: 0 };
+        if (!counts[cat]) {
+          counts[cat] = {
+            category: cat,
+            event_count: 0,
+            events_count: 0,
+            total_registered: 0,
+            registrations_count: 0,
+            total_capacity: 0
+          };
+        }
+        counts[cat].event_count += 1;
         counts[cat].events_count += 1;
+        counts[cat].total_registered += (e.registered_count || 0);
         counts[cat].registrations_count += (e.registered_count || 0);
+        counts[cat].total_capacity += (e.capacity || 0);
       });
       return Object.values(counts);
     }
@@ -577,17 +664,40 @@ export const api = {
 
   async fetchActivityLog() {
     if (isSupabaseConfigured()) {
-      const { data } = await supabase
-        .from('registrations')
-        .select('participant_name, registered_at, events(title)')
-        .order('registered_at', { ascending: false })
-        .limit(10);
+      const [regsRes, ancsRes] = await Promise.all([
+        supabase
+          .from('registrations')
+          .select('id, participant_name, registered_at, events(title)')
+          .order('registered_at', { ascending: false })
+          .limit(5),
+        supabase
+          .from('announcements')
+          .select('id, title, priority, created_at')
+          .order('created_at', { ascending: false })
+          .limit(3)
+      ]);
 
-      return (data || []).map(r => ({
+      const regs = (regsRes.data || []).map(r => ({
         type: 'registration',
+        id: r.id,
+        title: r.participant_name,
+        subtitle: r.events?.title || 'Event',
         message: `${r.participant_name} registered for ${r.events?.title || 'an event'}`,
         timestamp: r.registered_at
       }));
+
+      const ancs = (ancsRes.data || []).map(a => ({
+        type: 'announcement',
+        id: a.id,
+        title: a.title,
+        subtitle: a.priority,
+        message: `Announcement: ${a.title}`,
+        timestamp: a.created_at
+      }));
+
+      const combined = [...regs, ...ancs];
+      combined.sort((a, b) => new Date(b.timestamp) - new Date(a.timestamp));
+      return combined;
     }
 
     const res = await fetch(`${BASE_URL}/stats/activity-log`);
