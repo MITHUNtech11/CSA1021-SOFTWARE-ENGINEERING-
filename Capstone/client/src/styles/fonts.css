@@ -1,22 +1,52 @@
-/* Akira Expanded Display Font Definition with fallback */
-@font-face {
-  font-family: 'Akira';
-  src: local('Akira Expanded'), local('Akira-Expanded'), local('AkiraExpanded-SuperBold');
-  font-weight: 800 900;
-  font-style: normal;
-  font-display: swap;
+/* Poppins Typography Hierarchy & Variations */
+
+.font-poppins-light {
+  font-family: 'Poppins', -apple-system, sans-serif;
+  font-weight: 300;
+}
+
+.font-poppins-regular {
+  font-family: 'Poppins', -apple-system, sans-serif;
+  font-weight: 400;
+}
+
+.font-poppins-medium {
+  font-family: 'Poppins', -apple-system, sans-serif;
+  font-weight: 500;
+}
+
+.font-poppins-semibold {
+  font-family: 'Poppins', -apple-system, sans-serif;
+  font-weight: 600;
+}
+
+.font-poppins-bold {
+  font-family: 'Poppins', -apple-system, sans-serif;
+  font-weight: 700;
+}
+
+.font-poppins-extrabold {
+  font-family: 'Poppins', -apple-system, sans-serif;
+  font-weight: 800;
+}
+
+.font-poppins-black {
+  font-family: 'Poppins', -apple-system, sans-serif;
+  font-weight: 900;
 }
 
 .font-display {
-  font-family: 'Akira', 'Poppins', -apple-system, BlinkMacSystemFont, sans-serif;
-  letter-spacing: 0.06em;
-  text-transform: uppercase;
+  font-family: 'Poppins', -apple-system, BlinkMacSystemFont, sans-serif;
+  font-weight: 800;
+  letter-spacing: -0.02em;
 }
 
 .font-heading {
   font-family: 'Poppins', -apple-system, BlinkMacSystemFont, sans-serif;
+  font-weight: 600;
+  letter-spacing: -0.01em;
 }
 
 .font-sans {
-  font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+  font-family: 'Poppins', -apple-system, BlinkMacSystemFont, sans-serif;
 }
