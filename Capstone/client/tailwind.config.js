@@ -11,6 +11,17 @@ export default {
         heading: ['Poppins', '-apple-system', 'sans-serif'],
         display: ['Poppins', '-apple-system', 'sans-serif'],
       },
+      fontSize: {
+        'xs': ['15px', { lineHeight: '1.45' }],
+        'sm': ['16px', { lineHeight: '1.5' }],
+        'base': ['17px', { lineHeight: '1.6' }],
+        'lg': ['19px', { lineHeight: '1.5' }],
+        'xl': ['22px', { lineHeight: '1.4' }],
+        '2xl': ['26px', { lineHeight: '1.35' }],
+        '3xl': ['32px', { lineHeight: '1.25' }],
+        '4xl': ['40px', { lineHeight: '1.2' }],
+        '5xl': ['48px', { lineHeight: '1.15' }],
+      },
       fontWeight: {
         light: '300',
         normal: '400',
