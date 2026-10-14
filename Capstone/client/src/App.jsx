@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import Navbar from './components/Navbar.jsx';
 import ParticipantPortal from './components/ParticipantPortal.jsx';
 import RegistrationModal from './components/RegistrationModal.jsx';
@@ -13,7 +13,26 @@ import RegistrationsManager from './components/admin/RegistrationsManager.jsx';
 import AnnouncementBroadcast from './components/admin/AnnouncementBroadcast.jsx';
 import TicketScannerModal from './components/admin/TicketScannerModal.jsx';
 
+// Auth Hook & Modals
+import { useAuth } from './context/useAuth.js';
+import { useToast } from './context/ToastContext.jsx';
+import AuthModal from './components/auth/AuthModal.jsx';
+import UserProfileModal from './components/auth/UserProfileModal.jsx';
+
 export default function App() {
+  const { 
+    role: authRole, 
+    user,
+    isAuthModalOpen,
+    closeAuthModal,
+    authModalTab,
+    openAuthModal,
+    isProfileModalOpen,
+    closeProfileModal,
+    openProfileModal
+  } = useAuth();
+  const toast = useToast();
+
   const [role, setRole] = useState('participant'); // 'participant' | 'admin'
   const [adminTab, setAdminTab] = useState('overview'); // 'overview' | 'events' | 'registrations' | 'announcements' | 'scanner'
   const [adminEventFilter, setAdminEventFilter] = useState('All');
@@ -23,6 +42,13 @@ export default function App() {
   const [activeTicketPass, setActiveTicketPass] = useState(null);
   const [isMyTicketsOpen, setIsMyTicketsOpen] = useState(false);
 
+  // If user signs out while in admin view, revert to participant view
+  useEffect(() => {
+    if (authRole !== 'admin' && role === 'admin') {
+      setRole('participant');
+    }
+  }, [authRole, role]);
+
   const handleRegisterEvent = (event) => {
     setRegisteringEvent(event);
   };
@@ -30,6 +56,10 @@ export default function App() {
   const handleRegistrationSuccess = (issuedTicket) => {
     setRegisteringEvent(null);
     setActiveTicketPass(issuedTicket);
+    toast.success(
+      `Pass issued for "${issuedTicket.event_title || issuedTicket.title || 'Event'}"! Ticket Code: ${issuedTicket.ticket_code}`,
+      'Registration Confirmed'
+    );
   };
 
   const handleOpenMyTickets = () => {
@@ -73,7 +103,7 @@ export default function App() {
               <span>•</span>
               <span className="font-heading font-medium text-slate-400">Campus Event Coordination Operating System</span>
             </div>
-            <p className="text-slate-500 text-[11px]">
+            <p className="text-slate-400 text-xs">
               Built for TechTrove Hackathon 2026. Empowering college organizers, department societies, and student attendees.
             </p>
           </footer>
@@ -118,6 +148,34 @@ export default function App() {
         isOpen={isMyTicketsOpen}
         onClose={() => setIsMyTicketsOpen(false)}
         onViewPass={handleViewPassFromLookup}
+      />
+
+      {/* Global Auth Modal */}
+      <AuthModal
+        isOpen={isAuthModalOpen}
+        onClose={closeAuthModal}
+        initialTab={authModalTab}
+        onSuccess={(authedUser) => {
+          closeAuthModal();
+          toast.success(
+            `Logged in as ${authedUser.name} (${authedUser.role === 'admin' ? (authedUser.roleTitle || 'Organizer') : 'Student'})`,
+            'Authentication Success'
+          );
+          if (authedUser.role === 'admin') {
+            setRole('admin');
+          }
+        }}
+      />
+
+      {/* Global User Profile Modal */}
+      <UserProfileModal
+        isOpen={isProfileModalOpen}
+        onClose={closeProfileModal}
+        onOpenMyTickets={handleOpenMyTickets}
+        onSwitchUser={() => {
+          closeProfileModal();
+          openAuthModal('student');
+        }}
       />
 
     </div>

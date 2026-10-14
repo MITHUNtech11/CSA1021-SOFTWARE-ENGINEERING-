@@ -33,27 +33,27 @@ export default function EventCard({ event, onViewDetails, onRegister }) {
 
         {/* Top Badges */}
         <div className="absolute top-3 left-3 right-3 flex items-center justify-between gap-2">
-          <span className={`px-2.5 py-1 rounded-xl text-[11px] font-bold uppercase tracking-wider border backdrop-blur-md shadow-sm ${categoryStyle}`}>
+          <span className={`px-3 py-1 rounded-xl text-xs font-bold uppercase tracking-wider border backdrop-blur-md shadow-sm ${categoryStyle}`}>
             {event.category}
           </span>
 
           {event.sessions_count > 0 && (
-            <span className="flex items-center gap-1 px-2.5 py-1 rounded-xl text-[11px] font-medium bg-slate-900/80 text-slate-200 border border-slate-700/80 backdrop-blur-md">
-              <Layers className="w-3 h-3 text-indigo-400" />
+            <span className="flex items-center gap-1.5 px-3 py-1 rounded-xl text-xs font-semibold bg-slate-900/85 text-slate-200 border border-slate-700/80 backdrop-blur-md shadow-sm">
+              <Layers className="w-3.5 h-3.5 text-indigo-400" />
               <span>{event.sessions_count} {event.sessions_count === 1 ? 'Round' : 'Rounds'}</span>
             </span>
           )}
         </div>
 
-        {/* Date on Banner */}
-        <div className="absolute bottom-3 left-3 flex items-center gap-2 text-white text-xs font-medium">
-          <span className="flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-white/20 backdrop-blur-md border border-white/20 shadow-sm">
+        {/* Date & Time on Banner */}
+        <div className="absolute bottom-3 left-3 right-3 flex items-center gap-2 text-white text-sm font-semibold">
+          <span className="flex items-center gap-1.5 px-3 py-1 rounded-xl bg-white/20 backdrop-blur-md border border-white/20 shadow-sm">
             <Calendar className="w-3.5 h-3.5 text-brand-300" />
-            {event.date}
+            <span>{event.date}</span>
           </span>
-          <span className="flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-white/20 backdrop-blur-md border border-white/20 shadow-sm">
+          <span className="flex items-center gap-1.5 px-3 py-1 rounded-xl bg-white/20 backdrop-blur-md border border-white/20 shadow-sm">
             <Clock className="w-3.5 h-3.5 text-brand-300" />
-            {event.start_time}
+            <span>{event.start_time}</span>
           </span>
         </div>
       </div>
@@ -62,41 +62,46 @@ export default function EventCard({ event, onViewDetails, onRegister }) {
       <div className="p-5 sm:p-6 flex-1 flex flex-col justify-between space-y-4">
         
         <div>
-          <h3 className="font-bold text-lg text-slate-900 line-clamp-1 group-hover:text-brand-600 transition-colors tracking-tight">
+          <h3 className="font-heading font-extrabold text-lg sm:text-xl text-slate-900 line-clamp-1 group-hover:text-brand-600 transition-colors tracking-tight">
             {event.title}
           </h3>
 
-          <p className="text-slate-600 text-xs font-normal line-clamp-2 mt-1.5 leading-relaxed">
+          <p className="text-slate-600 text-xs sm:text-sm font-normal line-clamp-2 mt-2 leading-relaxed">
             {event.description}
           </p>
         </div>
 
         {/* Venue & Coordinator Info */}
-        <div className="space-y-2 pt-2 border-t border-slate-100 text-xs text-slate-600">
+        <div className="space-y-2.5 pt-2 border-t border-slate-100 text-xs sm:text-sm text-slate-600">
           <div className="flex items-center gap-2">
-            <MapPin className="w-3.5 h-3.5 text-brand-500 shrink-0" />
-            <span className="truncate font-medium text-slate-700">{event.venue}</span>
+            <MapPin className="w-4 h-4 text-brand-600 shrink-0" />
+            <span className="truncate font-semibold text-slate-800">{event.venue}</span>
           </div>
 
-          <div className="flex items-center justify-between text-[11px] text-slate-500">
+          <div className="flex items-center justify-between text-xs text-slate-500">
             <span>Lead: <strong className="font-semibold text-slate-700">{event.coordinator_name}</strong></span>
             <span>Deadline: <strong className="font-semibold text-slate-700">{event.registration_deadline}</strong></span>
           </div>
         </div>
 
         {/* Capacity Progress Bar */}
-        <div className="space-y-1.5 pt-1">
-          <div className="flex items-center justify-between text-xs">
-            <span className="flex items-center gap-1 text-slate-500 font-medium">
-              <Users className="w-3.5 h-3.5 text-slate-400" />
+        <div className="space-y-2 pt-1">
+          <div className="flex items-center justify-between text-xs sm:text-sm">
+            <span className="flex items-center gap-1.5 text-slate-600 font-medium">
+              <Users className="w-4 h-4 text-brand-500" />
               <span>Capacity</span>
             </span>
-            <span className="font-semibold text-slate-800">
-              {registered}/{capacity} <span className="text-[11px] font-normal text-slate-500">({spotsLeft} spots left)</span>
-            </span>
+            <div className="flex items-center gap-1.5">
+              <span className="font-bold text-slate-900 text-sm">
+                {registered}/{capacity}
+              </span>
+              <span className="text-xs font-semibold px-2 py-0.5 rounded-md bg-indigo-50 text-brand-700 border border-indigo-200/60">
+                {spotsLeft} spots left
+              </span>
+            </div>
           </div>
 
-          <div className="w-full h-2 bg-slate-100 rounded-full overflow-hidden">
+          <div className="w-full h-2.5 bg-slate-100 rounded-full overflow-hidden">
             <div
               className={`h-full rounded-full transition-all duration-500 ${
                 isFull
@@ -111,25 +116,25 @@ export default function EventCard({ event, onViewDetails, onRegister }) {
         </div>
 
         {/* Action Buttons */}
-        <div className="grid grid-cols-2 gap-2 pt-2">
+        <div className="grid grid-cols-2 gap-2.5 pt-2">
           <button
             onClick={() => onViewDetails(event)}
-            className="w-full px-3 py-2.5 rounded-xl text-xs font-medium bg-slate-100/90 hover:bg-slate-200 text-slate-700 transition-colors flex items-center justify-center gap-1 border border-slate-200/60"
+            className="w-full px-3.5 py-2.5 rounded-xl text-xs sm:text-sm font-heading font-semibold bg-slate-100/90 hover:bg-slate-200 text-slate-700 hover:text-slate-900 transition-all flex items-center justify-center gap-1.5 border border-slate-200/80 hover:border-slate-300 shadow-2xs active:scale-95"
           >
             <span>Timeline</span>
-            <ChevronRight className="w-3.5 h-3.5 text-slate-400" />
+            <ChevronRight className="w-4 h-4 text-slate-400" />
           </button>
 
           <button
             onClick={() => onRegister(event)}
             disabled={isFull}
-            className={`w-full px-3 py-2.5 rounded-xl text-xs font-semibold transition-all flex items-center justify-center gap-1 shadow-sm ${
+            className={`w-full px-3.5 py-2.5 rounded-xl text-xs sm:text-sm font-heading font-semibold transition-all flex items-center justify-center gap-1.5 shadow-md active:scale-95 ${
               isFull
                 ? 'bg-slate-200 text-slate-400 cursor-not-allowed'
-                : 'bg-gradient-to-r from-brand-600 to-indigo-600 hover:from-brand-700 hover:to-indigo-700 text-white shadow-brand-600/25 hover:shadow-md'
+                : 'bg-gradient-to-r from-brand-600 to-indigo-600 hover:from-brand-700 hover:to-indigo-700 text-white shadow-brand-600/30 hover:shadow-lg hover:scale-[1.02]'
             }`}
           >
-            <UserCheck className="w-3.5 h-3.5" />
+            <UserCheck className="w-4 h-4" />
             <span>{isFull ? 'Event Full' : 'Register'}</span>
           </button>
         </div>

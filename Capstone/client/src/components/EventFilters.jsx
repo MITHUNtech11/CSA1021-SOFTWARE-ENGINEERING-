@@ -21,40 +21,40 @@ export default function EventFilters({
   totalCount
 }) {
   return (
-    <div className="bg-white rounded-3xl p-5 sm:p-6 border border-slate-200/80 shadow-sm space-y-4">
+    <div className="bg-white rounded-3xl p-5 sm:p-6 border border-slate-200/90 shadow-sm space-y-4">
       
       {/* Search Bar & Status Filter */}
       <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-3">
         
         {/* Search Input */}
         <div className="relative flex-1">
-          <Search className="w-4 h-4 text-slate-400 absolute left-3.5 top-1/2 -translate-y-1/2 pointer-events-none" />
+          <Search className="w-4 h-4 text-slate-400 absolute left-4 top-1/2 -translate-y-1/2 pointer-events-none" />
           <input
             type="text"
             value={search}
             onChange={(e) => setSearch(e.target.value)}
             placeholder="Search by event title, venue, coordinator, or keywords..."
-            className="w-full pl-10 pr-9 py-2.5 bg-slate-50 border border-slate-200 rounded-2xl text-xs sm:text-sm font-normal focus:outline-none focus:ring-2 focus:ring-brand-500/20 focus:border-brand-500 transition-all text-slate-800 placeholder:text-slate-400"
+            className="w-full pl-11 pr-10 py-3 bg-slate-50 border border-slate-200/90 rounded-2xl text-xs sm:text-sm font-normal focus:outline-none focus:ring-2 focus:ring-brand-500/25 focus:border-brand-500 transition-all text-slate-800 placeholder:text-slate-400 shadow-2xs"
           />
           {search && (
             <button
               onClick={() => setSearch('')}
-              className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600 p-0.5"
+              className="absolute right-3.5 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600 p-1 rounded-lg hover:bg-slate-200/60 transition-colors"
             >
-              <X className="w-3.5 h-3.5" />
+              <X className="w-4 h-4" />
             </button>
           )}
         </div>
 
         {/* Status Dropdown */}
         <div className="flex items-center gap-2 shrink-0">
-          <div className="flex items-center gap-1.5 px-3.5 py-2.5 bg-slate-50 border border-slate-200 rounded-2xl text-xs font-medium text-slate-700">
-            <SlidersHorizontal className="w-3.5 h-3.5 text-slate-400" />
+          <div className="flex items-center gap-2 px-4 py-3 bg-slate-50 border border-slate-200/90 rounded-2xl text-xs sm:text-sm font-medium text-slate-700 shadow-2xs">
+            <SlidersHorizontal className="w-4 h-4 text-brand-600" />
             <span>Status:</span>
             <select
               value={selectedStatus}
               onChange={(e) => setSelectedStatus(e.target.value)}
-              className="bg-transparent font-semibold text-brand-600 focus:outline-none cursor-pointer"
+              className="bg-transparent font-semibold text-brand-700 focus:outline-none cursor-pointer text-xs sm:text-sm"
             >
               <option value="All">All Events</option>
               <option value="upcoming">Upcoming</option>
@@ -67,30 +67,30 @@ export default function EventFilters({
       </div>
 
       {/* Category Pills & Count */}
-      <div className="flex flex-wrap items-center justify-between gap-3 pt-2 border-t border-slate-100">
+      <div className="flex flex-wrap items-center justify-between gap-3 pt-3 border-t border-slate-100">
         
-        <div className="flex flex-wrap items-center gap-1.5 sm:gap-2">
+        <div className="flex flex-wrap items-center gap-2">
           {CATEGORIES.map((cat) => {
             const isActive = selectedCategory === cat;
             return (
               <button
                 key={cat}
                 onClick={() => setSelectedCategory(cat)}
-                className={`px-3.5 py-1.5 rounded-xl text-xs font-medium transition-all duration-150 ${
+                className={`px-4 py-2 rounded-xl text-xs sm:text-sm font-heading transition-all duration-150 flex items-center gap-1.5 ${
                   isActive
-                    ? 'bg-gradient-to-r from-brand-600 to-indigo-600 text-white shadow-sm shadow-brand-600/30 ring-2 ring-brand-600/20 font-semibold'
-                    : 'bg-slate-100/80 hover:bg-slate-200 text-slate-600 hover:text-slate-900'
+                    ? 'bg-gradient-to-r from-brand-600 to-indigo-600 text-white shadow-md shadow-brand-600/30 ring-2 ring-brand-500/25 font-bold scale-[1.02]'
+                    : 'bg-slate-100/90 hover:bg-slate-200/80 text-slate-700 hover:text-slate-900 font-medium active:scale-95'
                 }`}
               >
-                {cat === 'All' && <Sparkles className="w-3 h-3 inline mr-1 text-amber-300" />}
-                {cat}
+                {cat === 'All' && <Sparkles className="w-3.5 h-3.5 text-amber-300" />}
+                <span>{cat}</span>
               </button>
             );
           })}
         </div>
 
-        <div className="text-xs font-medium text-slate-500">
-          Showing <span className="font-semibold text-slate-800">{totalCount}</span> {totalCount === 1 ? 'event' : 'events'}
+        <div className="text-xs sm:text-sm font-medium text-slate-500">
+          Showing <span className="font-bold text-slate-800">{totalCount}</span> {totalCount === 1 ? 'event' : 'events'}
         </div>
 
       </div>
