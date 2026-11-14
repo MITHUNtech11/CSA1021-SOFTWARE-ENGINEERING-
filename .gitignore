@@ -34,3 +34,7 @@ __pycache__/
 Thumbs.db
 .vscode/
 .idea/
+
+# Assignments Appendix directories (intermediate scripts, figures, and notes)
+[Aa]ppendix/
+
