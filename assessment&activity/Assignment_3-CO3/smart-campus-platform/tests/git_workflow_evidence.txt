@@ -1,0 +1,28 @@
+======================================================================
+TASK 4: VERSION-CONTROL WORKFLOW & MERGE CONFLICT RESOLUTION PROOF
+======================================================================
+[STEP 1] Initialized clean repository on 'main' with .gitignore and baseline policy.json
+[STEP 2] Committed feature/booking-overlap: added validator and updated policy duration to 4h
+[STEP 3] Committed feature/approval-controls: added approval guard and set max duration to 2h
+[STEP 4] Successfully merged feature/booking-overlap into main (Fast-Forward/Clean Merge)
+[STEP 5] Merging feature/approval-controls into main (expecting policy.json conflict)...
+  -> Merge Status: Exit Code 1 (Conflict triggered as expected)
+  -> Conflict Output:
+Auto-merging policy.json
+CONFLICT (content): Merge conflict in policy.json
+Automatic merge failed; fix conflicts and then commit the result.
+[STEP 6] Resolving conflict in policy.json...
+  -> Conflict resolved and committed cleanly to main!
+[STEP 7] Created release tag 'v1.0.0'
+
+[VERIFICATION] Git Graph & Commit History Log:
+*   394e224 (HEAD -> main, tag: v1.0.0) merge: resolve conflict in policy.json by establishing 3h ceiling with 2h approval threshold
+|\  
+| * 2d90186 (feature/approval-controls) feat: introduce server-side approval guard and tighten max booking duration to 2h
+* |   0e47ae2 merge: integrate feature/booking-overlap into main
+|\ \  
+| |/  
+|/|   
+| * 93ccfd7 (feature/booking-overlap) feat: implement non-overlap reservation check and set 4h max slot duration
+|/  
+* ea91923 chore: initial repository structure and operational policy

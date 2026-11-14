@@ -1,0 +1,455 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Smart Campus Facility & Operations Platform</title>
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+
+  <!-- App Header -->
+  <header class="app-header">
+    <div class="brand-section">
+      <h1>Smart Campus Operations Platform</h1>
+      <div class="subtitle">CO3: Containerized Full-Stack Operations Release | Reg: 192324056</div>
+    </div>
+    <div class="header-controls">
+      <div class="control-group">
+        <label for="campusSelect">Campus:</label>
+        <select id="campusSelect">
+          <option value="1">Campus 1 - Main City Campus</option>
+          <option value="2">Campus 2 - Engineering Complex</option>
+          <option value="3">Campus 3 - Medical Sciences</option>
+          <option value="4">Campus 4 - Technology Hub</option>
+          <option value="5">Campus 5 - Innovation Center</option>
+          <option value="6">Campus 6 - Research Triangle</option>
+        </select>
+      </div>
+      <div class="control-group">
+        <label for="activeRoleSelect">Active Persona / Role:</label>
+        <select id="activeRoleSelect">
+          <option value="student">Student (Mithun Senthil - 192324056)</option>
+          <option value="faculty">Faculty (Dr. Aris Thorne)</option>
+          <option value="technician">Technician (Elena Rostova)</option>
+          <option value="approver">Approver (Dean Sarah Jenkins)</option>
+          <option value="facility_manager">Facility Manager (Marcus Vance)</option>
+          <option value="admin">System Administrator</option>
+        </select>
+      </div>
+      <div class="control-group">
+        <span class="instance-badge" id="backendInstancePill">Backend: Loading...</span>
+      </div>
+    </div>
+  </header>
+
+  <!-- Navigation Tabs -->
+  <nav class="nav-tabs">
+    <button class="nav-tab active" data-tab="tab-dashboard">Operations Dashboard</button>
+    <button class="nav-tab" data-tab="tab-facilities">Facility Catalogue</button>
+    <button class="nav-tab" data-tab="tab-bookings">Bookings & Calendar</button>
+    <button class="nav-tab" data-tab="tab-tickets">Maintenance Queue & Triage</button>
+    <button class="nav-tab" data-tab="tab-sensors">Sensor Telemetry & Deduplication</button>
+    <button class="nav-tab" data-tab="tab-approvals">Approval Workflow</button>
+    <button class="nav-tab" data-tab="tab-devops">DevOps Integration</button>
+    <button class="nav-tab" data-tab="tab-audit">Audit Event Log</button>
+  </nav>
+
+  <!-- Global Alert Box -->
+  <div class="main-container">
+    <div id="globalAlert" class="alert-box"></div>
+
+    <!-- TAB 1: OPERATIONS DASHBOARD -->
+    <div id="tab-dashboard" class="tab-pane active">
+      <div class="stats-grid">
+        <div class="stat-card">
+          <div class="stat-title">Active Bookings</div>
+          <div class="stat-value" id="kpiActiveBookings">0</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-title">Open Tickets</div>
+          <div class="stat-value" id="kpiOpenTickets">0</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-title">Critical SLA Tickets</div>
+          <div class="stat-value critical" id="kpiCriticalTickets">0</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-title">Sensor Breaches</div>
+          <div class="stat-value" id="kpiSensorAlerts">0</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-title">Pending Approvals</div>
+          <div class="stat-value" id="kpiPendingApprovals">0</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-title">Total Audit Entries</div>
+          <div class="stat-value success" id="kpiAuditEvents">0</div>
+        </div>
+      </div>
+
+      <div class="content-card">
+        <div class="card-header">
+          <h2>High-Priority Triage & Incident Overview</h2>
+          <button class="btn btn-secondary btn-sm" onclick="app.refreshAllData()">Refresh Data</button>
+        </div>
+        <div class="table-responsive">
+          <table id="dashboardIncidentTable">
+            <thead>
+              <tr>
+                <th>Ticket Code</th>
+                <th>Facility</th>
+                <th>Category</th>
+                <th>Urgency x Impact</th>
+                <th>Calculated Priority</th>
+                <th>Status</th>
+                <th>Explainable Triage Rule</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr><td colspan="7">Loading incidents...</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+
+    <!-- TAB 2: FACILITY CATALOGUE -->
+    <div id="tab-facilities" class="tab-pane">
+      <div class="content-card">
+        <div class="card-header">
+          <h2>Campus Facilities & Laboratory Catalogue</h2>
+          <div>
+            <select id="facilityFilterType" onchange="app.renderFacilities()">
+              <option value="">All Room Types</option>
+              <option value="laboratory">Laboratories Only</option>
+              <option value="lecture_hall">Lecture Halls Only</option>
+              <option value="seminar_room">Seminar Rooms Only</option>
+            </select>
+          </div>
+        </div>
+        <div class="table-responsive">
+          <table id="facilitiesTable">
+            <thead>
+              <tr>
+                <th>ID</th>
+                <th>Facility Name</th>
+                <th>Building & Room</th>
+                <th>Type</th>
+                <th>Capacity</th>
+                <th>Restricted Access</th>
+                <th>Status</th>
+                <th>Action</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr><td colspan="8">Loading facilities...</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+
+    <!-- TAB 3: BOOKINGS & CALENDAR -->
+    <div id="tab-bookings" class="tab-pane">
+      <div class="content-card">
+        <div class="card-header">
+          <h2>Reserve Campus Facility Slot</h2>
+        </div>
+        <form id="bookingForm" onsubmit="app.handleBookingSubmit(event)">
+          <div class="form-grid">
+            <div class="form-group">
+              <label for="bookFacility">Facility:</label>
+              <select id="bookFacility" class="form-control" required></select>
+            </div>
+            <div class="form-group">
+              <label for="bookStartTime">Start Date & Time:</label>
+              <input type="datetime-local" id="bookStartTime" class="form-control" required>
+            </div>
+            <div class="form-group">
+              <label for="bookEndTime">End Date & Time:</label>
+              <input type="datetime-local" id="bookEndTime" class="form-control" required>
+            </div>
+            <div class="form-group">
+              <label for="bookPurpose">Purpose / Event Title:</label>
+              <input type="text" id="bookPurpose" class="form-control" placeholder="e.g. Distributed Computing Lab" required>
+            </div>
+            <div class="form-group">
+              <label for="bookRequestKey">Idempotency Request Key:</label>
+              <input type="text" id="bookRequestKey" class="form-control" placeholder="REQ-XXXX (Auto-generated if empty)">
+            </div>
+          </div>
+          <div style="margin-top: 10px;">
+            <button type="submit" class="btn btn-primary">Submit Slot Reservation</button>
+            <button type="button" class="btn btn-secondary" onclick="app.simulateOverlapConflict()">Simulate Overlap Conflict Test</button>
+          </div>
+        </form>
+      </div>
+
+      <div class="content-card">
+        <div class="card-header">
+          <h2>Active Reservations & Bookings</h2>
+        </div>
+        <div class="table-responsive">
+          <table id="bookingsTable">
+            <thead>
+              <tr>
+                <th>ID</th>
+                <th>Facility</th>
+                <th>Booked By</th>
+                <th>Start Time</th>
+                <th>End Time</th>
+                <th>Purpose</th>
+                <th>Status</th>
+                <th>Version</th>
+                <th>Request Key</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr><td colspan="9">Loading bookings...</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+
+    <!-- TAB 4: MAINTENANCE QUEUE & TRIAGE -->
+    <div id="tab-tickets" class="tab-pane">
+      <div class="content-card">
+        <div class="card-header">
+          <h2>Maintenance Ticket Lifecycle Queue</h2>
+          <div>
+            <select id="ticketFilterStatus" onchange="app.renderTickets()">
+              <option value="">All Statuses</option>
+              <option value="intake">Intake</option>
+              <option value="assigned">Assigned</option>
+              <option value="inspection">Inspection</option>
+              <option value="in_progress">In Progress</option>
+              <option value="resolved">Resolved</option>
+              <option value="closed">Closed</option>
+            </select>
+          </div>
+        </div>
+        <div class="table-responsive">
+          <table id="ticketsTable">
+            <thead>
+              <tr>
+                <th>Code</th>
+                <th>Title & Facility</th>
+                <th>Category</th>
+                <th>Priority (SLA)</th>
+                <th>Status</th>
+                <th>Assigned Tech</th>
+                <th>Version</th>
+                <th>Action</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr><td colspan="8">Loading tickets...</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+
+    <!-- TAB 5: SENSOR TELEMETRY & DEDUPLICATION -->
+    <div id="tab-sensors" class="tab-pane">
+      <div class="content-card">
+        <div class="card-header">
+          <h2>Simulate Controlled Sensor Alert & Test Deduplication</h2>
+        </div>
+        <form id="sensorForm" onsubmit="app.handleSensorSubmit(event)">
+          <div class="form-grid">
+            <div class="form-group">
+              <label for="sensorSource">Sensor Source:</label>
+              <input type="text" id="sensorSource" class="form-control" value="HVAC-LAB-301" required>
+            </div>
+            <div class="form-group">
+              <label for="sensorEventId">Event Identifier (Deduplication Key):</label>
+              <input type="text" id="sensorEventId" class="form-control" value="EVT-LIVE-701" required>
+            </div>
+            <div class="form-group">
+              <label for="sensorMetric">Metric Type:</label>
+              <select id="sensorMetric" class="form-control">
+                <option value="temperature_c">Temperature (°C)</option>
+                <option value="hvac_power_kw">HVAC Power (kW)</option>
+                <option value="vibration_mm_s">Motor Vibration (mm/s)</option>
+              </select>
+            </div>
+            <div class="form-group">
+              <label for="sensorValue">Measured Value:</label>
+              <input type="number" step="0.1" id="sensorValue" class="form-control" value="34.2" required>
+            </div>
+            <div class="form-group">
+              <label for="sensorThreshold">Safety Ceiling Threshold:</label>
+              <input type="number" step="0.1" id="sensorThreshold" class="form-control" value="28.0" required>
+            </div>
+          </div>
+          <div style="margin-top: 10px; display: flex; gap: 8px;">
+            <button type="submit" class="btn btn-primary">Transmit Sensor Event</button>
+            <button type="button" class="btn btn-secondary" onclick="app.simulateDeduplicationTest()">Replay Event 5x (Deduplication Test)</button>
+          </div>
+        </form>
+      </div>
+
+      <div class="content-card">
+        <div class="card-header">
+          <h2>Recent Sensor Telemetry Log</h2>
+        </div>
+        <div class="table-responsive">
+          <table id="sensorEventsTable">
+            <thead>
+              <tr>
+                <th>ID</th>
+                <th>Source</th>
+                <th>Event ID</th>
+                <th>Metric</th>
+                <th>Value</th>
+                <th>Threshold</th>
+                <th>Observed At</th>
+                <th>Ticket Spun Up</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr><td colspan="8">Loading sensor telemetry...</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+
+    <!-- TAB 6: APPROVAL WORKFLOW -->
+    <div id="tab-approvals" class="tab-pane">
+      <div class="content-card">
+        <div class="card-header">
+          <h2>Restricted Facility & Equipment Change Approval Queue</h2>
+        </div>
+        <p style="margin-bottom: 14px; color: var(--text-muted);">
+          Server enforces role-based governance: Only users with <strong>'approver'</strong>, <strong>'facility_manager'</strong>, or <strong>'admin'</strong> roles can sign off.
+        </p>
+        <div class="table-responsive">
+          <table id="approvalsTable">
+            <thead>
+              <tr>
+                <th>ID</th>
+                <th>Target Type</th>
+                <th>Target ID</th>
+                <th>Decision</th>
+                <th>Reason / Condition</th>
+                <th>Decided At</th>
+                <th>Approver</th>
+                <th>Action</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr><td colspan="8">Loading approvals...</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+
+    <!-- TAB 7: DEVOPS INTEGRATION HUB -->
+    <div id="tab-devops" class="tab-pane">
+      <div class="content-card">
+        <div class="card-header">
+          <h2>External DevOps & Git Issue Integration Outbox</h2>
+        </div>
+        <p style="margin-bottom: 14px; color: var(--text-muted);">
+          Transactional outbox ensuring external issue tracker crashes never lose local ticket state. Retries use stable correlation keys.
+        </p>
+        <div class="table-responsive">
+          <table id="devopsTable">
+            <thead>
+              <tr>
+                <th>ID</th>
+                <th>Correlation Key</th>
+                <th>Target Service</th>
+                <th>Payload</th>
+                <th>Status</th>
+                <th>Attempts</th>
+                <th>Last Error</th>
+                <th>Action</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr><td colspan="8">Loading DevOps intents...</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+
+    <!-- TAB 8: AUDIT TRAIL -->
+    <div id="tab-audit" class="tab-pane">
+      <div class="content-card">
+        <div class="card-header">
+          <h2>Immutable Chronological Audit Event Trail</h2>
+        </div>
+        <div class="table-responsive">
+          <table id="auditTable">
+            <thead>
+              <tr>
+                <th>ID</th>
+                <th>Timestamp</th>
+                <th>Entity Type</th>
+                <th>Entity ID</th>
+                <th>Action</th>
+                <th>Performed By</th>
+                <th>Details Payload</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr><td colspan="7">Loading audit events...</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- TICKET TRANSITION MODAL -->
+  <div id="ticketModal" class="modal-overlay">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h3 id="modalTicketTitle">Update Ticket State</h3>
+        <button class="modal-close" onclick="app.closeTicketModal()">&times;</button>
+      </div>
+      <form id="ticketModalForm" onsubmit="app.handleTicketTransitionSubmit(event)">
+        <input type="hidden" id="modalTicketId">
+        <div class="form-group">
+          <label>Current Status:</label>
+          <div id="modalCurrentStatus" style="font-weight: 700; color: var(--accent);">intake</div>
+        </div>
+        <div class="form-group">
+          <label>Current Server Version (Optimistic Locking):</label>
+          <input type="number" id="modalExpectedVersion" class="form-control" readonly>
+        </div>
+        <div class="form-group">
+          <label for="modalTargetStatus">Target Status Transition:</label>
+          <select id="modalTargetStatus" class="form-control" required></select>
+        </div>
+        <div class="form-group" id="modalTechGroup">
+          <label for="modalAssignTech">Assign Technician:</label>
+          <select id="modalAssignTech" class="form-control"></select>
+        </div>
+        <div class="form-group">
+          <label for="modalInspectionNotes">Inspection Notes:</label>
+          <textarea id="modalInspectionNotes" class="form-control" rows="2" placeholder="e.g. Verified sensor diagnostic; solenoid valve tested."></textarea>
+        </div>
+        <div class="form-group">
+          <label for="modalResolutionNotes">Resolution Notes (Required to Resolve):</label>
+          <textarea id="modalResolutionNotes" class="form-control" rows="2" placeholder="e.g. Replaced faulty relay; calibrated temperature sensor to 22.0°C."></textarea>
+        </div>
+        <div style="margin-top: 16px; display: flex; gap: 8px;">
+          <button type="submit" class="btn btn-primary">Commit Transition</button>
+          <button type="button" class="btn btn-danger btn-sm" onclick="app.simulateStaleVersionConflict()">Simulate Stale Version Conflict</button>
+          <button type="button" class="btn btn-secondary" onclick="app.closeTicketModal()">Cancel</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <script src="app.js"></script>
+</body>
+</html>

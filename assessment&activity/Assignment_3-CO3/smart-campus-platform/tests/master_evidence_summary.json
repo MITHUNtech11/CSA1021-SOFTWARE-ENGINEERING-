@@ -1,0 +1,96 @@
+{
+  "metadata": {
+    "assignment": "Assignment 3 (CO3)",
+    "student_name": "S Mithun Senthil",
+    "register_number": "192324056",
+    "execution_timestamp": "2026-11-14T17:22:33.676563",
+    "environment": "Windows / Python 3.11 / FastAPI / SQLite-WAL / Docker Compose"
+  },
+  "tasks": {
+    "task3_functional": {
+      "status": "PASS",
+      "tests_run": 14,
+      "failures": 0,
+      "errors": 0
+    },
+    "task4_git_workflow": {
+      "status": "PASS",
+      "branches": [
+        "main",
+        "feature/booking-overlap",
+        "feature/approval-controls"
+      ],
+      "conflict_resolved_file": "policy.json",
+      "release_tag": "v1.0.0",
+      "git_graph": "*   394e224 (HEAD -> main, tag: v1.0.0) merge: resolve conflict in policy.json by establishing 3h ceiling with 2h approval threshold\n|\\  \n| * 2d90186 (feature/approval-controls) feat: introduce server-side approval guard and tighten max booking duration to 2h\n* |   0e47ae2 merge: integrate feature/booking-overlap into main\n|\\ \\  \n| |/  \n|/|   \n| * 93ccfd7 (feature/booking-overlap) feat: implement non-overlap reservation check and set 4h max slot duration\n|/  \n* ea91923 chore: initial repository structure and operational policy"
+    },
+    "task5_persistence": {
+      "status": "PASS",
+      "tested_volume": "smart_campus_persistent_volume",
+      "verified_elements": [
+        "Booking survival across process termination",
+        "Ticket priority & SLA retention",
+        "State machine progression on fresh instance",
+        "Full audit trail retention"
+      ]
+    },
+    "task6_concurrency": {
+      "exp1_overlap": {
+        "status": "PASS",
+        "thread1_status": 409,
+        "thread2_status": 201,
+        "detail": "Race condition resolved: Database non-overlap query prevented double-booking."
+      },
+      "exp2_optimistic_locking": {
+        "status": "PASS",
+        "worker1_status": 200,
+        "worker2_status": 409,
+        "detail": "Optimistic locking prevented lost update; second worker forced to refresh."
+      },
+      "exp3_deduplication": {
+        "status": "PASS",
+        "total_requests": 10,
+        "created_tickets": 1,
+        "duplicate_count": 9,
+        "detail": "Unique constraint on (source, event_id) safely deduplicated concurrent burst."
+      },
+      "stepped_load_benchmarks": [
+        {
+          "concurrent_users": 10,
+          "requests_completed": 10,
+          "success_rate_pct": 100.0,
+          "avg_latency_ms": 43.78,
+          "p50_latency_ms": 45.67,
+          "p95_latency_ms": 53.32,
+          "p99_latency_ms": 53.32,
+          "throughput_rps": 159.63
+        },
+        {
+          "concurrent_users": 25,
+          "requests_completed": 25,
+          "success_rate_pct": 100.0,
+          "avg_latency_ms": 97.04,
+          "p50_latency_ms": 99.93,
+          "p95_latency_ms": 114.56,
+          "p99_latency_ms": 122.06,
+          "throughput_rps": 145.09
+        },
+        {
+          "concurrent_users": 50,
+          "requests_completed": 50,
+          "success_rate_pct": 100.0,
+          "avg_latency_ms": 189.82,
+          "p50_latency_ms": 192.11,
+          "p95_latency_ms": 242.38,
+          "p99_latency_ms": 265.85,
+          "throughput_rps": 148.69
+        }
+      ]
+    }
+  },
+  "execution_summary": {
+    "total_duration_seconds": 3.8,
+    "overall_status": "ALL_TESTS_PASSED",
+    "verdict": "Full-stack application satisfies all CO3 Bloom's Level 5/6 evidence criteria."
+  }
+}

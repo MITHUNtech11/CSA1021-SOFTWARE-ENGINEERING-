@@ -1,0 +1,53 @@
+{
+  "exp1_overlap": {
+    "status": "PASS",
+    "thread1_status": 409,
+    "thread2_status": 201,
+    "detail": "Race condition resolved: Database non-overlap query prevented double-booking."
+  },
+  "exp2_optimistic_locking": {
+    "status": "PASS",
+    "worker1_status": 200,
+    "worker2_status": 409,
+    "detail": "Optimistic locking prevented lost update; second worker forced to refresh."
+  },
+  "exp3_deduplication": {
+    "status": "PASS",
+    "total_requests": 10,
+    "created_tickets": 1,
+    "duplicate_count": 9,
+    "detail": "Unique constraint on (source, event_id) safely deduplicated concurrent burst."
+  },
+  "stepped_load_benchmarks": [
+    {
+      "concurrent_users": 10,
+      "requests_completed": 10,
+      "success_rate_pct": 100.0,
+      "avg_latency_ms": 43.78,
+      "p50_latency_ms": 45.67,
+      "p95_latency_ms": 53.32,
+      "p99_latency_ms": 53.32,
+      "throughput_rps": 159.63
+    },
+    {
+      "concurrent_users": 25,
+      "requests_completed": 25,
+      "success_rate_pct": 100.0,
+      "avg_latency_ms": 97.04,
+      "p50_latency_ms": 99.93,
+      "p95_latency_ms": 114.56,
+      "p99_latency_ms": 122.06,
+      "throughput_rps": 145.09
+    },
+    {
+      "concurrent_users": 50,
+      "requests_completed": 50,
+      "success_rate_pct": 100.0,
+      "avg_latency_ms": 189.82,
+      "p50_latency_ms": 192.11,
+      "p95_latency_ms": 242.38,
+      "p99_latency_ms": 265.85,
+      "throughput_rps": 148.69
+    }
+  ]
+}

@@ -1,0 +1,48 @@
+version: '3.8'
+
+services:
+  backend:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    container_name: smart_campus_backend
+    environment:
+      - PORT=8000
+      - DATABASE_PATH=/data/smart_campus.db
+      - INSTANCE_ID=backend-primary
+    volumes:
+      - campus_data:/data
+    ports:
+      - "8000:8000"
+    healthcheck:
+      test: ["CMD", "python", "-c", "import urllib.request; urllib.request.urlopen('http://localhost:8000/api/health')"]
+      interval: 10s
+      timeout: 5s
+      retries: 3
+      start_period: 5s
+    networks:
+      - campus_net
+    restart: unless-stopped
+
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+    container_name: smart_campus_frontend
+    ports:
+      - "3000:80"
+    depends_on:
+      backend:
+        condition: service_healthy
+    networks:
+      - campus_net
+    restart: unless-stopped
+
+volumes:
+  campus_data:
+    name: smart_campus_persistent_volume
+
+networks:
+  campus_net:
+    name: smart_campus_internal_network
+    driver: bridge

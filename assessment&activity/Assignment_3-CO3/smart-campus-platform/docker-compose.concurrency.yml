@@ -1,0 +1,66 @@
+version: '3.8'
+
+# Task 6: Adapted Multi-Instance Architecture for 6 Campuses and Peak Concurrency
+services:
+  lb:
+    image: nginx:alpine
+    container_name: smart_campus_load_balancer
+    ports:
+      - "80:80"
+    volumes:
+      - ./nginx-lb.conf:/etc/nginx/nginx.conf:ro
+    depends_on:
+      - backend-1
+      - backend-2
+      - frontend
+    networks:
+      - campus_cluster_net
+    restart: unless-stopped
+
+  backend-1:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    container_name: smart_campus_backend_1
+    environment:
+      - PORT=8000
+      - DATABASE_PATH=/data/smart_campus.db
+      - INSTANCE_ID=replica-node-1
+    volumes:
+      - shared_campus_data:/data
+    networks:
+      - campus_cluster_net
+    restart: unless-stopped
+
+  backend-2:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    container_name: smart_campus_backend_2
+    environment:
+      - PORT=8000
+      - DATABASE_PATH=/data/smart_campus.db
+      - INSTANCE_ID=replica-node-2
+    volumes:
+      - shared_campus_data:/data
+    networks:
+      - campus_cluster_net
+    restart: unless-stopped
+
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+    container_name: smart_campus_frontend_cluster
+    networks:
+      - campus_cluster_net
+    restart: unless-stopped
+
+volumes:
+  shared_campus_data:
+    name: smart_campus_shared_db_volume
+
+networks:
+  campus_cluster_net:
+    name: smart_campus_cluster_network
+    driver: bridge
