@@ -1,0 +1,137 @@
+[
+  {
+    "exp": "Exp-04",
+    "release_time": "2026-11-17T18:30:00+05:30",
+    "commit_msg": "feat(lab-04): develop raptor flowchart for string length calculation"
+  },
+  {
+    "exp": "Exp-05",
+    "release_time": "2026-11-18T10:30:00+05:30",
+    "commit_msg": "feat(lab-05): implement lexicographically smallest string by swapping characters in raptor"
+  },
+  {
+    "exp": "Exp-06",
+    "release_time": "2026-11-18T13:15:00+05:30",
+    "commit_msg": "feat(lab-06): design uml class use case and activity diagrams for online food delivery system in umbrello"
+  },
+  {
+    "exp": "Exp-07",
+    "release_time": "2026-11-18T15:50:00+05:30",
+    "commit_msg": "feat(lab-07): model uml diagrams for college security management system in umbrello"
+  },
+  {
+    "exp": "Exp-08",
+    "release_time": "2026-11-18T18:15:00+05:30",
+    "commit_msg": "feat(lab-08): compute cyclomatic complexity and basis paths on control flow graph"
+  },
+  {
+    "exp": "Exp-09",
+    "release_time": "2026-11-19T10:00:00+05:30",
+    "commit_msg": "feat(lab-09): create scrum project with prioritized backlog and active sprint in jira"
+  },
+  {
+    "exp": "Exp-10",
+    "release_time": "2026-11-19T12:45:00+05:30",
+    "commit_msg": "feat(lab-10): perform moscow prioritization for library management system requirements"
+  },
+  {
+    "exp": "Exp-11",
+    "release_time": "2026-11-19T15:30:00+05:30",
+    "commit_msg": "feat(lab-11): establish bidirectional issue linking between jira and confluence"
+  },
+  {
+    "exp": "Exp-12",
+    "release_time": "2026-11-19T18:00:00+05:30",
+    "commit_msg": "feat(lab-12): prioritize task management system requirements using moscow and kano models in jira"
+  },
+  {
+    "exp": "Exp-13",
+    "release_time": "2026-11-20T11:00:00+05:30",
+    "commit_msg": "feat(lab-13): evaluate online learning platform requirements via moscow and kano model in jira"
+  },
+  {
+    "exp": "Exp-14",
+    "release_time": "2026-11-20T14:15:00+05:30",
+    "commit_msg": "feat(lab-14): simulate git fork and pull request collaboration workflow"
+  },
+  {
+    "exp": "Exp-15",
+    "release_time": "2026-11-20T16:45:00+05:30",
+    "commit_msg": "feat(lab-15): resolve 3-way merge conflicts across divergent git branches"
+  },
+  {
+    "exp": "Exp-16",
+    "release_time": "2026-11-20T19:15:00+05:30",
+    "commit_msg": "feat(lab-16): containerize static website with nginx alpine on docker"
+  },
+  {
+    "exp": "Exp-17",
+    "release_time": "2026-11-21T11:30:00+05:30",
+    "commit_msg": "feat(lab-17): containerize flask api with docker and deploy on kubernetes cluster"
+  },
+  {
+    "exp": "Exp-18",
+    "release_time": "2026-11-21T14:00:00+05:30",
+    "commit_msg": "feat(lab-18): build declarative ci-cd pipeline in jenkins for containerized app"
+  },
+  {
+    "exp": "Exp-19",
+    "release_time": "2026-11-21T16:30:00+05:30",
+    "commit_msg": "feat(lab-19): implement continuous deployment pipeline for docker app with github actions"
+  },
+  {
+    "exp": "Exp-20",
+    "release_time": "2026-11-21T19:00:00+05:30",
+    "commit_msg": "feat(lab-20): setup team project repository with git flow branch policies and pr templates"
+  },
+  {
+    "exp": "Exp-21",
+    "release_time": "2026-11-22T12:00:00+05:30",
+    "commit_msg": "feat(lab-21): containerize python flask todo application with docker volumes"
+  },
+  {
+    "exp": "Exp-22",
+    "release_time": "2026-11-22T15:30:00+05:30",
+    "commit_msg": "feat(lab-22): automate docker image tagging push and pull lifecycle on docker hub"
+  },
+  {
+    "exp": "Exp-23",
+    "release_time": "2026-11-22T18:15:00+05:30",
+    "commit_msg": "feat(lab-23): deploy and scale 3-tier multi-container microservice on kubernetes with hpa"
+  },
+  {
+    "exp": "Exp-24",
+    "release_time": "2026-11-23T10:15:00+05:30",
+    "commit_msg": "feat(lab-24): configure github actions ci-cd pipeline for flask app with cloud deployment"
+  },
+  {
+    "exp": "Exp-25",
+    "release_time": "2026-11-23T13:30:00+05:30",
+    "commit_msg": "feat(lab-25): initialize git repository and push initial readme documentation"
+  },
+  {
+    "exp": "Exp-26",
+    "release_time": "2026-11-23T16:00:00+05:30",
+    "commit_msg": "feat(lab-26): clone remote github repository and verify local file modifications with git diff"
+  },
+  {
+    "exp": "Exp-27",
+    "release_time": "2026-11-23T18:30:00+05:30",
+    "commit_msg": "feat(lab-27): perform atomic staging and push semantic commits to remote repository"
+  },
+  {
+    "exp": "Exp-28",
+    "release_time": "2026-11-24T10:45:00+05:30",
+    "commit_msg": "feat(lab-28): fetch and pull collaborator branch changes with fast-forward merge"
+  },
+  {
+    "exp": "Exp-29",
+    "release_time": "2026-11-24T14:15:00+05:30",
+    "commit_msg": "feat(lab-29): develop feature-login authentication branch and submit pull request"
+  },
+  {
+    "exp": "Exp-30",
+    "release_time": "2026-11-24T17:00:00+05:30",
+    "commit_msg": "feat(lab-30): submit cross-repository fork pull request for batch scheduling optimization"
+  }
+]
