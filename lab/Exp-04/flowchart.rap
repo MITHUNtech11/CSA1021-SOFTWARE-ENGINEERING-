@@ -1,0 +1,12 @@
+RAPTOR Flowchart Program
+Title: Find String Length
+Variables: input_string (String), length (Integer)
+Symbols:
+  1. Start
+  2. Input: input_string
+  3. Assignment: length := 0
+  4. Loop Condition: input_string[length] != ""
+     - Yes: length := length + 1
+     - No: Exit Loop
+  5. Output: "Length of the string is: " + length
+  6. End
