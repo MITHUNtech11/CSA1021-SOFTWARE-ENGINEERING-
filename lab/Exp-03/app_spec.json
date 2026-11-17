@@ -1,0 +1,34 @@
+{
+  "project": "Omnichannel E-Commerce Mobile App",
+  "tool": "Figma",
+  "screens": [
+    "Home & Product Discovery",
+    "Category & Product Listing",
+    "Product Detail Page",
+    "Cart & Stock Reservation",
+    "Checkout & Order Review",
+    "Stakeholder Feedback Review"
+  ],
+  "stakeholder_feedback_matrix": [
+    {
+      "stakeholder": "Customer",
+      "feedback": "Needs instant stock level visibility before adding to cart",
+      "action": "Implemented live TTL stock badge"
+    },
+    {
+      "stakeholder": "Store Manager",
+      "feedback": "Click-and-collect pickup option should show nearest store distance",
+      "action": "Added GPS distance indicator"
+    },
+    {
+      "stakeholder": "Finance Reviewer",
+      "feedback": "Order summary must break down regional GST clearly",
+      "action": "Added itemized tax and shipping table"
+    },
+    {
+      "stakeholder": "QA Lead",
+      "feedback": "Cart checkout button needs clear disabled state on zero stock",
+      "action": "Added disabled reactive state with error tooltip"
+    }
+  ]
+}
