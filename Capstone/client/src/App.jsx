@@ -1,183 +1,86 @@
-import React, { useState, useEffect } from 'react';
-import Navbar from './components/Navbar.jsx';
-import ParticipantPortal from './components/ParticipantPortal.jsx';
-import RegistrationModal from './components/RegistrationModal.jsx';
-import TicketPassModal from './components/TicketPassModal.jsx';
-import MyTicketsModal from './components/MyTicketsModal.jsx';
-
-// Admin Components
-import AdminLayout from './components/admin/AdminLayout.jsx';
-import AnalyticsOverview from './components/admin/AnalyticsOverview.jsx';
-import EventManager from './components/admin/EventManager.jsx';
-import RegistrationsManager from './components/admin/RegistrationsManager.jsx';
-import AnnouncementBroadcast from './components/admin/AnnouncementBroadcast.jsx';
-import TicketScannerModal from './components/admin/TicketScannerModal.jsx';
-
-// Auth Hook & Modals
-import { useAuth } from './context/useAuth.js';
-import { useToast } from './context/ToastContext.jsx';
-import AuthModal from './components/auth/AuthModal.jsx';
-import UserProfileModal from './components/auth/UserProfileModal.jsx';
+import React from 'react';
+import Header from './components/Header';
+import PlaybackControls from './components/PlaybackControls';
+import MatchVideoPlayer from './components/MatchVideoPlayer';
+import WinProbabilityGauge from './components/WinProbabilityGauge';
+import ChangePointTimeline from './components/ChangePointTimeline';
+import InflectionLog from './components/InflectionLog';
+import TeamComparisonCards from './components/TeamComparisonCards';
+import { useEsportWebSocket } from './hooks/useEsportWebSocket';
 
 export default function App() {
-  const { 
-    role: authRole, 
-    user,
-    isAuthModalOpen,
-    closeAuthModal,
-    authModalTab,
-    openAuthModal,
-    isProfileModalOpen,
-    closeProfileModal,
-    openProfileModal
-  } = useAuth();
-  const toast = useToast();
+  const {
+    isConnected,
+    ticks,
+    predictions,
+    changePoints,
+    simulatorStatus,
+    step,
+    play,
+    pause,
+    reset
+  } = useEsportWebSocket();
 
-  const [role, setRole] = useState('participant'); // 'participant' | 'admin'
-  const [adminTab, setAdminTab] = useState('overview'); // 'overview' | 'events' | 'registrations' | 'announcements' | 'scanner'
-  const [adminEventFilter, setAdminEventFilter] = useState('All');
-
-  // Modals state
-  const [registeringEvent, setRegisteringEvent] = useState(null);
-  const [activeTicketPass, setActiveTicketPass] = useState(null);
-  const [isMyTicketsOpen, setIsMyTicketsOpen] = useState(false);
-
-  // If user signs out while in admin view, revert to participant view
-  useEffect(() => {
-    if (authRole !== 'admin' && role === 'admin') {
-      setRole('participant');
-    }
-  }, [authRole, role]);
-
-  const handleRegisterEvent = (event) => {
-    setRegisteringEvent(event);
-  };
-
-  const handleRegistrationSuccess = (issuedTicket) => {
-    setRegisteringEvent(null);
-    setActiveTicketPass(issuedTicket);
-    toast.success(
-      `Pass issued for "${issuedTicket.event_title || issuedTicket.title || 'Event'}"! Ticket Code: ${issuedTicket.ticket_code}`,
-      'Registration Confirmed'
-    );
-  };
-
-  const handleOpenMyTickets = () => {
-    setIsMyTicketsOpen(true);
-  };
-
-  const handleViewPassFromLookup = (pass) => {
-    setIsMyTicketsOpen(false);
-    setActiveTicketPass(pass);
-  };
-
-  const handleManageEventRegistrations = (eventId) => {
-    setAdminEventFilter(eventId);
-    setAdminTab('registrations');
-  };
+  const currentTick = ticks.length > 0 ? ticks[ticks.length - 1] : null;
+  const latestPrediction = predictions.length > 0 ? predictions[predictions.length - 1] : null;
 
   return (
-    <div className="min-h-screen bg-slate-100 flex flex-col font-sans text-slate-800 antialiased selection:bg-brand-500 selection:text-white">
-      
-      {role === 'participant' ? (
-        <>
-          {/* Public Top Navbar with Akira Logo and Role Toggle */}
-          <Navbar
-            currentRole={role}
-            setRole={setRole}
-            onOpenMyTickets={handleOpenMyTickets}
-          />
+    <div className="min-h-screen bg-[#F8FAFC] text-slate-800 flex flex-col font-sans">
+      {/* Clean Top Navigation Bar */}
+      <Header isConnected={isConnected} currentTick={currentTick} />
 
-          {/* Main Participant Portal */}
-          <main className="flex-1 max-w-7xl mx-auto w-full px-4 sm:px-6 lg:px-8 pt-6">
-            <ParticipantPortal
-              onRegisterEvent={handleRegisterEvent}
-              onOpenMyTickets={handleOpenMyTickets}
+      {/* Main Canvas */}
+      <main className="flex-1 max-w-7xl w-full mx-auto p-4 sm:p-6 space-y-5">
+        {/* Playback & Story Controller */}
+        <PlaybackControls
+          status={simulatorStatus}
+          onPlay={play}
+          onPause={pause}
+          onStep={step}
+          onReset={reset}
+        />
+
+        {/* Live Match Broadcast Video Feed (Synchronized with Telemetry) */}
+        <MatchVideoPlayer
+          isPlaying={simulatorStatus.is_playing}
+          currentTimeSeconds={simulatorStatus.current_game_time}
+          currentTick={currentTick}
+        />
+
+        {/* Match Vitals Scoreboard Strip */}
+        <TeamComparisonCards currentTick={currentTick} />
+
+        {/* Primary Story View: Lead Timeline (2/3) + Win Outlook (1/3) */}
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-5 items-stretch">
+          <div className="lg:col-span-2">
+            <ChangePointTimeline ticks={ticks} changePoints={changePoints} />
+          </div>
+          <div className="lg:col-span-1">
+            <WinProbabilityGauge
+              latestPrediction={latestPrediction}
+              blueName={currentTick?.blue_team?.team_name || "T1"}
+              redName={currentTick?.red_team?.team_name || "WBG"}
             />
-          </main>
+          </div>
+        </div>
 
-          {/* Footer */}
-          <footer className="bg-navy-950 border-t border-slate-800 text-slate-400 py-8 px-4 text-center text-xs space-y-2 mt-auto">
-            <div className="flex items-center justify-center gap-2">
-              <span className="font-display text-xs tracking-wider text-slate-200">EVENTFLOW</span>
-              <span>•</span>
-              <span className="font-heading font-medium text-slate-400">Campus Event Coordination Operating System</span>
-            </div>
-            <p className="text-slate-400 text-xs">
-              Built for TechTrove Hackathon 2026. Empowering college organizers, department societies, and student attendees.
-            </p>
-          </footer>
-        </>
-      ) : (
-        /* Organizer & Admin SaaS Command Center */
-        <AdminLayout
-          activeTab={adminTab}
-          setActiveTab={(tab) => {
-            if (tab !== 'registrations') setAdminEventFilter('All');
-            setAdminTab(tab);
-          }}
-          onSwitchToParticipant={() => setRole('participant')}
-        >
-          {adminTab === 'overview' && <AnalyticsOverview />}
-          {adminTab === 'events' && (
-            <EventManager onManageRegistrations={handleManageEventRegistrations} />
-          )}
-          {adminTab === 'registrations' && (
-            <RegistrationsManager initialEventId={adminEventFilter} />
-          )}
-          {adminTab === 'announcements' && <AnnouncementBroadcast />}
-          {adminTab === 'scanner' && <TicketScannerModal />}
-        </AdminLayout>
-      )}
+        {/* Chronological Match Story & Turning Points Feed */}
+        <div>
+          <InflectionLog predictions={predictions} />
+        </div>
+      </main>
 
-      {/* Shared Modals */}
-      <RegistrationModal
-        event={registeringEvent}
-        isOpen={!!registeringEvent}
-        onClose={() => setRegisteringEvent(null)}
-        onRegistrationSuccess={handleRegistrationSuccess}
-      />
-
-      <TicketPassModal
-        ticket={activeTicketPass}
-        isOpen={!!activeTicketPass}
-        onClose={() => setActiveTicketPass(null)}
-      />
-
-      <MyTicketsModal
-        isOpen={isMyTicketsOpen}
-        onClose={() => setIsMyTicketsOpen(false)}
-        onViewPass={handleViewPassFromLookup}
-      />
-
-      {/* Global Auth Modal */}
-      <AuthModal
-        isOpen={isAuthModalOpen}
-        onClose={closeAuthModal}
-        initialTab={authModalTab}
-        onSuccess={(authedUser) => {
-          closeAuthModal();
-          toast.success(
-            `Logged in as ${authedUser.name} (${authedUser.role === 'admin' ? (authedUser.roleTitle || 'Organizer') : 'Student'})`,
-            'Authentication Success'
-          );
-          if (authedUser.role === 'admin') {
-            setRole('admin');
-          }
-        }}
-      />
-
-      {/* Global User Profile Modal */}
-      <UserProfileModal
-        isOpen={isProfileModalOpen}
-        onClose={closeProfileModal}
-        onOpenMyTickets={handleOpenMyTickets}
-        onSwitchUser={() => {
-          closeProfileModal();
-          openAuthModal('student');
-        }}
-      />
-
+      {/* Reassuring Academic Footer */}
+      <footer className="border-t border-warm-200/80 bg-white px-6 py-4 mt-8">
+        <div className="max-w-7xl mx-auto flex flex-col sm:flex-row items-center justify-between text-xs text-warm-500 gap-2">
+          <div className="font-medium">
+            EsportEcho Predict • Real-Time Statistical Change-Point Analytics Engine
+          </div>
+          <div>
+            S. Mithun Senthil (Reg. No: 192324056) • CSA1021 Capstone Project
+          </div>
+        </div>
+      </footer>
     </div>
   );
 }

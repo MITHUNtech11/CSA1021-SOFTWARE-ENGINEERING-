@@ -1,0 +1,1 @@
+# EsportEcho Shared Domain Models

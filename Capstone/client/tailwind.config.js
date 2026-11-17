@@ -6,56 +6,41 @@ export default {
   ],
   theme: {
     extend: {
-      fontFamily: {
-        sans: ['Poppins', '-apple-system', 'BlinkMacSystemFont', 'Segoe UI', 'Roboto', 'sans-serif'],
-        heading: ['Poppins', '-apple-system', 'sans-serif'],
-        display: ['Poppins', '-apple-system', 'sans-serif'],
-      },
-      fontSize: {
-        'xs': ['15px', { lineHeight: '1.45' }],
-        'sm': ['16px', { lineHeight: '1.5' }],
-        'base': ['17px', { lineHeight: '1.6' }],
-        'lg': ['19px', { lineHeight: '1.5' }],
-        'xl': ['22px', { lineHeight: '1.4' }],
-        '2xl': ['26px', { lineHeight: '1.35' }],
-        '3xl': ['32px', { lineHeight: '1.25' }],
-        '4xl': ['40px', { lineHeight: '1.2' }],
-        '5xl': ['48px', { lineHeight: '1.15' }],
-      },
-      fontWeight: {
-        light: '300',
-        normal: '400',
-        medium: '500',
-        semibold: '600',
-        bold: '700',
-        extrabold: '800',
-        black: '900',
-      },
       colors: {
-        brand: {
-          50: '#eef2ff',
-          100: '#e0e7ff',
-          200: '#c7d2fe',
-          300: '#a5b4fc',
-          400: '#818cf8',
-          500: '#6366f1',
-          600: '#4f46e5',
-          700: '#4338ca',
-          800: '#3730a3',
-          900: '#312e81',
-          950: '#1e1b4b',
+        warm: {
+          50: '#F8FAFC',
+          100: '#F1F5F9',
+          200: '#E2E8F0',
+          300: '#CBD5E1',
+          400: '#94A3B8',
+          500: '#64748B',
+          600: '#475569',
+          700: '#334155',
+          800: '#1E293B',
+          900: '#0F172A',
         },
-        navy: {
-          800: '#0F172A',
-          850: '#0d1322',
-          900: '#0B0F19',
-          950: '#060911',
+        team: {
+          blue: '#1D4ED8',      // Classic royal blue
+          blueSoft: '#EFF6FF',  // Soft tint
+          red: '#DC2626',       // Warm crimson
+          redSoft: '#FEF2F2',   // Soft tint
+        },
+        accent: {
+          sage: '#059669',      // Calming green for safe/winning states
+          sageSoft: '#ECFDF5',
+          amber: '#D97706',     // Warm amber for turning points
+          amberSoft: '#FFFBEB',
+          rose: '#E11D48',      // Soft alert coral
+          roseSoft: '#FFF1F2'
         }
       },
+      fontFamily: {
+        sans: ['"Plus Jakarta Sans"', 'Inter', 'system-ui', 'sans-serif'],
+        mono: ['"JetBrains Mono"', 'monospace']
+      },
       boxShadow: {
-        'glass': '0 8px 32px 0 rgba(31, 38, 135, 0.07)',
-        'glass-hover': '0 12px 40px 0 rgba(31, 38, 135, 0.12)',
-        'glow-brand': '0 0 25px -5px rgba(99, 102, 241, 0.4)',
+        'soft': '0 2px 10px -2px rgba(15, 23, 42, 0.05), 0 1px 3px -1px rgba(15, 23, 42, 0.05)',
+        'card': '0 4px 20px -4px rgba(15, 23, 42, 0.07), 0 2px 6px -2px rgba(15, 23, 42, 0.03)',
       }
     },
   },

@@ -1,0 +1,177 @@
+{
+  "match_id": "MATCH-2023-WORLDS-FINALS-G1",
+  "tournament": "League of Legends World Championship 2023 Finals",
+  "blue_team_name": "T1",
+  "red_team_name": "Weibo Gaming",
+  "total_duration_minutes": 25,
+  "timeline": [
+    {
+      "match_id": "MATCH-2023-WORLDS-FINALS-G1",
+      "sequence_id": 0,
+      "game_time_seconds": 0.0,
+      "blue_team": {"team_name": "T1", "total_gold": 2500, "total_kills": 0, "total_deaths": 0, "turrets_destroyed": 0, "dragons": 0, "barons": 0, "vision_score": 0.0},
+      "red_team": {"team_name": "WBG", "total_gold": 2500, "total_kills": 0, "total_deaths": 0, "turrets_destroyed": 0, "dragons": 0, "barons": 0, "vision_score": 0.0}
+    },
+    {
+      "match_id": "MATCH-2023-WORLDS-FINALS-G1",
+      "sequence_id": 1,
+      "game_time_seconds": 60.0,
+      "blue_team": {"team_name": "T1", "total_gold": 3100, "total_kills": 0, "total_deaths": 0, "turrets_destroyed": 0, "dragons": 0, "barons": 0, "vision_score": 2.1},
+      "red_team": {"team_name": "WBG", "total_gold": 3050, "total_kills": 0, "total_deaths": 0, "turrets_destroyed": 0, "dragons": 0, "barons": 0, "vision_score": 1.9}
+    },
+    {
+      "match_id": "MATCH-2023-WORLDS-FINALS-G1",
+      "sequence_id": 2,
+      "game_time_seconds": 120.0,
+      "blue_team": {"team_name": "T1", "total_gold": 4200, "total_kills": 0, "total_deaths": 0, "turrets_destroyed": 0, "dragons": 0, "barons": 0, "vision_score": 5.4},
+      "red_team": {"team_name": "WBG", "total_gold": 4150, "total_kills": 0, "total_deaths": 0, "turrets_destroyed": 0, "dragons": 0, "barons": 0, "vision_score": 4.8}
+    },
+    {
+      "match_id": "MATCH-2023-WORLDS-FINALS-G1",
+      "sequence_id": 3,
+      "game_time_seconds": 180.0,
+      "blue_team": {"team_name": "T1", "total_gold": 5600, "total_kills": 1, "total_deaths": 0, "turrets_destroyed": 0, "dragons": 0, "barons": 0, "vision_score": 8.5},
+      "red_team": {"team_name": "WBG", "total_gold": 5200, "total_kills": 0, "total_deaths": 1, "turrets_destroyed": 0, "dragons": 0, "barons": 0, "vision_score": 7.2}
+    },
+    {
+      "match_id": "MATCH-2023-WORLDS-FINALS-G1",
+      "sequence_id": 4,
+      "game_time_seconds": 240.0,
+      "blue_team": {"team_name": "T1", "total_gold": 7100, "total_kills": 1, "total_deaths": 1, "turrets_destroyed": 0, "dragons": 0, "barons": 0, "vision_score": 12.0},
+      "red_team": {"team_name": "WBG", "total_gold": 6900, "total_kills": 1, "total_deaths": 1, "turrets_destroyed": 0, "dragons": 0, "barons": 0, "vision_score": 11.2}
+    },
+    {
+      "match_id": "MATCH-2023-WORLDS-FINALS-G1",
+      "sequence_id": 5,
+      "game_time_seconds": 300.0,
+      "blue_team": {"team_name": "T1", "total_gold": 8800, "total_kills": 2, "total_deaths": 1, "turrets_destroyed": 0, "dragons": 1, "barons": 0, "vision_score": 16.4},
+      "red_team": {"team_name": "WBG", "total_gold": 8300, "total_kills": 1, "total_deaths": 2, "turrets_destroyed": 0, "dragons": 0, "barons": 0, "vision_score": 14.8}
+    },
+    {
+      "match_id": "MATCH-2023-WORLDS-FINALS-G1",
+      "sequence_id": 6,
+      "game_time_seconds": 360.0,
+      "blue_team": {"team_name": "T1", "total_gold": 10500, "total_kills": 2, "total_deaths": 1, "turrets_destroyed": 0, "dragons": 1, "barons": 0, "vision_score": 21.0},
+      "red_team": {"team_name": "WBG", "total_gold": 9950, "total_kills": 1, "total_deaths": 2, "turrets_destroyed": 0, "dragons": 0, "barons": 0, "vision_score": 18.5}
+    },
+    {
+      "match_id": "MATCH-2023-WORLDS-FINALS-G1",
+      "sequence_id": 7,
+      "game_time_seconds": 420.0,
+      "blue_team": {"team_name": "T1", "total_gold": 12300, "total_kills": 3, "total_deaths": 2, "turrets_destroyed": 0, "dragons": 1, "barons": 0, "vision_score": 25.5},
+      "red_team": {"team_name": "WBG", "total_gold": 11800, "total_kills": 2, "total_deaths": 3, "turrets_destroyed": 0, "dragons": 0, "barons": 0, "vision_score": 22.0}
+    },
+    {
+      "match_id": "MATCH-2023-WORLDS-FINALS-G1",
+      "sequence_id": 8,
+      "game_time_seconds": 480.0,
+      "blue_team": {"team_name": "T1", "total_gold": 14200, "total_kills": 3, "total_deaths": 2, "turrets_destroyed": 1, "dragons": 1, "barons": 0, "vision_score": 30.2},
+      "red_team": {"team_name": "WBG", "total_gold": 13400, "total_kills": 2, "total_deaths": 3, "turrets_destroyed": 0, "dragons": 0, "barons": 0, "vision_score": 26.5}
+    },
+    {
+      "match_id": "MATCH-2023-WORLDS-FINALS-G1",
+      "sequence_id": 9,
+      "game_time_seconds": 540.0,
+      "blue_team": {"team_name": "T1", "total_gold": 16200, "total_kills": 4, "total_deaths": 2, "turrets_destroyed": 1, "dragons": 1, "barons": 0, "vision_score": 34.0},
+      "red_team": {"team_name": "WBG", "total_gold": 15200, "total_kills": 2, "total_deaths": 4, "turrets_destroyed": 0, "dragons": 0, "barons": 0, "vision_score": 29.8}
+    },
+    {
+      "match_id": "MATCH-2023-WORLDS-FINALS-G1",
+      "sequence_id": 10,
+      "game_time_seconds": 600.0,
+      "blue_team": {"team_name": "T1", "total_gold": 18200, "total_kills": 4, "total_deaths": 3, "turrets_destroyed": 1, "dragons": 1, "barons": 0, "vision_score": 38.5},
+      "red_team": {"team_name": "WBG", "total_gold": 17400, "total_kills": 3, "total_deaths": 4, "turrets_destroyed": 0, "dragons": 1, "barons": 0, "vision_score": 35.0}
+    },
+    {
+      "match_id": "MATCH-2023-WORLDS-FINALS-G1",
+      "sequence_id": 11,
+      "game_time_seconds": 660.0,
+      "blue_team": {"team_name": "T1", "total_gold": 20400, "total_kills": 5, "total_deaths": 3, "turrets_destroyed": 1, "dragons": 1, "barons": 0, "vision_score": 42.0},
+      "red_team": {"team_name": "WBG", "total_gold": 19500, "total_kills": 3, "total_deaths": 5, "turrets_destroyed": 0, "dragons": 1, "barons": 0, "vision_score": 38.0}
+    },
+    {
+      "match_id": "MATCH-2023-WORLDS-FINALS-G1",
+      "sequence_id": 12,
+      "game_time_seconds": 720.0,
+      "blue_team": {"team_name": "T1", "total_gold": 23200, "total_kills": 8, "total_deaths": 3, "turrets_destroyed": 2, "dragons": 2, "barons": 0, "vision_score": 48.0},
+      "red_team": {"team_name": "WBG", "total_gold": 21100, "total_kills": 3, "total_deaths": 8, "turrets_destroyed": 0, "dragons": 1, "barons": 0, "vision_score": 40.5}
+    },
+    {
+      "match_id": "MATCH-2023-WORLDS-FINALS-G1",
+      "sequence_id": 13,
+      "game_time_seconds": 780.0,
+      "blue_team": {"team_name": "T1", "total_gold": 25800, "total_kills": 9, "total_deaths": 4, "turrets_destroyed": 3, "dragons": 2, "barons": 0, "vision_score": 53.0},
+      "red_team": {"team_name": "WBG", "total_gold": 23200, "total_kills": 4, "total_deaths": 9, "turrets_destroyed": 0, "dragons": 1, "barons": 0, "vision_score": 44.0}
+    },
+    {
+      "match_id": "MATCH-2023-WORLDS-FINALS-G1",
+      "sequence_id": 14,
+      "game_time_seconds": 840.0,
+      "blue_team": {"team_name": "T1", "total_gold": 28400, "total_kills": 10, "total_deaths": 4, "turrets_destroyed": 3, "dragons": 2, "barons": 0, "vision_score": 58.5},
+      "red_team": {"team_name": "WBG", "total_gold": 25400, "total_kills": 4, "total_deaths": 10, "turrets_destroyed": 0, "dragons": 1, "barons": 0, "vision_score": 47.5}
+    },
+    {
+      "match_id": "MATCH-2023-WORLDS-FINALS-G1",
+      "sequence_id": 15,
+      "game_time_seconds": 900.0,
+      "blue_team": {"team_name": "T1", "total_gold": 31000, "total_kills": 11, "total_deaths": 5, "turrets_destroyed": 4, "dragons": 2, "barons": 0, "vision_score": 64.0},
+      "red_team": {"team_name": "WBG", "total_gold": 27800, "total_kills": 5, "total_deaths": 11, "turrets_destroyed": 1, "dragons": 1, "barons": 0, "vision_score": 52.0}
+    },
+    {
+      "match_id": "MATCH-2023-WORLDS-FINALS-G1",
+      "sequence_id": 16,
+      "game_time_seconds": 960.0,
+      "blue_team": {"team_name": "T1", "total_gold": 33600, "total_kills": 12, "total_deaths": 5, "turrets_destroyed": 4, "dragons": 3, "barons": 0, "vision_score": 69.5},
+      "red_team": {"team_name": "WBG", "total_gold": 29900, "total_kills": 5, "total_deaths": 12, "turrets_destroyed": 1, "dragons": 1, "barons": 0, "vision_score": 55.0}
+    },
+    {
+      "match_id": "MATCH-2023-WORLDS-FINALS-G1",
+      "sequence_id": 17,
+      "game_time_seconds": 1020.0,
+      "blue_team": {"team_name": "T1", "total_gold": 36100, "total_kills": 13, "total_deaths": 6, "turrets_destroyed": 5, "dragons": 3, "barons": 0, "vision_score": 75.0},
+      "red_team": {"team_name": "WBG", "total_gold": 32200, "total_kills": 6, "total_deaths": 13, "turrets_destroyed": 1, "dragons": 1, "barons": 0, "vision_score": 59.0}
+    },
+    {
+      "match_id": "MATCH-2023-WORLDS-FINALS-G1",
+      "sequence_id": 18,
+      "game_time_seconds": 1080.0,
+      "blue_team": {"team_name": "T1", "total_gold": 41200, "total_kills": 17, "total_deaths": 6, "turrets_destroyed": 7, "dragons": 3, "barons": 1, "vision_score": 84.0},
+      "red_team": {"team_name": "WBG", "total_gold": 33900, "total_kills": 6, "total_deaths": 17, "turrets_destroyed": 1, "dragons": 1, "barons": 0, "vision_score": 62.0}
+    },
+    {
+      "match_id": "MATCH-2023-WORLDS-FINALS-G1",
+      "sequence_id": 19,
+      "game_time_seconds": 1140.0,
+      "blue_team": {"team_name": "T1", "total_gold": 44500, "total_kills": 18, "total_deaths": 6, "turrets_destroyed": 8, "dragons": 3, "barons": 1, "vision_score": 90.0},
+      "red_team": {"team_name": "WBG", "total_gold": 35500, "total_kills": 6, "total_deaths": 18, "turrets_destroyed": 1, "dragons": 1, "barons": 0, "vision_score": 65.0}
+    },
+    {
+      "match_id": "MATCH-2023-WORLDS-FINALS-G1",
+      "sequence_id": 20,
+      "game_time_seconds": 1200.0,
+      "blue_team": {"team_name": "T1", "total_gold": 47900, "total_kills": 20, "total_deaths": 6, "turrets_destroyed": 9, "dragons": 3, "barons": 1, "vision_score": 96.0},
+      "red_team": {"team_name": "WBG", "total_gold": 37200, "total_kills": 6, "total_deaths": 20, "turrets_destroyed": 1, "dragons": 1, "barons": 0, "vision_score": 68.0}
+    },
+    {
+      "match_id": "MATCH-2023-WORLDS-FINALS-G1",
+      "sequence_id": 21,
+      "game_time_seconds": 1260.0,
+      "blue_team": {"team_name": "T1", "total_gold": 50800, "total_kills": 21, "total_deaths": 7, "turrets_destroyed": 10, "dragons": 4, "barons": 1, "vision_score": 102.0},
+      "red_team": {"team_name": "WBG", "total_gold": 39000, "total_kills": 7, "total_deaths": 21, "turrets_destroyed": 1, "dragons": 1, "barons": 0, "vision_score": 71.0}
+    },
+    {
+      "match_id": "MATCH-2023-WORLDS-FINALS-G1",
+      "sequence_id": 22,
+      "game_time_seconds": 1320.0,
+      "blue_team": {"team_name": "T1", "total_gold": 53900, "total_kills": 23, "total_deaths": 7, "turrets_destroyed": 10, "dragons": 4, "barons": 1, "vision_score": 107.0},
+      "red_team": {"team_name": "WBG", "total_gold": 40500, "total_kills": 7, "total_deaths": 23, "turrets_destroyed": 1, "dragons": 1, "barons": 0, "vision_score": 73.0}
+    },
+    {
+      "match_id": "MATCH-2023-WORLDS-FINALS-G1",
+      "sequence_id": 23,
+      "game_time_seconds": 1380.0,
+      "blue_team": {"team_name": "T1", "total_gold": 57200, "total_kills": 25, "total_deaths": 7, "turrets_destroyed": 11, "dragons": 4, "barons": 1, "vision_score": 112.0},
+      "red_team": {"team_name": "WBG", "total_gold": 42000, "total_kills": 7, "total_deaths": 25, "turrets_destroyed": 1, "dragons": 1, "barons": 0, "vision_score": 75.0}
+    }
+  ]
+}
