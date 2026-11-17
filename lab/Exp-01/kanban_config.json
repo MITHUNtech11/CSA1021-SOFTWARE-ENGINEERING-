@@ -1,0 +1,61 @@
+{
+  "board_name": "Omnichannel Fulfilment Kanban",
+  "tool": "Jira Software",
+  "methodology": "Kanban with Lean Flow Control",
+  "wip_limits": {
+    "Backlog": null,
+    "Ready for Dev": 6,
+    "In Progress": 4,
+    "Code Review": 2,
+    "Testing & QA": 2,
+    "Done": null
+  },
+  "columns": [
+    {
+      "id": "COL-01",
+      "name": "Backlog",
+      "issues": [
+        "ORD-101",
+        "ORD-102",
+        "PAY-203",
+        "WHS-304"
+      ]
+    },
+    {
+      "id": "COL-02",
+      "name": "In Progress (WIP: 4)",
+      "issues": [
+        "ORD-105: Stock Reservation Lock",
+        "PAY-201: Idempotency Key Stub"
+      ]
+    },
+    {
+      "id": "COL-03",
+      "name": "Code Review (WIP: 2)",
+      "issues": [
+        "WHS-301: Pick-list Generation"
+      ]
+    },
+    {
+      "id": "COL-04",
+      "name": "Testing & QA (WIP: 2)",
+      "issues": [
+        "ORD-100: Auth RBAC"
+      ]
+    },
+    {
+      "id": "COL-05",
+      "name": "Done",
+      "issues": [
+        "INFRA-01: CI/CD Docker Pipeline Setup",
+        "DOC-01: System Architecture SRS"
+      ]
+    }
+  ],
+  "metrics": {
+    "average_lead_time_days": 4.2,
+    "average_cycle_time_days": 2.1,
+    "wip_limit_violations": 0,
+    "throughput_issues_per_week": 8.5
+  }
+}
