@@ -1,0 +1,73 @@
+{
+  "project": "Bus Ticket Booking Mobile Prototype",
+  "tool": "Figma",
+  "frames": [
+    {
+      "id": "F01",
+      "name": "Splash & Route Search",
+      "elements": [
+        "Origin",
+        "Destination",
+        "Date Picker",
+        "Bus Type"
+      ]
+    },
+    {
+      "id": "F02",
+      "name": "Bus Selection List",
+      "elements": [
+        "AC Sleeper",
+        "Seater",
+        "Rating",
+        "Fare Filter"
+      ]
+    },
+    {
+      "id": "F03",
+      "name": "Interactive Seat Layout",
+      "elements": [
+        "Lower Deck (2+1)",
+        "Upper Deck (2+1)",
+        "Seat Status (Available, Selected, Reserved, Female Only)"
+      ]
+    },
+    {
+      "id": "F04",
+      "name": "Passenger & Boarding Details",
+      "elements": [
+        "Name",
+        "Age",
+        "Gender",
+        "Boarding Point",
+        "Dropping Point"
+      ]
+    },
+    {
+      "id": "F05",
+      "name": "Payment Gateway",
+      "elements": [
+        "UPI",
+        "Credit/Debit Card",
+        "Net Banking",
+        "Fare Breakdown"
+      ]
+    },
+    {
+      "id": "F06",
+      "name": "Ticket Confirmation",
+      "elements": [
+        "PNR Number",
+        "QR Code",
+        "Download e-Ticket",
+        "SMS Alert"
+      ]
+    }
+  ],
+  "design_tokens": {
+    "primary_color": "#E11D48",
+    "secondary_color": "#1E293B",
+    "accent_available": "#FFFFFF",
+    "accent_selected": "#22C55E",
+    "accent_reserved": "#94A3B8"
+  }
+}
