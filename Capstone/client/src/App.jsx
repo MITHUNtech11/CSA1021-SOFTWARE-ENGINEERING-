@@ -18,7 +18,9 @@ export default function App() {
     step,
     play,
     pause,
-    reset
+    reset,
+    analyzeYouTubeVideo,
+    seekToRound
   } = useEsportWebSocket();
 
   const currentTick = ticks.length > 0 ? ticks[ticks.length - 1] : null;
@@ -27,7 +29,13 @@ export default function App() {
   return (
     <div className="min-h-screen bg-[#F8FAFC] text-slate-800 flex flex-col font-sans">
       {/* Clean Top Navigation Bar */}
-      <Header isConnected={isConnected} currentTick={currentTick} />
+      <Header
+        isConnected={isConnected}
+        currentTick={currentTick}
+        matchName="VCT Champions Grand Finals • Map: Ascent"
+        blueName="Sentinels"
+        redName="Fnatic"
+      />
 
       {/* Main Canvas */}
       <main className="flex-1 max-w-7xl w-full mx-auto p-4 sm:p-6 space-y-5">
@@ -45,10 +53,21 @@ export default function App() {
           isPlaying={simulatorStatus.is_playing}
           currentTimeSeconds={simulatorStatus.current_game_time}
           currentTick={currentTick}
+          latestPrediction={latestPrediction}
+          changePoints={changePoints}
+          onPlay={play}
+          onPause={pause}
+          onReset={reset}
+          onAnalyzeYouTube={analyzeYouTubeVideo}
+          onSeek={seekToRound}
         />
 
         {/* Match Vitals Scoreboard Strip */}
-        <TeamComparisonCards currentTick={currentTick} />
+        <TeamComparisonCards
+          currentTick={currentTick}
+          blueName="Sentinels (SEN)"
+          redName="Fnatic (FNC)"
+        />
 
         {/* Primary Story View: Lead Timeline (2/3) + Win Outlook (1/3) */}
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-5 items-stretch">
@@ -58,8 +77,8 @@ export default function App() {
           <div className="lg:col-span-1">
             <WinProbabilityGauge
               latestPrediction={latestPrediction}
-              blueName={currentTick?.blue_team?.team_name || "T1"}
-              redName={currentTick?.red_team?.team_name || "WBG"}
+              blueName={currentTick?.blue_team?.team_name === "T1" ? "Sentinels (SEN)" : (currentTick?.blue_team?.team_name || "Sentinels (SEN)")}
+              redName={currentTick?.red_team?.team_name === "WBG" ? "Fnatic (FNC)" : (currentTick?.red_team?.team_name || "Fnatic (FNC)")}
             />
           </div>
         </div>

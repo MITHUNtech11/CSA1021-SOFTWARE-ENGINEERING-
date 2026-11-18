@@ -36,11 +36,11 @@ export default function PlaybackControls({ status, onPlay, onPause, onStep, onRe
           <button
             onClick={onStep}
             disabled={isPlaying}
-            title="Step forward 1 minute"
+            title="Step forward 1 round"
             className="flex items-center gap-1.5 px-3.5 py-2.5 rounded-xl text-sm font-medium bg-warm-50 hover:bg-warm-100 text-warm-700 border border-warm-200/90 disabled:opacity-40 transition-colors"
           >
             <SkipForward className="w-4 h-4 text-warm-500" />
-            +1 Min
+            +1 Round
           </button>
 
           <button
@@ -56,7 +56,7 @@ export default function PlaybackControls({ status, onPlay, onPause, onStep, onRe
         {/* Story Scrubber Progress */}
         <div className="w-full md:w-5/12 flex flex-col gap-1.5">
           <div className="flex justify-between text-xs font-medium text-warm-500">
-            <span>Minute {currentIndex} of {totalTicks}</span>
+            <span>Round {currentIndex === 0 ? 1 : currentIndex} of {totalTicks} (Ascent)</span>
             <span>{Math.round(progressPercent)}% Played</span>
           </div>
           <div className="w-full h-2.5 rounded-full bg-warm-100 overflow-hidden relative border border-warm-200/60">

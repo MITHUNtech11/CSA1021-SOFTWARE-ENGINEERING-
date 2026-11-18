@@ -209,6 +209,49 @@ export function useEsportWebSocket() {
     });
   }, [pause]);
 
+  const analyzeYouTubeVideo = useCallback(async (url) => {
+    pause();
+    try {
+      const res = await fetch('/api/v1/simulation/analyze-youtube', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ url })
+      });
+      if (res.ok) {
+        const data = await res.json();
+        setTicks([]);
+        setPredictions([]);
+        setChangePoints([]);
+        setSimulatorStatus((prev) => ({
+          ...prev,
+          is_playing: false,
+          current_index: 0,
+          total_ticks: data.total_rounds || 24,
+          current_game_time: 0.0
+        }));
+        return data;
+      }
+    } catch (e) {
+      console.error("YouTube analysis request failed:", e);
+    }
+  }, [pause]);
+
+  const seekToRound = useCallback(async (roundIndex) => {
+    try {
+      const res = await fetch('/api/v1/simulation/seek', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ sequence_id: roundIndex })
+      });
+      if (res.ok) {
+        const data = await res.json();
+        if (data.packet) applyTickPacket(data.packet);
+      }
+    } catch (e) {
+      console.warn("Seek request failed:", e);
+    }
+  }, [applyTickPacket]);
+
   return {
     isConnected,
     ticks,
@@ -218,6 +261,8 @@ export function useEsportWebSocket() {
     step,
     play,
     pause,
-    reset
+    reset,
+    analyzeYouTubeVideo,
+    seekToRound
   };
 }

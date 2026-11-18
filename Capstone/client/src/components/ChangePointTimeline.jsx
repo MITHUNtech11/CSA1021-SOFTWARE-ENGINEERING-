@@ -59,7 +59,7 @@ export default function ChangePointTimeline({ ticks = [], changePoints = [] }) {
         <div className="flex items-center gap-4 text-xs font-medium">
           <div className="flex items-center gap-1.5 text-team-blue">
             <span className="w-3 h-0.5 bg-team-blue inline-block rounded-full"></span>
-            Gold Advantage
+            Credits Economy Lead
           </div>
           <div className="flex items-center gap-1.5 text-accent-amber">
             <span className="w-2.5 h-2.5 rounded-full bg-accent-amber inline-block"></span>
@@ -116,7 +116,7 @@ export default function ChangePointTimeline({ ticks = [], changePoints = [] }) {
             fontWeight="600"
             textAnchor="end"
           >
-            +T1 Lead
+            +SEN Lead
           </text>
           <text
             x={padding.left - 8}
@@ -127,7 +127,7 @@ export default function ChangePointTimeline({ ticks = [], changePoints = [] }) {
             fontWeight="600"
             textAnchor="end"
           >
-            +WBG Lead
+            +FNC Lead
           </text>
 
           {/* Soft blue area fill under lead curve */}
@@ -223,7 +223,7 @@ export default function ChangePointTimeline({ ticks = [], changePoints = [] }) {
               fontFamily="sans-serif"
               textAnchor="middle"
             >
-              {m} min
+              {m === 0 ? 'Rnd 1' : `Rnd ${m}`}
             </text>
           ))}
         </svg>

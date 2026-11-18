@@ -1,7 +1,7 @@
 import React from 'react';
 import { TrendingUp, TrendingDown, Minus, Compass } from 'lucide-react';
 
-export default function WinProbabilityGauge({ latestPrediction, blueName = "T1", redName = "Weibo Gaming" }) {
+export default function WinProbabilityGauge({ latestPrediction, blueName = "Sentinels (SEN)", redName = "Fnatic (FNC)" }) {
   const probBlue = latestPrediction ? latestPrediction.win_probability_blue : 0.50;
   const probRed = latestPrediction ? latestPrediction.win_probability_red : 0.50;
   const momentum = latestPrediction ? latestPrediction.momentum_score : 0.0;

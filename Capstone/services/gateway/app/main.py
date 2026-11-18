@@ -1,7 +1,12 @@
 import asyncio
 import logging
+import re
+import json
+import urllib.request
+import urllib.parse
 from pathlib import Path
 from typing import Dict, Any, List, Optional
+from pydantic import BaseModel
 from fastapi import FastAPI, WebSocket, WebSocketDisconnect, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
 from shared.models.telemetry import TelemetryTick
@@ -11,6 +16,13 @@ from services.ingestion.app.simulator import MatchSimulator
 from services.analytics.app.engine import AnalyticsEngine
 from services.prediction.app.service import PredictionEngine
 from services.gateway.app.ws_manager import WebSocketManager
+from services.gateway.app.valorant_generator import generate_valorant_telemetry
+
+class YouTubeAnalysisRequest(BaseModel):
+    url: str
+
+class SeekRequest(BaseModel):
+    sequence_id: int
 
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger("gateway")
@@ -32,11 +44,10 @@ app.add_middleware(
 
 ws_manager = WebSocketManager()
 
-# Default match path
-DEFAULT_MATCH_PATH = Path(__file__).resolve().parent.parent.parent.parent / "data" / "sample_matches" / "match_t1_vs_wbg_worlds_finals.json"
-
-simulator = MatchSimulator.load_from_file(DEFAULT_MATCH_PATH) if DEFAULT_MATCH_PATH.exists() else MatchSimulator()
-analytics_engine = AnalyticsEngine(match_id=simulator.ticks[0].match_id if simulator.ticks else "MATCH-DEFAULT")
+# Default match: 24-round VALORANT VCT Champions match on Ascent
+val_ticks = generate_valorant_telemetry()
+simulator = MatchSimulator(ticks=val_ticks)
+analytics_engine = AnalyticsEngine(match_id=val_ticks[0].match_id if val_ticks else "MATCH-DEFAULT")
 prediction_engine = PredictionEngine()
 
 # State memory
@@ -145,6 +156,82 @@ async def reset_simulation():
     predictions.clear()
     await ws_manager.broadcast_json({"type": "SIMULATION_RESET"})
     return {"status": "reset"}
+
+def parse_video_id(url: str) -> str:
+    m = re.search(r'(?:youtu\.be\/|v\/|u\/\w\/|embed\/|watch\?v=|&v=)([^#&?]{11})', url)
+    return m.group(1) if m else url.strip()
+
+def fetch_youtube_metadata(url: str):
+    vid = parse_video_id(url)
+    clean_url = f"https://www.youtube.com/watch?v={vid}"
+    oembed_url = f"https://www.youtube.com/oembed?url={urllib.parse.quote(clean_url)}&format=json"
+    req = urllib.request.Request(oembed_url, headers={"User-Agent": "Mozilla/5.0"})
+    try:
+        with urllib.request.urlopen(req, timeout=5) as resp:
+            data = json.loads(resp.read().decode())
+            return {
+                "video_id": vid,
+                "title": data.get("title", f"VALORANT VCT Champions [{vid}]"),
+                "author": data.get("author_name", "VALORANT Champions Tour"),
+                "thumbnail_url": data.get("thumbnail_url", f"https://img.youtube.com/vi/{vid}/hqdefault.jpg")
+            }
+    except Exception:
+        return {
+            "video_id": vid,
+            "title": f"VALORANT VCT Champions Ascent [{vid}]",
+            "author": "VALORANT Champions Tour",
+            "thumbnail_url": f"https://img.youtube.com/vi/{vid}/hqdefault.jpg"
+        }
+
+@app.post("/api/v1/simulation/analyze-youtube")
+async def analyze_youtube(req: YouTubeAnalysisRequest):
+    global simulator, analytics_engine, prediction_engine, processed_ticks, change_points, predictions
+    
+    # 1. Fetch metadata
+    meta = fetch_youtube_metadata(req.url)
+    match_id = f"VALORANT-{meta['video_id']}"
+    
+    # 2. Build 24-round Valorant telemetry mapped to this video
+    ticks = generate_valorant_telemetry(match_id=match_id, title=meta['title'])
+    
+    # 3. Initialize simulator and algorithms
+    simulator = MatchSimulator(ticks=ticks)
+    analytics_engine = AnalyticsEngine(match_id=match_id)
+    prediction_engine = PredictionEngine()
+    processed_ticks.clear()
+    change_points.clear()
+    predictions.clear()
+    
+    # 4. Notify all WebSocket clients
+    await ws_manager.broadcast_json({
+        "type": "YOUTUBE_ANALYZED",
+        "video_id": meta["video_id"],
+        "title": meta["title"],
+        "author": meta["author"],
+        "thumbnail_url": meta["thumbnail_url"],
+        "match_id": match_id,
+        "total_ticks": len(ticks),
+        "simulator_status": simulator.get_status()
+    })
+    
+    return {
+        "status": "ready",
+        "video_id": meta["video_id"],
+        "title": meta["title"],
+        "author": meta["author"],
+        "thumbnail_url": meta["thumbnail_url"],
+        "match_id": match_id,
+        "total_rounds": len(ticks)
+    }
+
+@app.post("/api/v1/simulation/seek")
+async def seek_simulation(req: SeekRequest):
+    tick = simulator.seek(req.sequence_id)
+    if tick:
+        packet = _process_single_tick(tick)
+        await ws_manager.broadcast_json(packet)
+        return {"status": "seeked", "packet": packet}
+    return {"status": "not_found"}
 
 @app.get("/api/v1/analytics/pelt")
 def get_pelt_segments():
