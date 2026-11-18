@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<XMI xmi.version="1.2" xmlns:UML="org.omg.xmi.namespace.UML">
+  <XMI.header><XMI.metamodel xmi.name="UML" xmi.version="1.4"/></XMI.header>
+  <XMI.content>
+    <UML:Model xmi.id="M-SEC" name="CollegeSecurityManagement">
+      <UML:Class xmi.id="C-01" name="Person"/>
+      <UML:Class xmi.id="C-02" name="Student"/>
+      <UML:Class xmi.id="C-03" name="Visitor"/>
+      <UML:Class xmi.id="C-04" name="SecurityOfficer"/>
+      <UML:Class xmi.id="C-05" name="GatePass"/>
+      <UML:Class xmi.id="C-06" name="IncidentLog"/>
+    </UML:Model>
+  </XMI.content>
+</XMI>
