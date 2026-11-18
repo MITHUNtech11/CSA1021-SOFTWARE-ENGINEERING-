@@ -1,0 +1,9 @@
+RAPTOR Flowchart Program
+Title: Lexicographically Smallest String by Swapping
+Variables: s (String), i (Integer), j (Integer), min_idx (Integer), temp (Character)
+Logic:
+  1. Input: s
+  2. Outer Loop: i := 0 to length(s)-1
+  3. Inner Loop: j := length(s)-1 down to i+1
+  4. If min_idx != i Then Swap and Exit
+  5. Output: s
