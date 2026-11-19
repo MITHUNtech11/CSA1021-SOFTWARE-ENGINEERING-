@@ -1,0 +1,26 @@
+{
+  "integration": "Atlassian Jira Software & Confluence Cloud",
+  "confluence_url": "https://saveetha-team-y1phosj4.atlassian.net/wiki/x/FABn",
+  "linked_space": "SE-LAB (Software Engineering Laboratory)",
+  "linked_issues": [
+    {
+      "jira_key": "SCRUM-101",
+      "type": "Story",
+      "summary": "User Authentication & RBAC",
+      "doc_page": "PRD: Security & Access Control Architecture"
+    },
+    {
+      "jira_key": "SCRUM-102",
+      "type": "Story",
+      "summary": "Stock Reservation Lock",
+      "doc_page": "SRS: Inventory Concurrency Management"
+    },
+    {
+      "jira_key": "SCRUM-103",
+      "type": "Story",
+      "summary": "Idempotent Payment Stub",
+      "doc_page": "API Spec: Payment Gateway Contracts"
+    }
+  ],
+  "traceability_status": "Synchronized (Bidirectional Issue Linking Enabled)"
+}
