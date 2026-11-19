@@ -1,0 +1,68 @@
+{
+  "project": "Omnichannel Fulfilment Scrum",
+  "key": "SCRUM",
+  "sprint_1": {
+    "name": "Sprint 1: Core Fulfilment Backbone",
+    "goal": "Deliver working order reservation, payment intent stub, and picklist generation.",
+    "duration": "2 weeks (10 working days)",
+    "capacity_story_points": 16,
+    "user_stories": [
+      {
+        "key": "SCRUM-101",
+        "summary": "User Authentication & RBAC",
+        "points": 3,
+        "status": "Done"
+      },
+      {
+        "key": "SCRUM-102",
+        "summary": "Stock Reservation with Expiry TTL",
+        "points": 5,
+        "status": "Done"
+      },
+      {
+        "key": "SCRUM-103",
+        "summary": "Idempotent Payment Request Stub",
+        "points": 3,
+        "status": "Done"
+      },
+      {
+        "key": "SCRUM-104",
+        "summary": "Warehouse Pick-list Generation",
+        "points": 5,
+        "status": "In Progress"
+      }
+    ]
+  },
+  "product_backlog": [
+    {
+      "key": "SCRUM-105",
+      "summary": "Dispatch Workflow & State Machine",
+      "points": 5,
+      "priority": "High"
+    },
+    {
+      "key": "SCRUM-106",
+      "summary": "Customer Self-Service Tracking Portal",
+      "points": 3,
+      "priority": "Medium"
+    },
+    {
+      "key": "SCRUM-107",
+      "summary": "Return Request Eligibility Validation",
+      "points": 3,
+      "priority": "Medium"
+    },
+    {
+      "key": "SCRUM-108",
+      "summary": "Dual-Control Finance Refund Approval",
+      "points": 5,
+      "priority": "High"
+    },
+    {
+      "key": "SCRUM-109",
+      "summary": "Automated CI/CD Verification Pipeline",
+      "points": 5,
+      "priority": "High"
+    }
+  ]
+}
