@@ -1,5 +1,5 @@
-from fastapi import FastAPI, HTTPException, status
-from typing import List, Dict, Any, Optional
+from fastapi import FastAPI, status
+from typing import List
 from shared.models.telemetry import TelemetryTick
 from services.ingestion.app.validator import OutOfOrderBuffer
 from services.ingestion.app.simulator import MatchSimulator

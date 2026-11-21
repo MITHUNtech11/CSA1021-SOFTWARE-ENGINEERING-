@@ -48,3 +48,29 @@ def test_classify_decisive_comeback(classifier):
     assert is_inflection is True
     assert tag == InflectionCategory.DECISIVE_COMEBACK
     assert tpis > 0.20
+
+def test_classify_objective_steal_swing_only_on_differential_transition(classifier):
+    # Tick 1: Baron diff is 0
+    blue1 = TeamState(team_name="SEN", total_gold=25000, total_kills=5, total_deaths=5, turrets_destroyed=2, dragons=0, barons=0)
+    red1 = TeamState(team_name="FNC", total_gold=25000, total_kills=5, total_deaths=5, turrets_destroyed=2, dragons=0, barons=0)
+    tick1 = TelemetryTick(match_id="M1", sequence_id=10, game_time_seconds=600.0, blue_team=blue1, red_team=red1)
+    classifier.evaluate(tick=tick1, change_point=None, prev_prob=0.50, curr_prob=0.50)
+
+    # Tick 2: SEN secures baron/clutch (baron_diff 0 -> 1)
+    blue2 = TeamState(team_name="SEN", total_gold=27000, total_kills=8, total_deaths=5, turrets_destroyed=2, dragons=0, barons=1)
+    red2 = TeamState(team_name="FNC", total_gold=25000, total_kills=5, total_deaths=8, turrets_destroyed=2, dragons=0, barons=0)
+    tick2 = TelemetryTick(match_id="M1", sequence_id=11, game_time_seconds=660.0, blue_team=blue2, red_team=red2)
+    tag, tpis, is_inflection, explanation = classifier.evaluate(
+        tick=tick2, change_point=None, prev_prob=0.50, curr_prob=0.64
+    )
+    assert is_inflection is True
+    assert tag == InflectionCategory.OBJECTIVE_STEAL_SWING
+
+    # Tick 3: Baron diff remains 1 (no new baron secured) -> should NOT trigger OBJECTIVE_STEAL_SWING again
+    blue3 = TeamState(team_name="SEN", total_gold=28000, total_kills=8, total_deaths=5, turrets_destroyed=2, dragons=0, barons=1)
+    red3 = TeamState(team_name="FNC", total_gold=26000, total_kills=5, total_deaths=8, turrets_destroyed=2, dragons=0, barons=0)
+    tick3 = TelemetryTick(match_id="M1", sequence_id=12, game_time_seconds=720.0, blue_team=blue3, red_team=red3)
+    tag3, _, is_inflection3, _ = classifier.evaluate(
+        tick=tick3, change_point=None, prev_prob=0.64, curr_prob=0.65
+    )
+    assert tag3 != InflectionCategory.OBJECTIVE_STEAL_SWING

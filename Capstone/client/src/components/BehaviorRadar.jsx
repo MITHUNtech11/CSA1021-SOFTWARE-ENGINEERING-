@@ -1,7 +1,7 @@
 import React from 'react';
 import { Compass } from 'lucide-react';
 
-export default function BehaviorRadar({ currentTick, blueName = "T1", redName = "WBG" }) {
+export default function BehaviorRadar({ currentTick, blueName = "Sentinels", redName = "Fnatic" }) {
   const blue = currentTick?.blue_team;
   const red = currentTick?.red_team;
 
@@ -34,13 +34,13 @@ export default function BehaviorRadar({ currentTick, blueName = "T1", redName = 
   const redPath = redPoints.map((p, i) => `${i === 0 ? 'M' : 'L'} ${p.x} ${p.y}`).join(' ') + ' Z';
 
   return (
-    <div className="bg-[#111827] border border-slate-800 rounded-xl p-5 shadow-xl flex flex-col justify-between">
-      <div className="flex items-center justify-between border-b border-slate-800 pb-3">
-        <h3 className="text-xs font-mono font-bold tracking-wider text-slate-300 uppercase flex items-center gap-2">
-          <Compass className="w-4 h-4 text-purple-400" />
+    <div className="bg-white border border-warm-200/80 rounded-2xl p-5 shadow-card flex flex-col justify-between">
+      <div className="flex items-center justify-between border-b border-warm-100 pb-3">
+        <h3 className="text-xs font-bold uppercase tracking-wider text-warm-700 flex items-center gap-2">
+          <Compass className="w-4 h-4 text-accent-amber" />
           Tactical Behavior Radar
         </h3>
-        <span className="text-[11px] font-mono text-slate-400">
+        <span className="text-[11px] font-medium text-warm-500">
           Normalized Profiles
         </span>
       </div>
@@ -56,7 +56,7 @@ export default function BehaviorRadar({ currentTick, blueName = "T1", redName = 
                 key={level}
                 d={ringPath}
                 fill="none"
-                stroke="#1E293B"
+                stroke="#E2E8F0"
                 strokeWidth="1"
                 strokeDasharray={level === 1.0 ? "none" : "2 2"}
               />
@@ -73,7 +73,7 @@ export default function BehaviorRadar({ currentTick, blueName = "T1", redName = 
                 y1={center}
                 x2={end.x}
                 y2={end.y}
-                stroke="#1E293B"
+                stroke="#E2E8F0"
                 strokeWidth="1"
               />
             );
@@ -82,9 +82,9 @@ export default function BehaviorRadar({ currentTick, blueName = "T1", redName = 
           {/* Red Team Polygon */}
           <path
             d={redPath}
-            fill="#F43F5E"
-            fillOpacity="0.25"
-            stroke="#F43F5E"
+            fill="#EF4444"
+            fillOpacity="0.20"
+            stroke="#EF4444"
             strokeWidth="2"
             className="transition-all duration-300"
           />
@@ -92,9 +92,9 @@ export default function BehaviorRadar({ currentTick, blueName = "T1", redName = 
           {/* Blue Team Polygon */}
           <path
             d={bluePath}
-            fill="#06B6D4"
-            fillOpacity="0.35"
-            stroke="#06B6D4"
+            fill="#0284C7"
+            fillOpacity="0.25"
+            stroke="#0284C7"
             strokeWidth="2"
             className="transition-all duration-300"
           />
@@ -107,10 +107,10 @@ export default function BehaviorRadar({ currentTick, blueName = "T1", redName = 
                 key={i}
                 x={labelCoord.x}
                 y={labelCoord.y + 3}
-                fill="#94A3B8"
+                fill="#64748B"
                 fontSize="9"
-                fontFamily="monospace"
-                fontWeight="bold"
+                fontFamily="sans-serif"
+                fontWeight="600"
                 textAnchor="middle"
               >
                 {axis.label}
@@ -121,14 +121,14 @@ export default function BehaviorRadar({ currentTick, blueName = "T1", redName = 
       </div>
 
       {/* Legend */}
-      <div className="flex justify-center gap-6 pt-3 border-t border-slate-800 text-xs font-mono">
-        <div className="flex items-center gap-1.5 text-cyan-400 font-semibold">
-          <span className="w-2.5 h-2.5 rounded bg-cyan-400 inline-block"></span>
-          {blueName} Profile
+      <div className="flex justify-center gap-6 pt-3 border-t border-warm-100 text-xs">
+        <div className="flex items-center gap-1.5 text-team-blue font-semibold">
+          <span className="w-2.5 h-2.5 rounded bg-team-blue inline-block"></span>
+          {blueName}
         </div>
-        <div className="flex items-center gap-1.5 text-rose-400 font-semibold">
-          <span className="w-2.5 h-2.5 rounded bg-rose-400 inline-block"></span>
-          {redName} Profile
+        <div className="flex items-center gap-1.5 text-team-red font-semibold">
+          <span className="w-2.5 h-2.5 rounded bg-team-red inline-block"></span>
+          {redName}
         </div>
       </div>
     </div>

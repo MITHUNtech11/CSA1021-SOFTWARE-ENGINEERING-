@@ -1,4 +1,4 @@
-from typing import Optional, Tuple
+from typing import Optional
 from shared.models.telemetry import TelemetryTick
 from shared.models.change_point import ChangePointRecord
 from shared.models.prediction import PredictionRecord

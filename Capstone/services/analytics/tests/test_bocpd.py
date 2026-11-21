@@ -1,4 +1,3 @@
-import pytest
 import numpy as np
 from services.analytics.app.algorithms.bocpd import BayesianOnlineCPD
 

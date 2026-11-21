@@ -1,5 +1,5 @@
 import numpy as np
-from typing import List, Optional, Tuple, Dict, Any
+from typing import List, Optional, Tuple, Dict
 from shared.models.telemetry import TelemetryTick
 from shared.models.change_point import ChangePointRecord, ChangePointType
 from services.analytics.app.algorithms.cusum import TwoSidedCUSUM

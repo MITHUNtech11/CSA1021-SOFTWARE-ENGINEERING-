@@ -13,7 +13,7 @@ if %errorlevel% neq 0 (
     pause
     exit /b %errorlevel%
 )
-echo   -^> All 32 unit, integration, and E2E tests PASSED!
+echo   -^> All 52 unit, integration, and E2E tests PASSED!
 
 echo.
 echo [2/3] Launching Backend API Gateway on http://127.0.0.1:8000...

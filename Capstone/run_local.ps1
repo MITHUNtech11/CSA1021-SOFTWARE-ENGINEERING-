@@ -14,7 +14,7 @@ if ($LASTEXITCODE -ne 0) {
     Write-Host "Verification tests failed. Please review the output above." -ForegroundColor Red
     exit 1
 }
-Write-Host "  -> All 32 unit, integration, and E2E tests PASSED (>90% coverage)!" -ForegroundColor Green
+Write-Host "  -> All 52 unit, integration, and E2E tests PASSED (>90% coverage)!" -ForegroundColor Green
 
 # 2. Launch Backend API Gateway via dedicated batch script
 Write-Host "`n[2/3] Launching Backend API Gateway on http://127.0.0.1:8000..." -ForegroundColor Yellow

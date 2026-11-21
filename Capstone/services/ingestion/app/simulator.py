@@ -1,8 +1,8 @@
 import json
 import asyncio
 from pathlib import Path
-from typing import List, Optional, Callable
-from shared.models.telemetry import TelemetryTick, TeamState
+from typing import List, Optional
+from shared.models.telemetry import TelemetryTick
 
 class MatchSimulator:
     """

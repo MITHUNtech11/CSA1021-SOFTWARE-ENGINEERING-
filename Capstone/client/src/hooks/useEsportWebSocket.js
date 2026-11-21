@@ -13,9 +13,20 @@ export function useEsportWebSocket() {
     current_game_time: 0.0
   });
 
+  // Live Broadcast HUD Analytics State
+  const [activeVideo, setActiveVideo] = useState(null);
+  const [isLiveBroadcasting, setIsLiveBroadcasting] = useState(false);
+  const [liveHudState, setLiveHudState] = useState(null);
+  const [liveWinProbability, setLiveWinProbability] = useState({
+    round_blue: 0.50,
+    round_red: 0.50,
+    match_blue: 0.50,
+    match_red: 0.50
+  });
+  const [liveInflectionEvents, setLiveInflectionEvents] = useState([]);
+
   const wsRef = useRef(null);
   const heartbeatRef = useRef(null);
-  const playbackTimerRef = useRef(null);
   const isMountedRef = useRef(true);
 
   // Helper to deduplicate ticks by sequence_id
@@ -48,28 +59,44 @@ export function useEsportWebSocket() {
     }
   }, []);
 
-  // Fetch initial match state snapshot via same-origin REST
+  // Fetch initial match state snapshot via REST
   const fetchInitialState = useCallback(async () => {
     try {
-      const res = await fetch('/api/v1/matches/current');
-      if (res.ok) {
-        const data = await res.json();
+      const [matchRes, broadcastRes] = await Promise.all([
+        fetch('/api/v1/matches/current'),
+        fetch('/api/v1/broadcast/current')
+      ]);
+      if (matchRes.ok) {
+        const data = await matchRes.json();
         setTicks(data.ticks || []);
         setPredictions(data.predictions || []);
         setChangePoints(data.change_points || []);
         if (data.status) setSimulatorStatus(data.status);
+      }
+      if (broadcastRes.ok) {
+        const bData = await broadcastRes.json();
+        if (bData.is_initialized) {
+          setActiveVideo({
+            videoId: bData.video_id,
+            title: bData.title,
+            author: bData.author,
+            thumbnailUrl: bData.thumbnail_url,
+            matchId: bData.match_id,
+            totalRounds: bData.total_rounds,
+            isLive: bData.is_live
+          });
+        }
       }
     } catch (e) {
       console.warn("Initial state fetch error:", e);
     }
   }, []);
 
-  // Connect to WebSocket with resilient fallback
+  // Connect to WebSocket with resilient reconnection
   const connect = useCallback(() => {
     if (!isMountedRef.current) return;
 
     try {
-      // Connect to same-host /ws/live
       const protocol = window.location.protocol === 'https:' ? 'wss:' : 'ws:';
       const wsUrl = `${protocol}//${window.location.host}/ws/live`;
       const ws = new WebSocket(wsUrl);
@@ -94,8 +121,49 @@ export function useEsportWebSocket() {
             setPredictions(data.predictions || []);
             setChangePoints(data.change_points || []);
             if (data.simulator_status) setSimulatorStatus(data.simulator_status);
+            if (data.broadcast_meta && data.broadcast_meta.video_id) {
+              setActiveVideo({
+                videoId: data.broadcast_meta.video_id,
+                title: data.broadcast_meta.title,
+                author: data.broadcast_meta.author,
+                thumbnailUrl: data.broadcast_meta.thumbnail_url,
+                matchId: data.broadcast_meta.match_id,
+                totalRounds: data.broadcast_meta.total_rounds,
+                isLive: data.broadcast_meta.is_live
+              });
+            }
+            if (data.live_status && data.live_status.is_running) {
+              setIsLiveBroadcasting(true);
+              if (data.live_status.current_live) {
+                setLiveHudState(data.live_status.current_live.hud_state);
+                setLiveWinProbability(data.live_status.current_live.win_probability);
+              }
+            }
+          } else if (data.type === 'YOUTUBE_ANALYZED') {
+            setActiveVideo({
+              videoId: data.video_id,
+              title: data.title,
+              author: data.author,
+              thumbnailUrl: data.thumbnail_url,
+              matchId: data.match_id,
+              totalRounds: data.total_rounds,
+              isLive: data.is_live
+            });
+            setTicks([]);
+            setPredictions([]);
+            setChangePoints([]);
+            if (data.simulator_status) setSimulatorStatus(data.simulator_status);
           } else if (data.type === 'TICK_UPDATE') {
             applyTickPacket(data);
+          } else if (data.type === 'LIVE_HUD_UPDATE') {
+            setIsLiveBroadcasting(true);
+            setLiveHudState(data.hud_state);
+            setLiveWinProbability(data.win_probability);
+            if (data.inflection_events && data.inflection_events.length > 0) {
+              setLiveInflectionEvents((prev) => [...data.inflection_events, ...prev].slice(0, 50));
+            }
+          } else if (data.type === 'LIVE_STOPPED') {
+            setIsLiveBroadcasting(false);
           } else if (data.type === 'SIMULATION_RESET') {
             setTicks([]);
             setPredictions([]);
@@ -119,15 +187,12 @@ export function useEsportWebSocket() {
         if (!isMountedRef.current) return;
         setIsConnected(false);
         clearInterval(heartbeatRef.current);
-        // Retry connection gracefully
         setTimeout(() => {
           if (isMountedRef.current) connect();
         }, 4000);
       };
 
-      ws.onerror = (err) => {
-        // Will trigger onclose and retry
-      };
+      ws.onerror = () => {};
     } catch (e) {
       console.warn("WebSocket init failed:", e);
     }
@@ -141,7 +206,6 @@ export function useEsportWebSocket() {
     return () => {
       isMountedRef.current = false;
       clearInterval(heartbeatRef.current);
-      clearInterval(playbackTimerRef.current);
       if (wsRef.current) {
         wsRef.current.onclose = null;
         wsRef.current.close();
@@ -149,7 +213,7 @@ export function useEsportWebSocket() {
     };
   }, [connect, fetchInitialState]);
 
-  // Step 1 minute forward (called manually or by reactive player interval)
+  // Step 1 round forward
   const step = useCallback(async () => {
     try {
       const res = await fetch('/api/v1/simulation/step', { method: 'POST' });
@@ -166,29 +230,13 @@ export function useEsportWebSocket() {
     }
   }, [applyTickPacket]);
 
-  // Reactive playback loop: when is_playing is true, advance ticks at variable speed
-  useEffect(() => {
-    if (simulatorStatus.is_playing) {
-      const intervalMs = Math.max(200, 1500 / Math.max(0.5, simulatorStatus.playback_speed));
-      playbackTimerRef.current = setInterval(() => {
-        step();
-      }, intervalMs);
-    } else {
-      clearInterval(playbackTimerRef.current);
-    }
-
-    return () => clearInterval(playbackTimerRef.current);
-  }, [simulatorStatus.is_playing, simulatorStatus.playback_speed, step]);
-
   const play = useCallback((speed = 1.0) => {
     setSimulatorStatus((prev) => ({ ...prev, is_playing: true, playback_speed: speed }));
-    // Also notify backend
     fetch(`/api/v1/simulation/play?speed=${speed}`, { method: 'POST' }).catch(() => {});
   }, []);
 
   const pause = useCallback(() => {
     setSimulatorStatus((prev) => ({ ...prev, is_playing: false }));
-    clearInterval(playbackTimerRef.current);
     fetch('/api/v1/simulation/pause', { method: 'POST' }).catch(() => {});
   }, []);
 
@@ -208,6 +256,32 @@ export function useEsportWebSocket() {
       current_game_time: 0.0
     });
   }, [pause]);
+
+  const startLiveAnalysis = useCallback(async ({ source = "SYNTHETIC", source_type = "SYNTHETIC", fps = 1.0 } = {}) => {
+    pause();
+    try {
+      const res = await fetch('/api/v1/live/start', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ source, source_type, fps })
+      });
+      if (res.ok) {
+        setIsLiveBroadcasting(true);
+        return await res.json();
+      }
+    } catch (e) {
+      console.error("Start live analysis error:", e);
+    }
+  }, [pause]);
+
+  const stopLiveAnalysis = useCallback(async () => {
+    try {
+      await fetch('/api/v1/live/stop', { method: 'POST' });
+      setIsLiveBroadcasting(false);
+    } catch (e) {
+      console.error("Stop live analysis error:", e);
+    }
+  }, []);
 
   const analyzeYouTubeVideo = useCallback(async (url) => {
     pause();
@@ -244,13 +318,12 @@ export function useEsportWebSocket() {
         body: JSON.stringify({ sequence_id: roundIndex })
       });
       if (res.ok) {
-        const data = await res.json();
-        if (data.packet) applyTickPacket(data.packet);
+        await fetchInitialState();
       }
     } catch (e) {
       console.warn("Seek request failed:", e);
     }
-  }, [applyTickPacket]);
+  }, [fetchInitialState]);
 
   return {
     isConnected,
@@ -258,10 +331,16 @@ export function useEsportWebSocket() {
     predictions,
     changePoints,
     simulatorStatus,
+    isLiveBroadcasting,
+    liveHudState,
+    liveWinProbability,
+    liveInflectionEvents,
     step,
     play,
     pause,
     reset,
+    startLiveAnalysis,
+    stopLiveAnalysis,
     analyzeYouTubeVideo,
     seekToRound
   };

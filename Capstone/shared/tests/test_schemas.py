@@ -1,5 +1,4 @@
 import pytest
-from datetime import datetime
 from pydantic import ValidationError
 from shared.models.telemetry import TeamState, TelemetryTick
 from shared.models.change_point import ChangePointRecord, ChangePointType

@@ -10,6 +10,7 @@ class InflectionClassifier:
     """
     def __init__(self, impact_threshold: float = 0.12):
         self.impact_threshold = impact_threshold
+        self._prev_baron_diff: int = 0
 
     def evaluate(
         self,
@@ -43,8 +44,10 @@ class InflectionClassifier:
                 f"[{time_str}] Decisive Comeback: {winning_team} inverted the match trajectory with win probability surging by {int(abs_delta*100)}%."
             )
 
-        # 2. Objective Steal / Swing (Baron or Dragon differential shift)
-        if tick.baron_diff != 0:
+        # 2. Objective Steal / Swing (Baron or Dragon differential *changed* this tick)
+        baron_changed = tick.baron_diff != self._prev_baron_diff
+        self._prev_baron_diff = tick.baron_diff
+        if baron_changed and tick.baron_diff != 0:
             favored = tick.blue_team.team_name if tick.baron_diff > 0 else tick.red_team.team_name
             return (
                 InflectionCategory.OBJECTIVE_STEAL_SWING,

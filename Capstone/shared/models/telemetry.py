@@ -1,6 +1,6 @@
 from datetime import datetime, timezone
-from typing import Optional, List, Dict, Any
-from pydantic import BaseModel, Field, field_validator, model_validator
+from typing import Any
+from pydantic import BaseModel, Field, model_validator
 
 class TeamState(BaseModel):
     team_name: str = Field(..., description="Name or code of the team (e.g. T1, WBG)")

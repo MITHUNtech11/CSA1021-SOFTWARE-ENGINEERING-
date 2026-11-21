@@ -19,6 +19,13 @@ class OutOfOrderBuffer:
         self.buffer[tick.sequence_id] = tick
         released: List[TelemetryTick] = []
 
+        # Enforce sliding window: if gap between max sequence and expected sequence
+        # exceeds window_size, advance expected_sequence to prevent stalling on dropped packets
+        if self.buffer:
+            max_seq = max(self.buffer.keys())
+            if max_seq - self.expected_sequence >= self.window_size:
+                self.expected_sequence = min(self.buffer.keys())
+
         while self.expected_sequence in self.buffer:
             next_tick = self.buffer.pop(self.expected_sequence)
             released.append(next_tick)

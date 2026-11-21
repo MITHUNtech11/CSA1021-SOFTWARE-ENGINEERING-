@@ -34,3 +34,55 @@ def test_gateway_pelt_endpoint(client):
     response = client.get("/api/v1/analytics/pelt")
     assert response.status_code == 200
     assert "segments" in response.json()
+
+def test_gateway_simulation_seek(client):
+    response = client.post("/api/v1/simulation/seek", json={"sequence_id": 5})
+    assert response.status_code == 200
+    data = response.json()
+    assert data["status"] == "seeked"
+    assert data["packet"]["tick"]["sequence_id"] == 5
+
+    # Verify history replay synchronization
+    state_res = client.get("/api/v1/matches/current")
+    assert state_res.status_code == 200
+    ticks = state_res.json()["ticks"]
+    assert len(ticks) == 6
+    assert [t["sequence_id"] for t in ticks] == [0, 1, 2, 3, 4, 5]
+
+def test_gateway_simulation_seek_invalid(client):
+    response = client.post("/api/v1/simulation/seek", json={"sequence_id": 9999})
+    assert response.status_code == 200
+    assert response.json()["status"] == "not_found"
+
+def test_gateway_broadcast_current_and_init(client, monkeypatch):
+    from services.gateway.app import main as gw_main
+    monkeypatch.setattr(gw_main, "fetch_youtube_metadata", lambda url: {
+        "video_id": "s9pB4sD8QxM",
+        "title": "VALORANT VCT Champions Ascent [s9pB4sD8QxM]",
+        "author": "VALORANT Champions Tour",
+        "thumbnail_url": "https://img.youtube.com/vi/s9pB4sD8QxM/hqdefault.jpg",
+        "duration": 1440,
+        "is_live": False
+    })
+
+    # Check initial broadcast state
+    res = client.get("/api/v1/broadcast/current")
+    assert res.status_code == 200
+    assert "is_initialized" in res.json()
+
+    # Initialize with YouTube URL
+    init_res = client.post("/api/v1/broadcast/init-youtube", json={
+        "url": "https://www.youtube.com/watch?v=s9pB4sD8QxM"
+    })
+    assert init_res.status_code == 200
+    data = init_res.json()
+    assert data["status"] == "ready"
+    assert data["video_id"] == "s9pB4sD8QxM"
+    assert "total_rounds" in data
+
+    # Verify current broadcast endpoint reports initialized
+    cur_res = client.get("/api/v1/broadcast/current")
+    assert cur_res.status_code == 200
+    cur_data = cur_res.json()
+    assert cur_data["is_initialized"] is True
+    assert cur_data["video_id"] == "s9pB4sD8QxM"

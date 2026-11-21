@@ -47,18 +47,16 @@ export default function InflectionLog({ predictions = [] }) {
             const roundNumber = Math.min(24, timeMins + 1);
             const badge = getBadge(item.inflection_category);
 
-            // Adapt explanation to Valorant terminology if it contains LoL terms
+            // Map team codes to display names and adapt LoL-era terms
             let explanation = item.explanation || item.narrative_summary || '';
             explanation = explanation
-              .replace(/T1/g, 'Sentinels')
-              .replace(/WBG/g, 'Fnatic')
-              .replace(/Weibo Gaming/g, 'Fnatic')
-              .replace(/Baron Nashor/g, 'A-Site Spike Retake & 1v3 Clutch')
-              .replace(/Baron/g, 'Spike Retake')
-              .replace(/dragons/g, 'first bloods')
-              .replace(/dragon/g, 'first blood')
-              .replace(/turrets/g, 'sites defended')
-              .replace(/turret/g, 'site defended');
+              .replace(/\bSEN\b/g, 'Sentinels')
+              .replace(/\bFNC\b/g, 'Fnatic')
+              .replace(/\bT1\b/g, 'Sentinels')
+              .replace(/\bWBG\b/g, 'Fnatic')
+              .replace(/Baron Nashor/g, 'Spike Retake')
+              .replace(/\bBaron\b/g, 'Clutch')
+              .replace(/\bgold\b/g, 'credits');
 
             return (
               <div

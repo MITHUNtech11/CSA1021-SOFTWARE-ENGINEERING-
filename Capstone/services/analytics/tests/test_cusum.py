@@ -1,4 +1,3 @@
-import pytest
 import numpy as np
 from services.analytics.app.algorithms.cusum import TwoSidedCUSUM
 from shared.models.change_point import ChangePointType

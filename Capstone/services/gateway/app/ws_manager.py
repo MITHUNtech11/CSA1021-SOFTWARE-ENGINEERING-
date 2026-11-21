@@ -1,4 +1,3 @@
-import json
 import logging
 from typing import List, Dict, Any
 from fastapi import WebSocket
@@ -24,7 +23,8 @@ class WebSocketManager:
 
     async def broadcast_json(self, message: Dict[str, Any]):
         disconnected = []
-        for connection in self.active_connections:
+        # Iterate over a snapshot copy to prevent concurrent modification errors
+        for connection in list(self.active_connections):
             try:
                 await connection.send_json(message)
             except Exception as e:

@@ -6,4 +6,6 @@ COPY shared ./shared
 COPY services/prediction ./services/prediction
 ENV PYTHONPATH=/app
 EXPOSE 8003
-CMD ["python", "-m", "services.prediction.app.service"]
+# Prediction is a library consumed by the gateway service.
+# This healthcheck validates the module imports correctly at build time.
+CMD ["python", "-c", "from services.prediction.app.service import PredictionEngine; print('prediction module OK')"]
