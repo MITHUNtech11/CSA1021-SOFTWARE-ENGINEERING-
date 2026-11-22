@@ -1,5 +1,6 @@
-﻿import { useEffect, useRef, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { Film, Upload, Video } from 'lucide-react';
+import YouTubePlayer from './YouTubePlayer';
 
 export default function MatchVideoPlayer({ active, isConnected, activeVideo, onAnalyzeYouTube }) {
   const [input, setInput] = useState('');
@@ -65,11 +66,8 @@ export default function MatchVideoPlayer({ active, isConnected, activeVideo, onA
         <div className="reference-content">
           {mode === 'youtube' && activeVideo ? (
             <>
-              <iframe title={activeVideo.title || 'YouTube reference video'} src={`https://www.youtube-nocookie.com/embed/${activeVideo.video_id}`}
-                allow="encrypted-media; picture-in-picture" allowFullScreen />
-              <p className="reference-caption">{activeVideo.title}
-                <a href={`https://www.youtube.com/watch?v=${activeVideo.video_id}`} target="_blank" rel="noreferrer">Open in YouTube</a>
-              </p>
+              <YouTubePlayer videoId={activeVideo.video_id} title={activeVideo.title || 'YouTube reference video'} />
+              {activeVideo.title && <p className="reference-caption">{activeVideo.title}</p>}
             </>
           ) : mode === 'file' && localVideo ? (
             <>

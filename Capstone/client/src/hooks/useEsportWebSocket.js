@@ -9,7 +9,7 @@ const INITIAL_REPLAY = {
   simulator_status: { is_playing: false, playback_speed: 1, current_index: 0, total_ticks: 24, current_game_time: 0 },
 };
 
-const INITIAL_LIVE = { is_running: false, current_live: null, inflection_events: [], source_type: 'NONE' };
+const INITIAL_LIVE = { is_running: false, current_live: null, inflection_events: [], source_type: 'NONE', video_id: null };
 
 function appendTick(history, item, key) {
   if (!item || (history.length > 0 && history.at(-1)[key] >= item[key])) return history;
@@ -51,7 +51,7 @@ export function useEsportWebSocket() {
         }));
         break;
       case 'LIVE_STARTED':
-        setLive({ ...INITIAL_LIVE, is_running: true, source_type: event.source_type });
+        setLive({ ...INITIAL_LIVE, is_running: true, source_type: event.source_type, video_id: event.video_id });
         break;
       case 'LIVE_HUD_UPDATE':
         setLive((prev) => ({
@@ -168,6 +168,8 @@ export function useEsportWebSocket() {
     activeVideo: replay.broadcast_meta,
     isLiveBroadcasting: live.is_running,
     liveSourceType: live.source_type,
+    liveVideoId: live.video_id,
+    liveAnalysisSeconds: live.current_live?.analysis_seconds,
     liveHudState: live.current_live?.hud_state,
     liveWinProbability: live.current_live?.win_probability,
     liveInflectionEvents: live.inflection_events,

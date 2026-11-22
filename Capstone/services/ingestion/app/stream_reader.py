@@ -54,6 +54,10 @@ class LiveStreamWorker:
         self._video_input: str | None = None
         self._headers = ""
 
+    @property
+    def analysis_seconds(self) -> float:
+        return max(0, self._frame_count - 1) / self.fps
+
     def prepare(self):
         if self.source_type != StreamSourceType.YOUTUBE_LIVE:
             self._video_input = self.source

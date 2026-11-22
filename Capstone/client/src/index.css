@@ -286,9 +286,33 @@ h1[tabindex="-1"]:focus { outline: none; }
 .segmented-control { display: inline-flex; background: var(--inset); padding: 3px; border: 1px solid var(--border); border-radius: 8px; gap: 3px; margin-bottom: 12px; }
 .segmented-control button { min-height: 34px; padding: 0 9px; font-size: 12px; color: var(--muted); border-radius: 6px; font-weight: 650; }
 .segmented-control button[aria-pressed="true"] { color: #e9ddff; background: #302642; }
-.reference-content iframe, .reference-content video { display: block; margin-top: 13px; width: min(100%, 820px); aspect-ratio: 16 / 9; background: #080910; border: 1px solid var(--border); border-radius: 9px; }
+.youtube-player iframe, .reference-content video { display: block; margin-top: 13px; width: min(100%, 820px); aspect-ratio: 16 / 9; background: #080910; border: 1px solid var(--border); border-radius: 9px; }
 .reference-caption { display: flex; flex-wrap: wrap; gap: 8px 14px; margin-top: 8px; overflow-wrap: anywhere; color: var(--muted); font-size: 12px; }
 .reference-caption a { color: var(--accent); text-decoration: underline; text-underline-offset: 2px; }
+
+.youtube-player iframe { min-height: 200px; }
+.youtube-player .reference-caption a { display: inline-flex; align-items: center; gap: 5px; }
+.broadcast-results.with-video { display: grid; gap: 14px; margin-top: 14px; align-items: start; }
+.broadcast-player { min-width: 0; }
+.broadcast-player-heading { display: flex; gap: 8px; justify-content: space-between; align-items: center; flex-wrap: wrap; }
+.broadcast-player-heading h3 { font-size: 14px; font-weight: 750; }
+.broadcast-player .youtube-player iframe { width: 100%; margin-top: 7px; }
+.broadcast-player > .subtle { margin-top: 6px; }
+.with-video .hud-results, .with-video .panel-empty { margin-top: 0; }
+.with-video .hud-metrics { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+.analysis-clock { display: flex; align-items: center; justify-content: space-between; padding: 0 0 8px; color: var(--muted); font-size: 12px; }
+.analysis-clock strong, .event-time { color: var(--accent); font-variant-numeric: tabular-nums; }
+.event-time { display: inline-block; margin-right: 8px; font-weight: 750; }
+.trend-heading { display: flex; flex-wrap: wrap; justify-content: space-between; align-items: end; gap: 8px; padding: 0 1px; }
+.trend-heading h2 { font-size: 16px; font-weight: 800; }
+.trend-plot { height: clamp(130px, 15vw, 180px); }
+.trend-rounds { position: relative; min-height: 15px; padding: 0; }
+.trend-rounds span { position: absolute; transform: translateX(-50%); }
+.trend-reading { display: flex; align-items: center; gap: 6px 12px; flex-wrap: wrap; margin-top: 8px; font-size: 12px; color: var(--muted); font-variant-numeric: tabular-nums; }
+
+@media (min-width: 1060px) {
+  .broadcast-results.with-video { grid-template-columns: minmax(0, 1.55fr) minmax(0, 1fr); }
+}
 
 @media (max-width: 900px) {
   .workspace { grid-template-columns: minmax(0, 1fr); }

@@ -171,8 +171,13 @@ async def _playback_loop():
         logger.info("Playback loop task cancelled.")
 
 def live_status():
+    is_running = bool(live_worker and live_worker.is_running)
     return {
-        "is_running": bool(live_worker and live_worker.is_running),
+        "is_running": is_running,
+        "video_id": (
+            parse_video_id(live_worker.source)
+            if is_running and live_worker.source_type == StreamSourceType.YOUTUBE_LIVE else None
+        ),
         "source_type": live_worker.source_type.value if live_worker else "NONE",
         "fps": live_worker.fps if live_worker else 1.0,
         "processed_frames": len(live_history),
@@ -197,8 +202,10 @@ async def _live_analysis_loop(worker: LiveStreamWorker, frame):
             prev_live_hud_state = hud_state
             prev_prob_blue = p_blue_rnd
 
+            analysis_seconds = worker.analysis_seconds
             packet = {
                 "type": "LIVE_HUD_UPDATE",
+                "analysis_seconds": analysis_seconds,
                 "hud_state": hud_state.model_dump(mode="json"),
                 "win_probability": {
                     "round_blue": p_blue_rnd,
@@ -206,7 +213,10 @@ async def _live_analysis_loop(worker: LiveStreamWorker, frame):
                     "match_blue": p_blue_match,
                     "match_red": p_red_match
                 },
-                "inflection_events": [event.model_dump(mode="json") for event in events],
+                "inflection_events": [
+                    {**event.model_dump(mode="json"), "analysis_seconds": analysis_seconds}
+                    for event in events
+                ],
                 "source_type": worker.source_type.value
             }
             current_live_state = packet

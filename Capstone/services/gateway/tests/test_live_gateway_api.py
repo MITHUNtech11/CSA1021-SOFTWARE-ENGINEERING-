@@ -99,3 +99,43 @@ def test_live_gateway_reports_decoder_error_through_rest_and_socket(client, monk
         assert "HTTP 403" in message
         assert socket.receive_json() == {"type": "LIVE_STOPPED", "error": message}
         assert not client.get("/api/v1/live/status").json()["is_running"]
+
+
+def test_youtube_session_shares_player_id_and_analysis_clock(client, monkeypatch):
+    from services.ingestion.app.stream_reader import LiveStreamWorker
+
+    def start_fixture(worker):
+        worker.is_running = True
+
+    def read_fixture(worker):
+        if not worker.is_running:
+            return None
+        worker._frame_count += 1
+        return worker._generate_synthetic_broadcast_frame(worker._frame_count)
+
+    monkeypatch.setattr(LiveStreamWorker, "prepare", lambda self: None)
+    monkeypatch.setattr(LiveStreamWorker, "start", start_fixture)
+    monkeypatch.setattr(LiveStreamWorker, "read_frame", read_fixture)
+
+    with client.websocket_connect("/ws/live") as socket:
+        assert socket.receive_json()["type"] == "INITIAL_SNAPSHOT"
+        response = client.post("/api/v1/live/start", json={
+            "source": "https://youtu.be/BaW_jenozKc", "source_type": "YOUTUBE_LIVE", "fps": 2,
+        })
+        response.raise_for_status()
+        assert response.json()["video_id"] == "BaW_jenozKc"
+        started = socket.receive_json()
+        assert started["type"] == "LIVE_STARTED"
+        assert started["video_id"] == "BaW_jenozKc"
+        for index in range(4):
+            update = socket.receive_json()
+            assert update["type"] == "LIVE_HUD_UPDATE"
+            assert update["analysis_seconds"] == index / 2
+        assert update["inflection_events"][0]["analysis_seconds"] == 1.5
+        with client.websocket_connect("/ws/live") as reconnect:
+            snapshot = reconnect.receive_json()
+            assert snapshot["live_status"]["video_id"] == "BaW_jenozKc"
+            assert snapshot["live_status"]["current_live"]["analysis_seconds"] >= 1.5
+
+    client.post("/api/v1/live/stop").raise_for_status()
+    assert client.get("/api/v1/live/status").json()["video_id"] is None

@@ -12,6 +12,7 @@ const LiveHUDOverlay = lazy(() => import('./components/LiveHUDOverlay'));
 const MatchVideoPlayer = lazy(() => import('./components/MatchVideoPlayer'));
 const BehaviorRadar = lazy(() => import('./components/BehaviorRadar'));
 const PELTSegmentsCard = lazy(() => import('./components/PELTSegmentsCard'));
+const ReplayTrends = lazy(() => import('./components/ReplayTrends'));
 
 const VIEW_TITLES = {
   overview: 'Match overview',
@@ -27,7 +28,7 @@ function currentView() {
 export default function App() {
   const {
     isConnected, ticks, predictions, changePoints, peltSegments, activeVideo,
-    liveSourceType, error, simulatorStatus, isLiveBroadcasting, liveHudState,
+    liveSourceType, liveVideoId, liveAnalysisSeconds, error, simulatorStatus, isLiveBroadcasting, liveHudState,
     liveWinProbability, liveInflectionEvents, dismissError, step, play, pause,
     reset, startLiveAnalysis, stopLiveAnalysis, analyzeYouTubeVideo, seekToRound,
   } = useEsportWebSocket();
@@ -117,7 +118,8 @@ export default function App() {
             <section hidden={view !== 'broadcast'} aria-label="Broadcast workspace">
               <Suspense fallback={<p role="status" className="panel">Loading broadcast tools…</p>}>
                 <div className="view-stack">
-                  <LiveHUDOverlay isConnected={isConnected} isLiveBroadcasting={isLiveBroadcasting} sourceType={liveSourceType}
+                  <LiveHUDOverlay active={view === 'broadcast'} isConnected={isConnected} isLiveBroadcasting={isLiveBroadcasting} sourceType={liveSourceType}
+                    videoId={liveVideoId} analysisSeconds={liveAnalysisSeconds}
                     liveHudState={liveHudState} liveWinProbability={liveWinProbability} liveInflectionEvents={liveInflectionEvents}
                     onStartLive={startLiveAnalysis} onStopLive={stopLiveAnalysis} />
                   <MatchVideoPlayer active={view === 'broadcast'} isConnected={isConnected} activeVideo={activeVideo} onAnalyzeYouTube={analyzeYouTubeVideo} />
@@ -130,6 +132,7 @@ export default function App() {
             <Suspense fallback={<p role="status" className="panel">Loading match analysis…</p>}>
               <div className="view-stack">
                 <ChangePointTimeline ticks={ticks} changePoints={changePoints} totalRounds={totalRounds} blueName={fullBlueName} redName={fullRedName} />
+                <ReplayTrends predictions={predictions} totalRounds={totalRounds} blueName={fullBlueName} redName={fullRedName} />
                 <div className="analysis-grid">
                   <BehaviorRadar currentTick={currentTick} blueName={fullBlueName} redName={fullRedName} />
                   <PELTSegmentsCard segments={peltSegments} processedRounds={processedRounds} />
