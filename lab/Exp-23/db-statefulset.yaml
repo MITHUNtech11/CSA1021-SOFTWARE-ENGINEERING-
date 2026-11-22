@@ -1,0 +1,25 @@
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  name: db-statefulset
+spec:
+  serviceName: db-service
+  replicas: 1
+  selector:
+    matchLabels:
+      tier: database
+  template:
+    metadata:
+      labels:
+        tier: database
+    spec:
+      containers:
+      - name: postgres-db
+        image: postgres:15-alpine
+        env:
+        - name: POSTGRES_DB
+          value: csa1021_db
+        - name: POSTGRES_PASSWORD
+          value: securepass123
+        ports:
+        - containerPort: 5432
