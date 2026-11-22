@@ -1,0 +1,27 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Flask To-Do Container</title>
+  <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+<body>
+  <div class="todo-card">
+    <h2>📝 Containerized To-Do Manager</h2>
+    <form action="/add" method="POST">
+      <input type="text" name="task" placeholder="Enter new sprint task..." required>
+      <button type="submit">Add Task</button>
+    </form>
+    <ul>
+      {% for t in todos %}
+        <li class="{% if t.done %}completed{% endif %}">
+          <span>{{ t.task }}</span>
+          <div class="actions">
+            <a href="/complete/{{ t.id }}">{% if t.done %}Undo{% else %}Complete{% endif %}</a>
+            <a href="/delete/{{ t.id }}" class="del">Delete</a>
+          </div>
+        </li>
+      {% endfor %}
+    </ul>
+  </div>
+</body>
+</html>
