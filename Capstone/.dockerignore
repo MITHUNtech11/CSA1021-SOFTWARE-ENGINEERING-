@@ -1,0 +1,10 @@
+*
+!requirements.txt
+!shared/
+!shared/**
+!services/
+!services/**
+!data/
+!data/**
+**/__pycache__
+**/tests

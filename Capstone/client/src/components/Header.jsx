@@ -65,7 +65,7 @@ export default function Header({
           {/* Connection Status */}
           <div className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-warm-50 border border-warm-200 text-xs font-medium text-warm-700">
             <span className={`w-2 h-2 rounded-full ${isConnected ? 'bg-emerald-500 animate-pulse' : 'bg-warm-400'}`} />
-            <span>{isConnected ? 'Live Telemetry' : 'Connecting...'}</span>
+            <span>{isConnected ? 'Gateway connected' : 'Connecting...'}</span>
           </div>
         </div>
       </div>

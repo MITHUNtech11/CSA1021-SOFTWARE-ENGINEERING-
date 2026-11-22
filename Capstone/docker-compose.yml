@@ -1,40 +1,34 @@
-version: '3.8'
-
-services:
-  redis:
-    image: redis:7.2-alpine
-    container_name: esportecho-redis
-    ports:
-      - "6379:6379"
-    restart: unless-stopped
-    healthcheck:
-      test: ["CMD", "redis-cli", "ping"]
-      interval: 5s
-      timeout: 3s
-      retries: 5
-
+﻿services:
   gateway:
     build:
       context: .
       dockerfile: services/gateway/Dockerfile
-    container_name: esportecho-gateway
     ports:
-      - "8000:8000"
-    environment:
-      - REDIS_HOST=redis
-      - REDIS_PORT=6379
-    depends_on:
-      redis:
-        condition: service_healthy
+      - "127.0.0.1:8000:8000"
     restart: unless-stopped
+    read_only: true
+    tmpfs:
+      - /tmp
+    security_opt:
+      - no-new-privileges:true
+    cap_drop:
+      - ALL
+    healthcheck:
+      test: ["CMD", "python", "-c", "import urllib.request; urllib.request.urlopen('http://127.0.0.1:8000/health', timeout=2).close()"]
+      interval: 10s
+      timeout: 3s
+      retries: 3
+      start_period: 10s
 
   dashboard:
     build:
       context: ./client
       dockerfile: Dockerfile
-    container_name: esportecho-dashboard
     ports:
-      - "5173:80"
+      - "127.0.0.1:5173:8080"
     depends_on:
-      - gateway
+      gateway:
+        condition: service_healthy
     restart: unless-stopped
+    security_opt:
+      - no-new-privileges:true

@@ -7,162 +7,59 @@ import {
 } from 'lucide-react';
 
 export default function MatchVideoPlayer({
-  isPlaying = false,
+  activeVideo = null,
+  totalRounds = 24,
   currentTimeSeconds = 0,
   currentTick = null,
   latestPrediction = null,
   changePoints = [],
-  onPlay = () => {},
-  onPause = () => {},
-  onReset = () => {},
   onAnalyzeYouTube = async () => {},
   onSeek = () => {}
 }) {
   const [isOpen, setIsOpen] = useState(true);
   const [displayMode, setDisplayMode] = useState('split'); // 'split' (video + radar) | 'video' | 'radar' | 'local'
-  const [youtubeVideoId, setYoutubeVideoId] = useState('s9pB4sD8QxM');
-  const [youtubeTitle, setYoutubeTitle] = useState('VALORANT VCT Champions Grand Finals - Ascent');
-  const [inputUrl, setInputUrl] = useState('https://www.youtube.com/watch?v=s9pB4sD8QxM');
+  const [inputUrl, setInputUrl] = useState('');
   const [isAnalyzing, setIsAnalyzing] = useState(false);
   const [analysisSuccess, setAnalysisSuccess] = useState(false);
-  const [selectedRound, setSelectedRound] = useState(null);
 
   const [localVideoUrl, setLocalVideoUrl] = useState(null);
   const [localFileName, setLocalFileName] = useState('');
 
   const fileInputRef = useRef(null);
-  const localVideoRef = useRef(null);
-  const ytPlayerRef = useRef(null);
-  const ytContainerId = useRef(`yt-player-${Math.random().toString(36).substring(2, 9)}`);
+  useEffect(() => () => {
+    if (localVideoUrl) URL.revokeObjectURL(localVideoUrl);
+  }, [localVideoUrl]);
 
-  // Parse YouTube video ID from URL or raw ID
-  const parseYouTubeId = (url) => {
-    if (!url) return '';
-    const regExp = /^.*(youtu.be\/|v\/|u\/\w\/|embed\/|watch\?v=|&v=)([^#&?]*).*/;
-    const match = url.match(regExp);
-    return (match && match[2].length === 11) ? match[2] : url.trim();
-  };
-
-  // Load YouTube IFrame API once
-  useEffect(() => {
-    if (!window.YT) {
-      const tag = document.createElement('script');
-      tag.src = 'https://www.youtube.com/iframe_api';
-      const firstScriptTag = document.getElementsByTagName('script')[0];
-      firstScriptTag.parentNode.insertBefore(tag, firstScriptTag);
-    }
-  }, []);
-
-  // Initialize or update YouTube Player
-  useEffect(() => {
-    let checkInterval = null;
-
-    const createPlayer = () => {
-      if (window.YT && window.YT.Player && document.getElementById(ytContainerId.current)) {
-        if (ytPlayerRef.current && ytPlayerRef.current.destroy) {
-          try { ytPlayerRef.current.destroy(); } catch (e) {}
-        }
-
-        try {
-          ytPlayerRef.current = new window.YT.Player(ytContainerId.current, {
-            videoId: youtubeVideoId,
-            playerVars: {
-              autoplay: isPlaying ? 1 : 0,
-              controls: 1,
-              rel: 0,
-              modestbranding: 1
-            },
-            events: {
-              onReady: (event) => {
-                if (isPlaying) {
-                  try { event.target.playVideo(); } catch (e) {}
-                }
-              },
-              onStateChange: (event) => {
-                if (event.data === window.YT.PlayerState.PLAYING) {
-                  if (!isPlaying) onPlay();
-                } else if (event.data === window.YT.PlayerState.PAUSED) {
-                  if (isPlaying) onPause();
-                }
-              }
-            }
-          });
-        } catch (e) {
-          console.warn("YouTube player init error:", e);
-        }
-      }
-    };
-
-    if (window.YT && window.YT.Player) {
-      createPlayer();
-    } else {
-      window.onYouTubeIframeAPIReady = createPlayer;
-      checkInterval = setInterval(() => {
-        if (window.YT && window.YT.Player) {
-          clearInterval(checkInterval);
-          createPlayer();
-        }
-      }, 500);
-    }
-
-    return () => {
-      if (checkInterval) clearInterval(checkInterval);
-    };
-  }, [youtubeVideoId]);
-
-  // Synchronize YouTube player with story play/pause
-  useEffect(() => {
-    if (ytPlayerRef.current && ytPlayerRef.current.getPlayerState) {
-      try {
-        const state = ytPlayerRef.current.getPlayerState();
-        if (isPlaying && state !== window.YT.PlayerState.PLAYING) {
-          ytPlayerRef.current.playVideo();
-        } else if (!isPlaying && state === window.YT.PlayerState.PLAYING) {
-          ytPlayerRef.current.pauseVideo();
-        }
-      } catch (e) {}
-    }
-  }, [isPlaying]);
-
-  // Synchronize local video playback
-  useEffect(() => {
-    if (localVideoRef.current) {
-      if (isPlaying) {
-        localVideoRef.current.play().catch(() => {});
-      } else {
-        localVideoRef.current.pause();
-      }
-    }
-  }, [isPlaying]);
-
-  // Handle YouTube URL Analysis Form
-  const handleAnalyzeSubmit = async (e) => {
-    if (e) e.preventDefault();
-    const vid = parseYouTubeId(inputUrl);
-    if (!vid) return;
-
+  const handleAnalyzeSubmit = async (event) => {
+    event.preventDefault();
     setIsAnalyzing(true);
     setAnalysisSuccess(false);
-    setYoutubeVideoId(vid);
-
     try {
-      const res = await onAnalyzeYouTube(inputUrl);
-      if (res && res.title) {
-        setYoutubeTitle(res.title);
-      }
-      setAnalysisSuccess(true);
-      setTimeout(() => setAnalysisSuccess(false), 3000);
-    } catch (err) {
-      console.warn("Backend analysis failed, using client sync:", err);
+      const result = await onAnalyzeYouTube(inputUrl.trim());
+      setAnalysisSuccess(Boolean(result));
+      if (result) setDisplayMode('split');
     } finally {
       setIsAnalyzing(false);
     }
   };
 
+  const renderReferenceVideo = () => activeVideo ? (
+    <iframe
+      title={activeVideo.title || 'YouTube reference video'}
+      src={`https://www.youtube-nocookie.com/embed/${activeVideo.video_id}`}
+      className="w-full h-full"
+      allow="encrypted-media; picture-in-picture"
+      allowFullScreen
+    />
+  ) : (
+    <p className="grid h-full place-items-center p-4 text-center text-sm text-slate-300">
+      Add a YouTube video to view it alongside the simulated replay.
+    </p>
+  );
+
   const handleFileChange = (e) => {
     const file = e.target.files?.[0];
     if (file) {
-      if (localVideoUrl) URL.revokeObjectURL(localVideoUrl);
       const url = URL.createObjectURL(file);
       setLocalVideoUrl(url);
       setLocalFileName(file.name);
@@ -171,8 +68,8 @@ export default function MatchVideoPlayer({
   };
 
   // Round calculation (0s to 1380s maps to 24 rounds)
-  const effectiveSeconds = selectedRound !== null ? (selectedRound - 1) * 60 : currentTimeSeconds;
-  const currentRound = Math.min(24, Math.floor(effectiveSeconds / 60) + 1);
+  const effectiveSeconds = currentTimeSeconds;
+  const currentRound = Math.min(totalRounds, Math.floor(effectiveSeconds / 60) + 1);
   const roundMins = Math.floor(effectiveSeconds / 60);
   const roundSecs = Math.floor(effectiveSeconds % 60);
   const timeStr = `${String(roundMins).padStart(2, '0')}:${String(roundSecs).padStart(2, '0')}`;
@@ -185,19 +82,6 @@ export default function MatchVideoPlayer({
   };
   const credsDiff = currentTick?.gold_diff ?? (blue.total_gold - red.total_gold);
   const isBlueAhead = credsDiff >= 0;
-
-  // Jump to specific round in both Video & Telemetry
-  const handleJumpRound = (roundNum) => {
-    setSelectedRound(roundNum);
-    const targetSec = (roundNum - 1) * 60;
-    if (ytPlayerRef.current && ytPlayerRef.current.seekTo) {
-      try { ytPlayerRef.current.seekTo(targetSec, true); } catch (e) {}
-    }
-    if (localVideoRef.current) {
-      localVideoRef.current.currentTime = targetSec;
-    }
-    onSeek(roundNum - 1);
-  };
 
   // Valorant Phase Classification
   const phaseInfo = useMemo(() => {
@@ -596,30 +480,33 @@ export default function MatchVideoPlayer({
             <input
               type="text"
               value={inputUrl}
-              onChange={(e) => setInputUrl(e.target.value)}
-              placeholder="Paste any YouTube Valorant Match Link (e.g. https://www.youtube.com/watch?v=...)"
+              aria-label="YouTube video URL or ID"
+              required
+              maxLength={2048}
+              onChange={(e) => { setInputUrl(e.target.value); setAnalysisSuccess(false); }}
+              placeholder="YouTube reference video URL or ID"
               className="w-full pl-9 pr-3 py-2 bg-slate-800 border border-slate-700 rounded-xl text-xs text-slate-100 placeholder-slate-400 focus:outline-none focus:border-cyan-400 font-mono"
             />
           </div>
           <button
             type="submit"
-            disabled={isAnalyzing}
+            disabled={isAnalyzing || !inputUrl.trim()}
             className="px-4 py-2 bg-team-blue hover:bg-blue-600 disabled:opacity-50 text-white text-xs font-semibold rounded-xl transition-all shadow-xs flex items-center justify-center gap-1.5 whitespace-nowrap active:scale-95"
           >
             {isAnalyzing ? (
               <>
                 <RefreshCw className="w-3.5 h-3.5 animate-spin" />
-                <span>Analyzing Video...</span>
+                <span>Loading replay...</span>
               </>
             ) : analysisSuccess ? (
               <>
                 <CheckCircle2 className="w-3.5 h-3.5 text-emerald-400" />
-                <span>AI Pipeline Ready!</span>
+                <span>Replay loaded</span>
               </>
             ) : (
               <>
                 <Zap className="w-3.5 h-3.5 text-amber-300" />
-                <span>Analyze & Sync Video</span>
+                <span>Load Simulated Replay</span>
               </>
             )}
           </button>
@@ -688,7 +575,7 @@ export default function MatchVideoPlayer({
           <div className="flex flex-wrap items-center justify-between gap-2 bg-slate-900/90 text-white px-4 py-2.5 rounded-xl text-xs font-mono border border-slate-800 shadow-inner">
             <div className="flex items-center gap-2.5">
               <span className="px-2.5 py-1 rounded bg-cyan-500/20 text-cyan-300 font-extrabold border border-cyan-400/30">
-                ROUND {currentRound} / 24
+                ROUND {currentRound} / {totalRounds}
               </span>
               <span className="text-slate-300 hidden sm:inline font-sans font-medium">
                 {phaseInfo.label}
@@ -733,15 +620,17 @@ export default function MatchVideoPlayer({
             </div>
           </div>
 
+          <p className="text-xs text-slate-300">Replay telemetry and map positions are simulated. Reference video playback is independent.</p>
+
           {/* VIEW MODE 1: SPLIT SCREEN (YOUTUBE VIDEO ON LEFT + ASCENT RADAR ON RIGHT) */}
           {displayMode === 'split' && (
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 items-stretch">
               {/* Left Column: YouTube Video Feed */}
               <div className="relative aspect-video w-full rounded-xl overflow-hidden bg-slate-950 border border-slate-800 shadow-xl flex flex-col justify-between">
-                <div id={ytContainerId.current} className="w-full h-full"></div>
+                {renderReferenceVideo()}
                 <div className="absolute top-2.5 left-2.5 bg-slate-900/80 backdrop-blur-xs text-white text-[11px] px-2.5 py-1 rounded-md font-mono border border-slate-700 flex items-center gap-1.5 pointer-events-none">
-                  <span className={`w-2 h-2 rounded-full ${isPlaying ? 'bg-emerald-400 animate-pulse' : 'bg-slate-400'}`}></span>
-                  <span>{isPlaying ? 'Live Video Synced' : 'Video Paused'}</span>
+                  <span className={`w-2 h-2 rounded-full bg-slate-400`}></span>
+                  <span>Reference video</span>
                 </div>
               </div>
 
@@ -755,10 +644,10 @@ export default function MatchVideoPlayer({
           {/* VIEW MODE 2: FULL YOUTUBE VIDEO */}
           {displayMode === 'video' && (
             <div className="relative aspect-video w-full rounded-xl overflow-hidden bg-slate-950 border border-slate-800 shadow-xl">
-              <div id={ytContainerId.current} className="w-full h-full"></div>
+              {renderReferenceVideo()}
               <div className="absolute top-3 left-3 bg-slate-900/80 backdrop-blur-xs text-white text-xs px-3 py-1 rounded-md font-mono border border-slate-700 flex items-center gap-2 pointer-events-none">
-                <span className={`w-2 h-2 rounded-full ${isPlaying ? 'bg-emerald-400 animate-pulse' : 'bg-slate-400'}`}></span>
-                <span>{youtubeTitle}</span>
+                <span className={`w-2 h-2 rounded-full bg-slate-400`}></span>
+                <span>Reference video</span>
               </div>
             </div>
           )}
@@ -776,7 +665,6 @@ export default function MatchVideoPlayer({
               {localVideoUrl ? (
                 <div className="relative aspect-video w-full rounded-xl overflow-hidden bg-slate-950 shadow-inner border border-slate-800 flex flex-col justify-center">
                   <video
-                    ref={localVideoRef}
                     src={localVideoUrl}
                     controls
                     className="w-full h-full object-contain"
@@ -820,7 +708,7 @@ export default function MatchVideoPlayer({
                   {liveEventCallout.title}
                 </h4>
                 <span className="text-[11px] font-mono font-semibold px-2 py-0.5 rounded bg-white/80 shadow-2xs">
-                  Round {currentRound} of 24
+                  Round {currentRound} of {totalRounds}
                 </span>
               </div>
               <p className="text-xs mt-0.5 leading-relaxed">
@@ -831,7 +719,7 @@ export default function MatchVideoPlayer({
                 <div className="mt-2 text-[11px] font-semibold text-purple-800 bg-purple-100/90 px-2.5 py-1 rounded-lg border border-purple-300 flex items-center gap-1.5">
                   <Sparkles className="w-3.5 h-3.5 text-purple-600" />
                   <span>
-                    BOCPD Algorithmic Confirmation: Win probability swung to {Math.round((latestPrediction.blue_win_probability || 0.88) * 100)}% for Sentinels (Turning Point Impact Score: {latestPrediction.turning_point_impact_score || '0.24'}).
+                    {latestPrediction.explanation} Blue win estimate {Math.round(latestPrediction.win_probability_blue * 100)}%. Impact score {latestPrediction.turning_point_impact_score}.
                   </span>
                 </div>
               )}
@@ -847,9 +735,9 @@ export default function MatchVideoPlayer({
             {keyEvents.map((ev) => (
               <button
                 key={ev.round}
-                onClick={() => handleJumpRound(ev.round)}
+                onClick={() => onSeek(ev.round - 1)}
                 className={`px-2.5 py-1 text-xs rounded-lg border transition-all flex items-center gap-1.5 ${
-                  currentRound === ev.round || selectedRound === ev.round
+                  currentRound === ev.round
                     ? 'bg-team-blue text-white border-blue-500 font-bold shadow-xs'
                     : 'bg-slate-800 hover:bg-slate-700 text-slate-300 border-slate-700'
                 }`}
@@ -858,14 +746,6 @@ export default function MatchVideoPlayer({
                 <span>{ev.label}</span>
               </button>
             ))}
-            {selectedRound !== null && (
-              <button
-                onClick={() => setSelectedRound(null)}
-                className="text-xs text-cyan-400 font-semibold hover:underline px-2"
-              >
-                Resume Live Sync
-              </button>
-            )}
           </div>
         </div>
       )}

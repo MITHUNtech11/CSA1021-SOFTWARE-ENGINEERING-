@@ -1,0 +1,58 @@
+name: Capstone checks
+
+on:
+  push:
+    paths: [Capstone/**, .github/workflows/capstone.yml]
+  pull_request:
+    paths: [Capstone/**, .github/workflows/capstone.yml]
+
+permissions:
+  contents: read
+
+jobs:
+  verify:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    defaults:
+      run:
+        working-directory: Capstone
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+          cache: pip
+          cache-dependency-path: |
+            Capstone/requirements.txt
+            Capstone/services/gateway/requirements.txt
+      - run: python -m pip install -r requirements.txt
+      - run: python -m pytest -q
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+          cache: npm
+          cache-dependency-path: Capstone/client/package-lock.json
+      - run: npm ci
+        working-directory: Capstone/client
+      - run: npm run build
+        working-directory: Capstone/client
+      - run: docker compose config --quiet
+      - run: docker compose up --build --wait --wait-timeout 120
+      - name: Smoke-test the deployed dashboard and replay socket
+        run: |
+          curl --fail --retry 5 --retry-connrefused http://127.0.0.1:5173/
+          python - <<'PY'
+          import json
+          import httpx
+          from websockets.sync.client import connect
+
+          base = "http://127.0.0.1:5173"
+          with connect("ws://127.0.0.1:5173/ws/live", origin=base) as socket:
+              assert json.loads(socket.recv(timeout=5))["type"] == "INITIAL_SNAPSHOT"
+              httpx.post(base + "/api/v1/simulation/step", headers={"Origin": base}).raise_for_status()
+              assert json.loads(socket.recv(timeout=5))["type"] == "TICK_UPDATE"
+          PY
+      - if: failure()
+        run: docker compose logs
+      - if: always()
+        run: docker compose down

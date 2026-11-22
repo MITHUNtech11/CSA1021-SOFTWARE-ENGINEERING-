@@ -1,12 +1,10 @@
-import logging
 import subprocess
 import shutil
+import sys
 from enum import Enum
 from typing import Optional
 import numpy as np
 from PIL import Image, ImageDraw
-
-logger = logging.getLogger("stream_reader")
 
 class StreamSourceType(str, Enum):
     SYNTHETIC = "SYNTHETIC"
@@ -35,77 +33,66 @@ class LiveStreamWorker:
         self._frame_count = 0
         self._ffmpeg_process: Optional[subprocess.Popen] = None
 
+    def prepare(self):
+        self._video_input = self.source
+        if self.source_type != StreamSourceType.YOUTUBE_LIVE:
+            return
+        result = subprocess.run(
+            [sys.executable, "-m", "yt_dlp", "--ignore-config", "--no-playlist",
+             "--js-runtimes", "node", "--socket-timeout", "5", "--extractor-retries", "0",
+             "-g", "--format", "best[height<=1080]/bestvideo[height<=1080]/best",
+             "--", self.source],
+            capture_output=True, text=True, timeout=18,
+        )
+        urls = result.stdout.strip().splitlines()
+        if result.returncode or not urls:
+            raise RuntimeError("Could not resolve the YouTube video stream")
+        self._video_input = urls[0]
+
     def start(self):
-        self.is_running = True
+        if self.is_running:
+            return
+        if self.source_type != StreamSourceType.SYNTHETIC:
+            ffmpeg = shutil.which("ffmpeg")
+            if not ffmpeg:
+                raise RuntimeError("FFmpeg is required for video sources")
+            if not hasattr(self, "_video_input"):
+                self.prepare()
+            protocols = "file" if self.source_type == StreamSourceType.LOCAL_VIDEO else "https,http,tcp,tls,crypto"
+            self._ffmpeg_process = subprocess.Popen(
+                [ffmpeg, "-nostdin", "-protocol_whitelist", protocols, "-i", self._video_input,
+                 "-map", "0:v:0", "-vf", f"fps={self.fps},scale={self.width}:{self.height}",
+                 "-pix_fmt", "rgb24", "-threads", "1", "-f", "rawvideo", "-"],
+                stdin=subprocess.DEVNULL, stdout=subprocess.PIPE, stderr=subprocess.DEVNULL,
+            )
         self._frame_count = 0
-        if self.source_type in [StreamSourceType.LOCAL_VIDEO, StreamSourceType.YOUTUBE_LIVE]:
-            self._start_ffmpeg_stream()
+        self.is_running = True
 
     def stop(self):
         self.is_running = False
-        if self._ffmpeg_process:
-            try:
-                self._ffmpeg_process.kill()
-            except Exception:
-                pass
-            self._ffmpeg_process = None
-
-    def _start_ffmpeg_stream(self):
-        """
-        Spawns FFmpeg to pipe RGB24 frames from the stream into memory.
-        """
-        video_url = self.source
-        if self.source_type == StreamSourceType.YOUTUBE_LIVE:
-            # Resolve HLS manifest via yt-dlp if available
-            try:
-                cmd = ["yt-dlp", "-g", "--format", "best[height<=1080]", self.source]
-                res = subprocess.run(cmd, capture_output=True, text=True, timeout=10)
-                if res.returncode == 0 and res.stdout.strip():
-                    video_url = res.stdout.strip().splitlines()[0]
-            except Exception as e:
-                logger.warning(f"yt-dlp resolution fallback: {e}")
-
-        ffmpeg_bin = shutil.which("ffmpeg") or "ffmpeg"
-        ffmpeg_cmd = [
-            ffmpeg_bin,
-            "-i", video_url,
-            "-vf", f"fps={self.fps},scale={self.width}:{self.height}",
-            "-f", "image2pipe",
-            "-pix_fmt", "rgb24",
-            "-vcodec", "rawvideo",
-            "-"
-        ]
-        try:
-            self._ffmpeg_process = subprocess.Popen(
-                ffmpeg_cmd,
-                stdout=subprocess.PIPE,
-                stderr=subprocess.DEVNULL,
-                bufsize=self.width * self.height * 3
-            )
-        except Exception as e:
-            logger.error(f"Failed to start FFmpeg worker: {e}")
-            self.source_type = StreamSourceType.SYNTHETIC
+        process = self._ffmpeg_process
+        self._ffmpeg_process = None
+        if process:
+            if process.poll() is None:
+                process.kill()
+            process.wait(timeout=2)
 
     def read_frame(self) -> Optional[np.ndarray]:
-        """
-        Reads the next 1920x1080 RGB frame.
-        """
         if not self.is_running:
-            self.start()
-
+            return None
         if self.source_type == StreamSourceType.SYNTHETIC:
             self._frame_count += 1
             return self._generate_synthetic_broadcast_frame(self._frame_count)
 
-        if self._ffmpeg_process and self._ffmpeg_process.stdout:
-            frame_bytes = self._ffmpeg_process.stdout.read(self.width * self.height * 3)
-            if not frame_bytes or len(frame_bytes) < self.width * self.height * 3:
-                # Stream ended or disconnected, fall back gracefully
-                return None
-            self._frame_count += 1
-            frame = np.frombuffer(frame_bytes, np.uint8).reshape((self.height, self.width, 3))
-            return frame
-
+        process = self._ffmpeg_process
+        if process and process.stdout:
+            size = self.width * self.height * 3
+            frame_bytes = process.stdout.read(size)
+            if len(frame_bytes) == size:
+                self._frame_count += 1
+                return np.frombuffer(frame_bytes, np.uint8).reshape(self.height, self.width, 3)
+            if process.wait(timeout=2) or self.source_type == StreamSourceType.YOUTUBE_LIVE:
+                raise RuntimeError("Video stream disconnected")
         return None
 
     def _generate_synthetic_broadcast_frame(self, step: int) -> np.ndarray:

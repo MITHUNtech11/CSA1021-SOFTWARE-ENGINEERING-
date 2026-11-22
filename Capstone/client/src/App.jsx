@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useCallback } from 'react';
+import React from 'react';
 import Header from './components/Header';
 import PlaybackControls from './components/PlaybackControls';
 import LiveHUDOverlay from './components/LiveHUDOverlay';
@@ -17,6 +17,10 @@ export default function App() {
     ticks,
     predictions,
     changePoints,
+    peltSegments,
+    activeVideo,
+    liveSourceType,
+    error,
     simulatorStatus,
     isLiveBroadcasting,
     liveHudState,
@@ -35,22 +39,6 @@ export default function App() {
   const currentTick = ticks.length > 0 ? ticks[ticks.length - 1] : null;
   const latestPrediction = predictions.length > 0 ? predictions[predictions.length - 1] : null;
 
-  // Fetch PELT segmentation boundaries when enough ticks have been processed
-  const [peltSegments, setPeltSegments] = useState([]);
-  const fetchPeltSegments = useCallback(async () => {
-    try {
-      const res = await fetch('/api/v1/analytics/pelt');
-      if (res.ok) {
-        const data = await res.json();
-        setPeltSegments(data.segments || []);
-      }
-    } catch (e) { /* silent */ }
-  }, []);
-
-  useEffect(() => {
-    if (ticks.length >= 6) fetchPeltSegments();
-  }, [ticks.length, fetchPeltSegments]);
-
   return (
     <div className="min-h-screen bg-[#F8FAFC] text-slate-800 flex flex-col font-sans">
       {/* Clean Top Navigation Bar */}
@@ -64,9 +52,11 @@ export default function App() {
 
       {/* Main Canvas */}
       <main className="flex-1 max-w-7xl w-full mx-auto p-4 sm:p-6 space-y-5">
+        {error && <p role="alert" className="rounded-xl border border-rose-200 bg-rose-50 p-3 text-sm text-rose-800">{error}</p>}
         {/* Live Broadcast Computer Vision & HUD Extraction Bar */}
         <LiveHUDOverlay
           isLiveBroadcasting={isLiveBroadcasting}
+          sourceType={liveSourceType}
           liveHudState={liveHudState}
           liveWinProbability={liveWinProbability}
           liveInflectionEvents={liveInflectionEvents}
@@ -85,14 +75,12 @@ export default function App() {
 
         {/* Live Match Broadcast Video Feed (Synchronized with Telemetry) */}
         <MatchVideoPlayer
-          isPlaying={simulatorStatus.is_playing}
+          activeVideo={activeVideo}
+          totalRounds={simulatorStatus.total_ticks}
           currentTimeSeconds={simulatorStatus.current_game_time}
           currentTick={currentTick}
           latestPrediction={latestPrediction}
           changePoints={changePoints}
-          onPlay={play}
-          onPause={pause}
-          onReset={reset}
           onAnalyzeYouTube={analyzeYouTubeVideo}
           onSeek={seekToRound}
         />
@@ -132,7 +120,7 @@ export default function App() {
           />
           <PELTSegmentsCard
             segments={peltSegments}
-            totalMinutes={24}
+            processedRounds={ticks.length}
           />
         </div>
       </main>

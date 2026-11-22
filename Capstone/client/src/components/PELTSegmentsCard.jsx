@@ -1,23 +1,12 @@
 import React from 'react';
 import { Layers, CheckCircle2 } from 'lucide-react';
 
-export default function PELTSegmentsCard({ segments = [], totalMinutes = 24 }) {
-  // Construct macro phase intervals from segment boundaries
-  const sortedBounds = [0, ...segments, totalMinutes].filter((v, i, a) => a.indexOf(v) === i).sort((a, b) => a - b);
-  
-  const intervals = [];
-  for (let i = 0; i < sortedBounds.length - 1; i++) {
-    const start = sortedBounds[i];
-    const end = sortedBounds[i + 1];
-    if (end > start) {
-      let label = "Pistol & Early Eco Phase";
-      if (start >= 18) label = "Late-Game Match Point & Overtime";
-      else if (start >= 12) label = "Second-Half Side Swap & Site Siege";
-      else if (start >= 6) label = "First-Half Mid & Gun Round Contest";
-      
-      intervals.push({ start, end, label });
-    }
-  }
+export default function PELTSegmentsCard({ segments = [], processedRounds = 0 }) {
+  const boundaries = [0, ...segments.filter((point) => point > 0 && point < processedRounds), processedRounds];
+  const intervals = processedRounds < 6 ? [] : boundaries.slice(1).map((end, index) => ({
+    start: boundaries[index],
+    end,
+  }));
 
   return (
     <div className="bg-white border border-warm-200/80 rounded-2xl p-5 shadow-card flex flex-col justify-between">
@@ -32,16 +21,16 @@ export default function PELTSegmentsCard({ segments = [], totalMinutes = 24 }) {
       </div>
 
       <div className="space-y-2.5">
+        {intervals.length === 0 && <p className="text-xs text-warm-500">Segmentation starts after six replay rounds.</p>}
         {intervals.map((intv, idx) => (
           <div
-            key={idx}
+            key={intv.start}
             className="flex items-center justify-between p-2.5 rounded-xl bg-warm-50/70 border border-warm-200/70 text-xs"
           >
             <div className="flex items-center gap-2.5">
               <CheckCircle2 className="w-4 h-4 text-emerald-600 flex-shrink-0" />
               <div>
-                <div className="text-warm-800 font-semibold">{intv.label}</div>
-                <div className="text-[10px] text-warm-500 font-medium">Statistical Regime {idx + 1}</div>
+                <div className="text-warm-800 font-semibold">Segment {idx + 1}</div>
               </div>
             </div>
 

@@ -1,340 +1,170 @@
-import { useState, useEffect, useRef, useCallback } from 'react';
+import { useCallback, useEffect, useRef, useState } from 'react';
+
+const INITIAL_REPLAY = {
+  ticks: [],
+  predictions: [],
+  change_points: [],
+  pelt_segments: [],
+  broadcast_meta: null,
+  simulator_status: { is_playing: false, playback_speed: 1, current_index: 0, total_ticks: 24, current_game_time: 0 },
+};
+
+const INITIAL_LIVE = { is_running: false, current_live: null, inflection_events: [], source_type: 'NONE' };
+
+function appendTick(history, item, key) {
+  if (!item || (history.length > 0 && history.at(-1)[key] >= item[key])) return history;
+  return [...history, item];
+}
 
 export function useEsportWebSocket() {
   const [isConnected, setIsConnected] = useState(false);
-  const [ticks, setTicks] = useState([]);
-  const [predictions, setPredictions] = useState([]);
-  const [changePoints, setChangePoints] = useState([]);
-  const [simulatorStatus, setSimulatorStatus] = useState({
-    is_playing: false,
-    playback_speed: 1.0,
-    current_index: 0,
-    total_ticks: 24,
-    current_game_time: 0.0
-  });
-
-  // Live Broadcast HUD Analytics State
-  const [activeVideo, setActiveVideo] = useState(null);
-  const [isLiveBroadcasting, setIsLiveBroadcasting] = useState(false);
-  const [liveHudState, setLiveHudState] = useState(null);
-  const [liveWinProbability, setLiveWinProbability] = useState({
-    round_blue: 0.50,
-    round_red: 0.50,
-    match_blue: 0.50,
-    match_red: 0.50
-  });
-  const [liveInflectionEvents, setLiveInflectionEvents] = useState([]);
-
+  const [replay, setReplay] = useState(INITIAL_REPLAY);
+  const [live, setLive] = useState(INITIAL_LIVE);
+  const [error, setError] = useState(null);
   const wsRef = useRef(null);
-  const heartbeatRef = useRef(null);
-  const isMountedRef = useRef(true);
 
-  // Helper to deduplicate ticks by sequence_id
-  const applyTickPacket = useCallback((packet) => {
-    if (!packet) return;
-    
-    if (packet.tick) {
-      setTicks((prev) => {
-        const exists = prev.some((t) => t.sequence_id === packet.tick.sequence_id);
-        return exists ? prev : [...prev, packet.tick];
-      });
-    }
-
-    if (packet.prediction) {
-      setPredictions((prev) => {
-        const exists = prev.some((p) => p.tick_sequence === packet.prediction.tick_sequence);
-        return exists ? prev : [...prev, packet.prediction];
-      });
-    }
-
-    if (packet.change_point) {
-      setChangePoints((prev) => {
-        const exists = prev.some((cp) => cp.tick_sequence === packet.change_point.tick_sequence);
-        return exists ? prev : [...prev, packet.change_point];
-      });
-    }
-
-    if (packet.simulator_status) {
-      setSimulatorStatus(packet.simulator_status);
-    }
-  }, []);
-
-  // Fetch initial match state snapshot via REST
-  const fetchInitialState = useCallback(async () => {
-    try {
-      const [matchRes, broadcastRes] = await Promise.all([
-        fetch('/api/v1/matches/current'),
-        fetch('/api/v1/broadcast/current')
-      ]);
-      if (matchRes.ok) {
-        const data = await matchRes.json();
-        setTicks(data.ticks || []);
-        setPredictions(data.predictions || []);
-        setChangePoints(data.change_points || []);
-        if (data.status) setSimulatorStatus(data.status);
-      }
-      if (broadcastRes.ok) {
-        const bData = await broadcastRes.json();
-        if (bData.is_initialized) {
-          setActiveVideo({
-            videoId: bData.video_id,
-            title: bData.title,
-            author: bData.author,
-            thumbnailUrl: bData.thumbnail_url,
-            matchId: bData.match_id,
-            totalRounds: bData.total_rounds,
-            isLive: bData.is_live
-          });
-        }
-      }
-    } catch (e) {
-      console.warn("Initial state fetch error:", e);
+  const applyEvent = useCallback((event) => {
+    switch (event.type) {
+      case 'INITIAL_SNAPSHOT':
+        setLive(event.live_status);
+        setReplay(event);
+        break;
+      case 'REPLAY_SNAPSHOT':
+        setReplay(event);
+        break;
+      case 'SIMULATION_STATUS':
+        setReplay((prev) => ({ ...prev, simulator_status: event.simulator_status }));
+        break;
+      case 'TICK_UPDATE':
+        setReplay((prev) => ({
+          ...prev,
+          ticks: appendTick(prev.ticks, event.tick, 'sequence_id'),
+          predictions: appendTick(prev.predictions, event.prediction, 'tick_sequence'),
+          change_points: appendTick(prev.change_points, event.change_point, 'tick_sequence'),
+          simulator_status: event.simulator_status,
+          pelt_segments: event.pelt_segments,
+        }));
+        break;
+      case 'LIVE_STARTED':
+        setLive({ ...INITIAL_LIVE, is_running: true, source_type: event.source_type });
+        break;
+      case 'LIVE_HUD_UPDATE':
+        setLive((prev) => ({
+          ...prev,
+          is_running: true,
+          source_type: event.source_type,
+          current_live: event,
+          inflection_events: [...event.inflection_events.slice().reverse(), ...prev.inflection_events].slice(0, 50),
+        }));
+        break;
+      case 'LIVE_STOPPED':
+        setLive({ ...INITIAL_LIVE, error: event.error });
+        break;
+      default:
+        break;
     }
   }, []);
 
-  // Connect to WebSocket with resilient reconnection
-  const connect = useCallback(() => {
-    if (!isMountedRef.current) return;
+  useEffect(() => {
+    let stopped = false;
+    let reconnectTimer;
+    let heartbeat;
+    let reconnectDelay = 1000;
 
-    try {
+    function connect() {
       const protocol = window.location.protocol === 'https:' ? 'wss:' : 'ws:';
-      const wsUrl = `${protocol}//${window.location.host}/ws/live`;
-      const ws = new WebSocket(wsUrl);
+      const ws = new WebSocket(`${protocol}//${window.location.host}/ws/live`);
       wsRef.current = ws;
+      let lastMessage = Date.now();
 
-      ws.onopen = () => {
-        if (!isMountedRef.current) return;
-        setIsConnected(true);
-        heartbeatRef.current = setInterval(() => {
-          if (ws.readyState === WebSocket.OPEN) {
-            ws.send('ping');
-          }
-        }, 8000);
-      };
+      heartbeat = setInterval(() => {
+        if (Date.now() - lastMessage > 20000) ws.close();
+        else if (ws.readyState === WebSocket.OPEN) ws.send('ping');
+      }, 8000);
 
-      ws.onmessage = (event) => {
-        if (event.data === 'pong' || !isMountedRef.current) return;
+      ws.onmessage = ({ data }) => {
+        if (stopped) return;
+        lastMessage = Date.now();
+        if (data === 'pong') return;
         try {
-          const data = JSON.parse(event.data);
-          if (data.type === 'INITIAL_SNAPSHOT') {
-            setTicks(data.ticks || []);
-            setPredictions(data.predictions || []);
-            setChangePoints(data.change_points || []);
-            if (data.simulator_status) setSimulatorStatus(data.simulator_status);
-            if (data.broadcast_meta && data.broadcast_meta.video_id) {
-              setActiveVideo({
-                videoId: data.broadcast_meta.video_id,
-                title: data.broadcast_meta.title,
-                author: data.broadcast_meta.author,
-                thumbnailUrl: data.broadcast_meta.thumbnail_url,
-                matchId: data.broadcast_meta.match_id,
-                totalRounds: data.broadcast_meta.total_rounds,
-                isLive: data.broadcast_meta.is_live
-              });
-            }
-            if (data.live_status && data.live_status.is_running) {
-              setIsLiveBroadcasting(true);
-              if (data.live_status.current_live) {
-                setLiveHudState(data.live_status.current_live.hud_state);
-                setLiveWinProbability(data.live_status.current_live.win_probability);
-              }
-            }
-          } else if (data.type === 'YOUTUBE_ANALYZED') {
-            setActiveVideo({
-              videoId: data.video_id,
-              title: data.title,
-              author: data.author,
-              thumbnailUrl: data.thumbnail_url,
-              matchId: data.match_id,
-              totalRounds: data.total_rounds,
-              isLive: data.is_live
-            });
-            setTicks([]);
-            setPredictions([]);
-            setChangePoints([]);
-            if (data.simulator_status) setSimulatorStatus(data.simulator_status);
-          } else if (data.type === 'TICK_UPDATE') {
-            applyTickPacket(data);
-          } else if (data.type === 'LIVE_HUD_UPDATE') {
-            setIsLiveBroadcasting(true);
-            setLiveHudState(data.hud_state);
-            setLiveWinProbability(data.win_probability);
-            if (data.inflection_events && data.inflection_events.length > 0) {
-              setLiveInflectionEvents((prev) => [...data.inflection_events, ...prev].slice(0, 50));
-            }
-          } else if (data.type === 'LIVE_STOPPED') {
-            setIsLiveBroadcasting(false);
-          } else if (data.type === 'SIMULATION_RESET') {
-            setTicks([]);
-            setPredictions([]);
-            setChangePoints([]);
-            setSimulatorStatus({
-              is_playing: false,
-              playback_speed: 1.0,
-              current_index: 0,
-              total_ticks: 24,
-              current_game_time: 0.0
-            });
-          } else if (data.type === 'SIMULATION_FINISHED') {
-            setSimulatorStatus((prev) => ({ ...prev, is_playing: false }));
+          const event = JSON.parse(data);
+          applyEvent(event);
+          if (event.type === 'INITIAL_SNAPSHOT') {
+            setIsConnected(true);
+            reconnectDelay = 1000;
           }
-        } catch (err) {
-          console.error("WebSocket message parse error:", err);
+        } catch (error) {
+          console.error('Invalid gateway message', error);
         }
       };
 
       ws.onclose = () => {
-        if (!isMountedRef.current) return;
+        clearInterval(heartbeat);
+        if (stopped) return;
         setIsConnected(false);
-        clearInterval(heartbeatRef.current);
-        setTimeout(() => {
-          if (isMountedRef.current) connect();
-        }, 4000);
+        reconnectTimer = setTimeout(connect, reconnectDelay);
+        reconnectDelay = Math.min(reconnectDelay * 2, 15000);
       };
-
-      ws.onerror = () => {};
-    } catch (e) {
-      console.warn("WebSocket init failed:", e);
     }
-  }, [applyTickPacket]);
 
-  useEffect(() => {
-    isMountedRef.current = true;
-    fetchInitialState();
     connect();
-
     return () => {
-      isMountedRef.current = false;
-      clearInterval(heartbeatRef.current);
-      if (wsRef.current) {
-        wsRef.current.onclose = null;
-        wsRef.current.close();
-      }
+      stopped = true;
+      clearTimeout(reconnectTimer);
+      clearInterval(heartbeat);
+      wsRef.current?.close();
+      wsRef.current = null;
     };
-  }, [connect, fetchInitialState]);
+  }, [applyEvent]);
 
-  // Step 1 round forward
-  const step = useCallback(async () => {
+  const command = useCallback(async (path, body) => {
+    setError(null);
     try {
-      const res = await fetch('/api/v1/simulation/step', { method: 'POST' });
-      if (res.ok) {
-        const data = await res.json();
-        if (data.packet) {
-          applyTickPacket(data.packet);
-        } else if (data.status === 'finished') {
-          setSimulatorStatus((prev) => ({ ...prev, is_playing: false }));
-        }
-      }
-    } catch (e) {
-      console.warn("Step request failed:", e);
-    }
-  }, [applyTickPacket]);
-
-  const play = useCallback((speed = 1.0) => {
-    setSimulatorStatus((prev) => ({ ...prev, is_playing: true, playback_speed: speed }));
-    fetch(`/api/v1/simulation/play?speed=${speed}`, { method: 'POST' }).catch(() => {});
-  }, []);
-
-  const pause = useCallback(() => {
-    setSimulatorStatus((prev) => ({ ...prev, is_playing: false }));
-    fetch('/api/v1/simulation/pause', { method: 'POST' }).catch(() => {});
-  }, []);
-
-  const reset = useCallback(async () => {
-    pause();
-    try {
-      await fetch('/api/v1/simulation/reset', { method: 'POST' });
-    } catch (e) {}
-    setTicks([]);
-    setPredictions([]);
-    setChangePoints([]);
-    setSimulatorStatus({
-      is_playing: false,
-      playback_speed: 1.0,
-      current_index: 0,
-      total_ticks: 24,
-      current_game_time: 0.0
-    });
-  }, [pause]);
-
-  const startLiveAnalysis = useCallback(async ({ source = "SYNTHETIC", source_type = "SYNTHETIC", fps = 1.0 } = {}) => {
-    pause();
-    try {
-      const res = await fetch('/api/v1/live/start', {
+      const response = await fetch(`/api/v1/${path}`, {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ source, source_type, fps })
+        ...(body && { headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(body) }),
+        signal: AbortSignal.timeout(45000),
       });
-      if (res.ok) {
-        setIsLiveBroadcasting(true);
-        return await res.json();
+      const result = await response.json();
+      if (!response.ok) {
+        throw new Error(typeof result.detail === 'string' ? result.detail : 'The gateway rejected the request.');
       }
-    } catch (e) {
-      console.error("Start live analysis error:", e);
-    }
-  }, [pause]);
-
-  const stopLiveAnalysis = useCallback(async () => {
-    try {
-      await fetch('/api/v1/live/stop', { method: 'POST' });
-      setIsLiveBroadcasting(false);
-    } catch (e) {
-      console.error("Stop live analysis error:", e);
-    }
-  }, []);
-
-  const analyzeYouTubeVideo = useCallback(async (url) => {
-    pause();
-    try {
-      const res = await fetch('/api/v1/simulation/analyze-youtube', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ url })
-      });
-      if (res.ok) {
-        const data = await res.json();
-        setTicks([]);
-        setPredictions([]);
-        setChangePoints([]);
-        setSimulatorStatus((prev) => ({
-          ...prev,
-          is_playing: false,
-          current_index: 0,
-          total_ticks: data.total_rounds || 24,
-          current_game_time: 0.0
-        }));
-        return data;
+      if (result.status === 'not_found') throw new Error('That round is unavailable.');
+      if (wsRef.current?.readyState !== WebSocket.OPEN) {
+        if (result.snapshot) applyEvent(result.snapshot);
+        else if (result.packet) applyEvent(result.packet);
+        else if (result.simulator_status) applyEvent({ type: 'SIMULATION_STATUS', ...result });
       }
-    } catch (e) {
-      console.error("YouTube analysis request failed:", e);
+      return result;
+    } catch (error) {
+      setError(error.name === 'TimeoutError' ? 'The gateway took too long to respond.' : error.message);
+      return null;
     }
-  }, [pause]);
+  }, [applyEvent]);
 
-  const seekToRound = useCallback(async (roundIndex) => {
-    try {
-      const res = await fetch('/api/v1/simulation/seek', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ sequence_id: roundIndex })
-      });
-      if (res.ok) {
-        await fetchInitialState();
-      }
-    } catch (e) {
-      console.warn("Seek request failed:", e);
-    }
-  }, [fetchInitialState]);
+  const step = useCallback(() => command('simulation/step'), [command]);
+  const play = useCallback((speed = 1) => command(`simulation/play?speed=${speed}`), [command]);
+  const pause = useCallback(() => command('simulation/pause'), [command]);
+  const reset = useCallback(() => command('simulation/reset'), [command]);
+  const startLiveAnalysis = useCallback((source) => command('live/start', source), [command]);
+  const stopLiveAnalysis = useCallback(() => command('live/stop'), [command]);
+  const analyzeYouTubeVideo = useCallback((url) => command('simulation/analyze-youtube', { url }), [command]);
+  const seekToRound = useCallback((round) => command('simulation/seek', { sequence_id: round }), [command]);
 
   return {
     isConnected,
-    ticks,
-    predictions,
-    changePoints,
-    simulatorStatus,
-    isLiveBroadcasting,
-    liveHudState,
-    liveWinProbability,
-    liveInflectionEvents,
+    ticks: replay.ticks,
+    predictions: replay.predictions,
+    changePoints: replay.change_points,
+    peltSegments: replay.pelt_segments,
+    simulatorStatus: replay.simulator_status,
+    activeVideo: replay.broadcast_meta,
+    isLiveBroadcasting: live.is_running,
+    liveSourceType: live.source_type,
+    liveHudState: live.current_live?.hud_state,
+    liveWinProbability: live.current_live?.win_probability,
+    liveInflectionEvents: live.inflection_events,
+    error: error || live.error,
     step,
     play,
     pause,
@@ -342,6 +172,6 @@ export function useEsportWebSocket() {
     startLiveAnalysis,
     stopLiveAnalysis,
     analyzeYouTubeVideo,
-    seekToRound
+    seekToRound,
   };
 }

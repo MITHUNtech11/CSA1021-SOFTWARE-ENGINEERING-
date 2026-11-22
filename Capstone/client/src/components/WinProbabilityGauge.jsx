@@ -40,7 +40,7 @@ export default function WinProbabilityGauge({ latestPrediction, blueName = "Sent
           <div className="flex items-center gap-2">
             <Compass className="w-4 h-4 text-team-blue" />
             <h3 className="text-xs font-bold uppercase tracking-wider text-warm-600">
-              Live Win Outlook
+              Replay Win Estimate
             </h3>
           </div>
           <span className={`px-2.5 py-0.5 rounded-full text-xs font-semibold border ${badgeColor}`}>

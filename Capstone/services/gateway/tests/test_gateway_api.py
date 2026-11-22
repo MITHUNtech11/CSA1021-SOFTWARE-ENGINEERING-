@@ -4,7 +4,8 @@ from services.gateway.app.main import app
 
 @pytest.fixture
 def client():
-    return TestClient(app)
+    with TestClient(app) as client:
+        yield client
 
 def test_gateway_health(client):
     response = client.get("/health")
@@ -86,3 +87,41 @@ def test_gateway_broadcast_current_and_init(client, monkeypatch):
     cur_data = cur_res.json()
     assert cur_data["is_initialized"] is True
     assert cur_data["video_id"] == "s9pB4sD8QxM"
+
+
+def test_websocket_replay_step_reconnect_and_backward_seek(client):
+    client.post("/api/v1/simulation/reset").raise_for_status()
+    with client.websocket_connect("/ws/live") as socket:
+        assert socket.receive_json()["type"] == "INITIAL_SNAPSHOT"
+        for sequence in range(4):
+            client.post("/api/v1/simulation/step").raise_for_status()
+            packet = socket.receive_json()
+            assert packet["type"] == "TICK_UPDATE"
+            assert packet["tick"]["sequence_id"] == sequence
+            assert packet["prediction"]["timestamp"]
+    with client.websocket_connect("/ws/live") as first, client.websocket_connect("/ws/live") as second:
+        for socket in (first, second):
+            snapshot = socket.receive_json()
+            assert len(snapshot["ticks"]) == 4
+            assert snapshot["ticks"][-1]["timestamp"]
+        result = client.post("/api/v1/simulation/seek", json={"sequence_id": 1}).json()
+        for socket in (first, second):
+            snapshot = socket.receive_json()
+            assert snapshot == result["snapshot"]
+            assert [tick["sequence_id"] for tick in snapshot["ticks"]] == [0, 1]
+            assert snapshot["simulator_status"]["current_index"] == 2
+            assert snapshot["simulator_status"]["is_playing"] is False
+
+
+def test_replay_and_live_input_validation(client):
+    assert client.post("/api/v1/simulation/play", params={"speed": 0}).status_code == 422
+    assert client.post("/api/v1/simulation/analyze-youtube", json={"url": "invalid"}).status_code == 422
+    assert client.post("/api/v1/live/start", json={"source_type": "unsupported"}).status_code == 422
+
+
+def test_browser_write_and_socket_require_same_origin(client):
+    origin = {"origin": "http://testserver"}
+    assert client.post("/api/v1/simulation/reset", headers=origin).status_code == 200
+    assert client.post("/api/v1/simulation/reset", headers={"origin": "null"}).status_code == 403
+    with client.websocket_connect("/ws/live", headers=origin) as socket:
+        assert socket.receive_json()["type"] == "INITIAL_SNAPSHOT"

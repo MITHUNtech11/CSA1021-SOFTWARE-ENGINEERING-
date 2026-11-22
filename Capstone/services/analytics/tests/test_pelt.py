@@ -27,3 +27,8 @@ def test_pelt_computational_pruning():
     pelt = PELTDetector(penalty=10.0)
     cps = pelt.segment(signal)
     assert isinstance(cps, list)
+
+
+def test_pelt_delays_pruning_until_dominating_boundary_is_feasible():
+    signal = np.array([0, 0, 3, 0, 0, 3, 3, 0])
+    assert PELTDetector(penalty=4, min_size=2).segment(signal) == []

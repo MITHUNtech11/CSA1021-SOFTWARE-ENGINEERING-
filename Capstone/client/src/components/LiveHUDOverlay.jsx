@@ -6,14 +6,19 @@ import {
 
 export default function LiveHUDOverlay({
   isLiveBroadcasting = false,
+  sourceType = "NONE",
   liveHudState = null,
   liveWinProbability = { round_blue: 0.50, round_red: 0.50, match_blue: 0.50, match_red: 0.50 },
   liveInflectionEvents = [],
   onStartLive = () => {},
   onStopLive = () => {}
 }) {
+  const [isSubmitting, setIsSubmitting] = useState(false);
   const [streamUrl, setStreamUrl] = useState('');
   const [mode, setMode] = useState('SYNTHETIC'); // 'SYNTHETIC' | 'YOUTUBE_LIVE' | 'LOCAL_VIDEO'
+
+  const blueName = sourceType === 'SYNTHETIC' ? 'Sentinels' : 'Blue side';
+  const redName = sourceType === 'SYNTHETIC' ? 'Fnatic' : 'Red side';
 
   const aliveBlue = liveHudState?.alive_blue ?? 5;
   const aliveRed = liveHudState?.alive_red ?? 5;
@@ -24,13 +29,17 @@ export default function LiveHUDOverlay({
   const pctBlue = Math.round((liveWinProbability?.round_blue ?? 0.50) * 100);
   const pctRed = Math.round((liveWinProbability?.round_red ?? 0.50) * 100);
 
-  const handleStart = (e) => {
-    e.preventDefault();
-    onStartLive({
-      source: mode === 'SYNTHETIC' ? 'SYNTHETIC' : streamUrl,
-      source_type: mode,
-      fps: 1.0
-    });
+  const handleStart = async () => {
+    setIsSubmitting(true);
+    try {
+      await onStartLive({
+        source: mode === 'SYNTHETIC' ? 'SYNTHETIC' : streamUrl.trim(),
+        source_type: mode,
+        fps: 1,
+      });
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
   return (
@@ -53,7 +62,7 @@ export default function LiveHUDOverlay({
                   ? 'bg-rose-50 text-rose-600 border-rose-200'
                   : 'bg-warm-100 text-warm-500 border-warm-200'
               }`}>
-                {isLiveBroadcasting ? 'LIVE HUD EXTRACTOR ACTIVE' : 'STANDBY'}
+                {isLiveBroadcasting ? (sourceType === 'SYNTHETIC' ? 'SYNTHETIC HUD DEMO' : 'VIDEO HUD ANALYSIS') : 'STANDBY'}
               </span>
             </div>
             <p className="text-xs text-warm-500">
@@ -75,6 +84,7 @@ export default function LiveHUDOverlay({
           ) : (
             <div className="flex items-center gap-2">
               <select
+                aria-label="Analysis source type"
                 value={mode}
                 onChange={(e) => setMode(e.target.value)}
                 className="text-xs bg-warm-50 border border-warm-200 rounded-xl px-2.5 py-2 font-medium text-warm-700 focus:outline-none"
@@ -87,7 +97,8 @@ export default function LiveHUDOverlay({
               {mode !== 'SYNTHETIC' && (
                 <input
                   type="text"
-                  placeholder={mode === 'YOUTUBE_LIVE' ? 'Paste YouTube stream URL...' : 'Local video file path...'}
+                  aria-label="Video source"
+                  placeholder={mode === 'YOUTUBE_LIVE' ? 'Paste YouTube stream URL...' : 'Server recording filename...'}
                   value={streamUrl}
                   onChange={(e) => setStreamUrl(e.target.value)}
                   className="text-xs bg-white border border-warm-200 rounded-xl px-3 py-2 w-52 font-mono text-warm-800 focus:outline-none"
@@ -96,22 +107,29 @@ export default function LiveHUDOverlay({
 
               <button
                 onClick={handleStart}
+                disabled={isSubmitting || (mode !== 'SYNTHETIC' && !streamUrl.trim())}
                 className="flex items-center gap-1.5 px-4 py-2 rounded-xl text-xs font-bold bg-team-blue hover:bg-blue-700 text-white shadow-xs transition-all active:scale-95"
               >
                 <Play className="w-3.5 h-3.5 fill-current" />
-                Start Live Analysis
+                {isSubmitting ? "Starting..." : "Start Analysis"}
               </button>
             </div>
           )}
         </div>
       </div>
 
+      {!liveHudState && (
+        <p className="text-sm text-warm-600">
+          {isLiveBroadcasting ? 'Waiting for the first HUD update.' : 'Start an analysis to see HUD readings.'}
+        </p>
+      )}
+      {liveHudState && <>
       {/* 5v5 Live Roster Visualizer */}
       <div className="grid grid-cols-1 md:grid-cols-11 gap-3 items-center bg-slate-900 text-white rounded-xl p-4 border border-slate-800 shadow-inner">
         {/* Blue Side Roster (5 slots) */}
         <div className="md:col-span-4 flex items-center justify-between sm:justify-start gap-2">
           <div className="text-xs font-bold font-mono text-cyan-400 mr-1">
-            SEN ({aliveBlue}/5)
+            {blueName} ({aliveBlue}/5)
           </div>
           <div className="flex items-center gap-1.5">
             {[0, 1, 2, 3, 4].map((idx) => {
@@ -176,7 +194,7 @@ export default function LiveHUDOverlay({
             })}
           </div>
           <div className="text-xs font-bold font-mono text-rose-400 ml-1">
-            FNC ({aliveRed}/5)
+            {redName} ({aliveRed}/5)
           </div>
         </div>
       </div>
@@ -186,10 +204,10 @@ export default function LiveHUDOverlay({
         <div className="flex justify-between items-center text-xs font-semibold text-warm-700 mb-1.5">
           <span className="text-team-blue flex items-center gap-1">
             <Zap className="w-3.5 h-3.5" />
-            Sentinels: {pctBlue}% Round Probability
+            {blueName} {pctBlue}% round estimate
           </span>
           <span className="text-team-red">
-            Fnatic: {pctRed}% Round Probability
+            {redName} {pctRed}% round estimate
           </span>
         </div>
 
@@ -221,6 +239,7 @@ export default function LiveHUDOverlay({
           </div>
         </div>
       )}
+      </>}
     </div>
   );
 }
