@@ -8,9 +8,9 @@ export default function BehaviorRadar({ currentTick, blueName = "Sentinels", red
   // Radar Axes Metrics normalized to [0.1, 1.0]
   const axes = [
     { label: "Aggression", blueVal: Math.min(1.0, 0.2 + (blue?.total_kills || 0) * 0.04), redVal: Math.min(1.0, 0.2 + (red?.total_kills || 0) * 0.04) },
-    { label: "Economy", blueVal: Math.min(1.0, (blue?.total_gold || 2500) / 55000), redVal: Math.min(1.0, (red?.total_gold || 2500) / 55000) },
+    { label: "Economy", blueVal: Math.min(1.0, (blue?.total_gold ?? 0) / 55000), redVal: Math.min(1.0, (red?.total_gold ?? 0) / 55000) },
     { label: "Objectives", blueVal: Math.min(1.0, 0.1 + ((blue?.turrets_destroyed || 0)*0.07) + ((blue?.dragons || 0)*0.1) + ((blue?.barons || 0)*0.25)), redVal: Math.min(1.0, 0.1 + ((red?.turrets_destroyed || 0)*0.07) + ((red?.dragons || 0)*0.1) + ((red?.barons || 0)*0.25)) },
-    { label: "Vision", blueVal: Math.min(1.0, (blue?.vision_score || 5) / 100), redVal: Math.min(1.0, (red?.vision_score || 5) / 100) },
+    { label: "Vision", blueVal: Math.min(1.0, (blue?.vision_score ?? 0) / 100), redVal: Math.min(1.0, (red?.vision_score ?? 0) / 100) },
     { label: "Structure Pressure", blueVal: Math.min(1.0, 0.15 + (blue?.turrets_destroyed || 0) * 0.08), redVal: Math.min(1.0, 0.15 + (red?.turrets_destroyed || 0) * 0.08) },
   ];
 
@@ -34,19 +34,13 @@ export default function BehaviorRadar({ currentTick, blueName = "Sentinels", red
   const redPath = redPoints.map((p, i) => `${i === 0 ? 'M' : 'L'} ${p.x} ${p.y}`).join(' ') + ' Z';
 
   return (
-    <div className="bg-white border border-warm-200/80 rounded-2xl p-5 shadow-card flex flex-col justify-between">
-      <div className="flex items-center justify-between border-b border-warm-100 pb-3">
-        <h3 className="text-xs font-bold uppercase tracking-wider text-warm-700 flex items-center gap-2">
-          <Compass className="w-4 h-4 text-accent-amber" />
-          Tactical Behavior Radar
-        </h3>
-        <span className="text-[11px] font-medium text-warm-500">
-          Normalized Profiles
-        </span>
-      </div>
-
-      <div className="relative flex items-center justify-center my-2">
-        <svg width={size} height={size} viewBox={`0 0 ${size} ${size}`}>
+    <section className="panel behavior-panel" aria-label="Team behavior">
+      <header className="panel-heading">
+        <div><h2><Compass size={17} aria-hidden="true" /> Team behavior</h2><p>Normalized replay metrics</p></div>
+      </header>
+      {!currentTick ? <p className="empty-copy">Play a round to compare the teams.</p> : <>
+      <div className="behavior-chart">
+        <svg width={size} height={size} viewBox={`0 0 ${size} ${size}`} role="img" aria-label={`Radar comparing ${blueName} and ${redName} by aggression, economy, objectives, vision, and structure pressure`}>
           {/* Concentric rings */}
           {[0.25, 0.5, 0.75, 1.0].map((level) => {
             const ringPoints = Array.from({ length: numAxes }).map((_, i) => getCoordinates(i, level));
@@ -56,7 +50,7 @@ export default function BehaviorRadar({ currentTick, blueName = "Sentinels", red
                 key={level}
                 d={ringPath}
                 fill="none"
-                stroke="#E2E8F0"
+                stroke="#38394c"
                 strokeWidth="1"
                 strokeDasharray={level === 1.0 ? "none" : "2 2"}
               />
@@ -73,7 +67,7 @@ export default function BehaviorRadar({ currentTick, blueName = "Sentinels", red
                 y1={center}
                 x2={end.x}
                 y2={end.y}
-                stroke="#E2E8F0"
+                stroke="#38394c"
                 strokeWidth="1"
               />
             );
@@ -82,9 +76,9 @@ export default function BehaviorRadar({ currentTick, blueName = "Sentinels", red
           {/* Red Team Polygon */}
           <path
             d={redPath}
-            fill="#EF4444"
+            fill="#f996ab"
             fillOpacity="0.20"
-            stroke="#EF4444"
+            stroke="#f996ab"
             strokeWidth="2"
             className="transition-all duration-300"
           />
@@ -92,9 +86,9 @@ export default function BehaviorRadar({ currentTick, blueName = "Sentinels", red
           {/* Blue Team Polygon */}
           <path
             d={bluePath}
-            fill="#0284C7"
+            fill="#71bbff"
             fillOpacity="0.25"
-            stroke="#0284C7"
+            stroke="#71bbff"
             strokeWidth="2"
             className="transition-all duration-300"
           />
@@ -107,7 +101,7 @@ export default function BehaviorRadar({ currentTick, blueName = "Sentinels", red
                 key={i}
                 x={labelCoord.x}
                 y={labelCoord.y + 3}
-                fill="#64748B"
+                fill="#c5c3d2"
                 fontSize="9"
                 fontFamily="sans-serif"
                 fontWeight="600"
@@ -120,17 +114,11 @@ export default function BehaviorRadar({ currentTick, blueName = "Sentinels", red
         </svg>
       </div>
 
-      {/* Legend */}
-      <div className="flex justify-center gap-6 pt-3 border-t border-warm-100 text-xs">
-        <div className="flex items-center gap-1.5 text-team-blue font-semibold">
-          <span className="w-2.5 h-2.5 rounded bg-team-blue inline-block"></span>
-          {blueName}
-        </div>
-        <div className="flex items-center gap-1.5 text-team-red font-semibold">
-          <span className="w-2.5 h-2.5 rounded bg-team-red inline-block"></span>
-          {redName}
-        </div>
+      <div className="behavior-legend">
+        <span className="side-blue">{blueName}</span>
+        <span className="side-red">{redName}</span>
       </div>
-    </div>
+      </>}
+    </section>
   );
 }

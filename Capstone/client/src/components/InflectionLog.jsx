@@ -1,91 +1,27 @@
-import React from 'react';
-import { Sparkles, Trophy, Zap, AlertCircle, Crosshair } from 'lucide-react';
+﻿import { Zap } from 'lucide-react';
 
-export default function InflectionLog({ predictions = [] }) {
-  // Only display actual turning points, newest on top
-  const inflections = predictions.filter((p) => p.is_inflection_point).slice().reverse();
+const CATEGORY_LABELS = {
+  DECISIVE_COMEBACK: 'Comeback',
+  SNOWBALL_ACCELERATION: 'Lead accelerating',
+  OBJECTIVE_STEAL_SWING: 'Objective swing',
+  STALEMATE_BREAK: 'Stalemate broken',
+};
 
-  const getBadge = (category) => {
-    switch (category) {
-      case 'DECISIVE_COMEBACK':
-        return { label: 'Decisive Clutch / Comeback', style: 'bg-purple-50 text-purple-700 border-purple-200' };
-      case 'OBJECTIVE_STEAL_SWING':
-        return { label: 'Spike Retake / Eco Swing', style: 'bg-amber-50 text-amber-700 border-amber-200' };
-      case 'SNOWBALL_ACCELERATION':
-        return { label: 'Economy & Lead Widening', style: 'bg-blue-50 text-team-blue border-blue-200' };
-      case 'STALEMATE_BREAK':
-        return { label: 'Halftime / Stalemate Broken', style: 'bg-emerald-50 text-emerald-700 border-emerald-200' };
-      default:
-        return { label: 'Tactical Inflection Point', style: 'bg-warm-100 text-warm-700 border-warm-200' };
-    }
-  };
-
+export default function InflectionLog({ predictions, rounds }) {
+  const events = predictions.filter((item) => item.is_inflection_point).reverse();
   return (
-    <div className="bg-white border border-warm-200/80 rounded-2xl p-5 shadow-card flex flex-col h-full">
-      <div className="flex items-center justify-between border-b border-warm-100 pb-3 mb-4">
-        <div className="flex items-center gap-2">
-          <Sparkles className="w-4 h-4 text-accent-amber" />
-          <h3 className="text-xs font-bold uppercase tracking-wider text-warm-700">
-            Tactical Story & Turning Points Log
-          </h3>
-        </div>
-        <span className="px-2.5 py-0.5 rounded-full text-xs font-medium bg-warm-100 text-warm-600">
-          {inflections.length} {inflections.length === 1 ? 'Event' : 'Events'} Detected
-        </span>
-      </div>
-
-      <div className="overflow-y-auto max-h-[360px] space-y-3 pr-1">
-        {inflections.length === 0 ? (
-          <div className="py-12 text-center text-xs font-medium text-warm-400">
-            No major turning points yet. Early pistol and buy rounds progressing cleanly...
-          </div>
-        ) : (
-          inflections.map((item, idx) => {
-            const timeMins = Math.floor(item.game_time_seconds / 60);
-            const timeSecs = Math.floor(item.game_time_seconds % 60);
-            const timeStr = `${String(timeMins).padStart(2, '0')}:${String(timeSecs).padStart(2, '0')}`;
-            const roundNumber = Math.min(24, timeMins + 1);
-            const badge = getBadge(item.inflection_category);
-
-            // Map team codes to display names and adapt LoL-era terms
-            let explanation = item.explanation || item.narrative_summary || '';
-            explanation = explanation
-              .replace(/\bSEN\b/g, 'Sentinels')
-              .replace(/\bFNC\b/g, 'Fnatic')
-              .replace(/\bT1\b/g, 'Sentinels')
-              .replace(/\bWBG\b/g, 'Fnatic')
-              .replace(/Baron Nashor/g, 'Spike Retake')
-              .replace(/\bBaron\b/g, 'Clutch')
-              .replace(/\bgold\b/g, 'credits');
-
-            return (
-              <div
-                key={idx}
-                className="bg-warm-50/70 hover:bg-warm-50 border border-warm-200/70 rounded-xl p-3.5 transition-all text-xs"
-              >
-                <div className="flex items-center justify-between gap-2 mb-2">
-                  <div className="flex items-center gap-2">
-                    <span className="font-mono font-bold text-warm-800 bg-white px-2 py-0.5 rounded-md border border-warm-200/80 shadow-xs">
-                      Round {roundNumber} ({timeStr})
-                    </span>
-                    <span className={`px-2 py-0.5 rounded-md text-[11px] font-semibold border ${badge.style}`}>
-                      {badge.label}
-                    </span>
-                  </div>
-
-                  <span className="text-[11px] font-semibold text-team-blue font-mono">
-                    SEN Win Odds: {Math.round(item.win_probability_blue * 100)}%
-                  </span>
-                </div>
-
-                <p className="text-warm-700 text-xs leading-relaxed font-medium">
-                  {explanation}
-                </p>
-              </div>
-            );
-          })
-        )}
-      </div>
-    </div>
+    <section className="panel" aria-label="Tactical shifts">
+      <header className="panel-heading"><div><h2><Zap size={17} aria-hidden="true" /> Tactical shifts</h2><p>Round-by-round model explanations for major changes</p></div></header>
+      {events.length ? (
+        <ol className="inflection-list">
+          {events.map((item) => (
+            <li key={item.tick_sequence}>
+              <div><strong>Round {item.tick_sequence + 1}</strong><span>{CATEGORY_LABELS[item.inflection_category] || 'Turning point'}</span></div>
+              <p>{item.explanation}</p>
+            </li>
+          ))}
+        </ol>
+      ) : <p className="empty-copy">{rounds ? `No tactical shifts detected in ${rounds} played ${rounds === 1 ? 'round' : 'rounds'}.` : 'Tactical shifts will appear as you play the replay.'}</p>}
+    </section>
   );
 }

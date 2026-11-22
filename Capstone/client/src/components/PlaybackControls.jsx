@@ -1,92 +1,80 @@
-import React from 'react';
-import { Play, Pause, SkipForward, RotateCcw, FastForward } from 'lucide-react';
+import { useRef, useState } from 'react';
+import { Pause, Play, RotateCcw, SkipForward } from 'lucide-react';
 
-export default function PlaybackControls({ status, onPlay, onPause, onStep, onReset }) {
-  const isPlaying = status?.is_playing || false;
-  const currentSpeed = status?.playback_speed || 1.0;
-  const currentIndex = status?.current_index || 0;
-  const totalTicks = status?.total_ticks || 24;
-  const progressPercent = totalTicks > 0 ? (currentIndex / totalTicks) * 100 : 0;
+const SPEEDS = [1, 2, 5, 10];
 
-  const speeds = [1.0, 2.0, 5.0, 10.0];
+export default function PlaybackControls({ status, isConnected, preferredSpeed, onSpeedChange, onPlay, onPause, onStep, onReset, onSeek }) {
+  const { is_playing: playing, playback_speed: activeSpeed, current_index: played, total_ticks: total } = status;
+  const [pending, setPending] = useState(false);
+  const inFlight = useRef(false);
+  const finished = total > 0 && played >= total;
+  const speed = playing ? activeSpeed : preferredSpeed ?? activeSpeed;
+  const disabled = pending || !isConnected || total === 0;
+
+  async function run(action) {
+    if (inFlight.current || disabled) return;
+    inFlight.current = true;
+    setPending(true);
+    try {
+      await action();
+    } finally {
+      inFlight.current = false;
+      setPending(false);
+    }
+  }
+
+  function togglePlayback() {
+    run(async () => {
+      if (playing) {
+        await onPause();
+        return;
+      }
+      if (!finished || await onReset()) await onPlay(speed);
+    });
+  }
 
   return (
-    <div className="bg-white border border-warm-200/80 rounded-2xl p-4 shadow-card">
-      <div className="flex flex-col md:flex-row items-center justify-between gap-4">
-        {/* Playback Action Buttons */}
-        <div className="flex items-center gap-2.5">
-          {isPlaying ? (
-            <button
-              onClick={onPause}
-              className="flex items-center gap-2 px-5 py-2.5 rounded-xl font-semibold text-sm bg-accent-amber hover:bg-amber-600 text-white transition-all shadow-sm active:scale-95"
-            >
-              <Pause className="w-4 h-4 fill-current" />
-              Pause Match
-            </button>
-          ) : (
-            <button
-              onClick={() => onPlay(currentSpeed)}
-              className="flex items-center gap-2 px-5 py-2.5 rounded-xl font-semibold text-sm bg-team-blue hover:bg-blue-700 text-white transition-all shadow-sm active:scale-95"
-            >
-              <Play className="w-4 h-4 fill-current" />
-              Play Match Story
-            </button>
-          )}
-
-          <button
-            onClick={onStep}
-            disabled={isPlaying}
-            title="Step forward 1 round"
-            className="flex items-center gap-1.5 px-3.5 py-2.5 rounded-xl text-sm font-medium bg-warm-50 hover:bg-warm-100 text-warm-700 border border-warm-200/90 disabled:opacity-40 transition-colors"
-          >
-            <SkipForward className="w-4 h-4 text-warm-500" />
-            +1 Round
-          </button>
-
-          <button
-            onClick={onReset}
-            title="Rewind match to the beginning"
-            className="flex items-center gap-1.5 px-3 py-2.5 rounded-xl text-sm font-medium bg-warm-50 hover:bg-warm-100 text-warm-600 border border-warm-200/90 transition-colors"
-          >
-            <RotateCcw className="w-4 h-4" />
-            Reset
-          </button>
+    <section className="panel playback-panel" aria-labelledby="replay-heading" aria-busy={pending}>
+      <div className="playback-info">
+        <div>
+          <h2 id="replay-heading">Replay controls</h2>
+          <span className="subtle">{played} of {total} rounds played</span>
         </div>
-
-        {/* Story Scrubber Progress */}
-        <div className="w-full md:w-5/12 flex flex-col gap-1.5">
-          <div className="flex justify-between text-xs font-medium text-warm-500">
-            <span>Round {currentIndex === 0 ? 1 : currentIndex} of {totalTicks} (Ascent)</span>
-            <span>{Math.round(progressPercent)}% Played</span>
-          </div>
-          <div className="w-full h-2.5 rounded-full bg-warm-100 overflow-hidden relative border border-warm-200/60">
-            <div
-              className="h-full bg-team-blue transition-all duration-300 rounded-full"
-              style={{ width: `${progressPercent}%` }}
-            />
-          </div>
-        </div>
-
-        {/* Speed Multipliers */}
-        <div className="flex items-center gap-2">
-          <span className="text-xs text-warm-500 font-medium">Speed:</span>
-          <div className="flex bg-warm-100 p-1 rounded-xl border border-warm-200/80">
-            {speeds.map((s) => (
-              <button
-                key={s}
-                onClick={() => onPlay(s)}
-                className={`px-2.5 py-1 text-xs font-semibold rounded-lg transition-all ${
-                  currentSpeed === s
-                    ? 'bg-white text-team-blue shadow-sm font-bold'
-                    : 'text-warm-500 hover:text-warm-900'
-                }`}
-              >
-                {s}x
-              </button>
-            ))}
-          </div>
-        </div>
+        <progress aria-label="Replay progress" max={total || 1} value={played} />
       </div>
-    </div>
+      <div className="playback-actions">
+        <button type="button" className="ui-button ui-primary" onClick={togglePlayback} disabled={disabled}>
+          {playing ? <Pause size={16} aria-hidden="true" /> : <Play size={16} aria-hidden="true" />}
+          {playing ? 'Pause' : finished ? 'Replay' : 'Play replay'}
+        </button>
+        <button type="button" className="ui-button" onClick={() => run(onStep)} disabled={disabled || playing || finished}>
+          <SkipForward size={16} aria-hidden="true" /> Step
+        </button>
+        <button type="button" className="ui-button" onClick={() => run(onReset)} disabled={disabled || (!playing && played === 0)}>
+          <RotateCcw size={15} aria-hidden="true" /> Reset
+        </button>
+        <label className="compact-field">
+          <span>Speed</span>
+          <select value={speed} disabled={disabled} onChange={(event) => {
+            const nextSpeed = Number(event.target.value);
+            onSpeedChange(nextSpeed);
+            if (playing) run(() => onPlay(nextSpeed));
+          }}>
+            {!SPEEDS.includes(speed) && <option value={speed}>{speed}?</option>}
+            {SPEEDS.map((value) => <option key={value} value={value}>{value}Ã—</option>)}
+          </select>
+        </label>
+        <label className="compact-field">
+          <span>Jump to</span>
+          <select value={played} disabled={disabled} onChange={(event) => {
+            const round = Number(event.target.value);
+            run(round === 0 ? onReset : () => onSeek(round - 1));
+          }}>
+            <option value={0}>Start</option>
+            {Array.from({ length: total }, (_, index) => <option key={index} value={index + 1}>Round {index + 1}</option>)}
+          </select>
+        </label>
+      </div>
+    </section>
   );
 }

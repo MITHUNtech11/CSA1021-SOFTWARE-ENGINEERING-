@@ -23,6 +23,11 @@ export function useEsportWebSocket() {
   const [error, setError] = useState(null);
   const wsRef = useRef(null);
 
+  const dismissError = useCallback(() => {
+    setError(null);
+    setLive((previous) => ({ ...previous, error: null }));
+  }, []);
+
   const applyEvent = useCallback((event) => {
     switch (event.type) {
       case 'INITIAL_SNAPSHOT':
@@ -107,9 +112,11 @@ export function useEsportWebSocket() {
       };
     }
 
-    connect();
+    // StrictMode replays effect setup and cleanup before the first task runs.
+    const initialConnect = setTimeout(connect, 0);
     return () => {
       stopped = true;
+      clearTimeout(initialConnect);
       clearTimeout(reconnectTimer);
       clearInterval(heartbeat);
       wsRef.current?.close();
@@ -165,6 +172,7 @@ export function useEsportWebSocket() {
     liveWinProbability: live.current_live?.win_probability,
     liveInflectionEvents: live.inflection_events,
     error: error || live.error,
+    dismissError,
     step,
     play,
     pause,

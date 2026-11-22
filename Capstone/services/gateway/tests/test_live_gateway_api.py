@@ -77,3 +77,25 @@ def test_synthetic_updates_include_source_and_clear_state_on_stop(client):
         assert client.post("/api/v1/live/stop").status_code == 200
         assert socket.receive_json()["type"] == "LIVE_STOPPED"
         assert client.get("/api/v1/live/status").json()["is_running"] is False
+
+
+def test_live_gateway_reports_decoder_error_through_rest_and_socket(client, monkeypatch):
+    from services.ingestion.app.stream_reader import LiveStreamWorker, VideoSourceError
+
+    def fail_to_decode(self):
+        raise VideoSourceError("YouTube media rejected access (HTTP 403).")
+
+    monkeypatch.setattr(LiveStreamWorker, "prepare", lambda self: None)
+    monkeypatch.setattr(LiveStreamWorker, "start", lambda self: None)
+    monkeypatch.setattr(LiveStreamWorker, "read_frame", fail_to_decode)
+
+    with client.websocket_connect("/ws/live") as socket:
+        assert socket.receive_json()["type"] == "INITIAL_SNAPSHOT"
+        response = client.post("/api/v1/live/start", json={
+            "source": "BaW_jenozKc", "source_type": "YOUTUBE_LIVE",
+        })
+        assert response.status_code == 502
+        message = response.json()["detail"]
+        assert "HTTP 403" in message
+        assert socket.receive_json() == {"type": "LIVE_STOPPED", "error": message}
+        assert not client.get("/api/v1/live/status").json()["is_running"]

@@ -14,7 +14,7 @@ from fastapi import FastAPI, HTTPException, Query, Request, WebSocket, WebSocket
 from fastapi.responses import JSONResponse
 from shared.models.telemetry import TelemetryTick
 from services.ingestion.app.simulator import MatchSimulator
-from services.ingestion.app.stream_reader import LiveStreamWorker, StreamSourceType
+from services.ingestion.app.stream_reader import LiveStreamWorker, StreamSourceType, VideoSourceError
 from services.analytics.app.engine import AnalyticsEngine
 from services.analytics.app.vision.hud_analyzer import ValorantHUDAnalyzer, ValorantHUDState
 from services.prediction.app.service import PredictionEngine
@@ -224,6 +224,12 @@ async def _live_analysis_loop(worker: LiveStreamWorker, frame):
                 break
     except asyncio.CancelledError:
         raise
+    except VideoSourceError as error:
+        live_error = str(error)
+        logger.warning("%s video analysis ended: %s", worker.source_type.value, live_error)
+    except (TimeoutError, subprocess.TimeoutExpired):
+        live_error = "The video source stopped sending frames."
+        logger.warning("%s video source timed out", worker.source_type.value)
     except Exception:
         logger.exception("Live frame processing failed")
         live_error = "The video stream stopped responding."
@@ -278,13 +284,19 @@ async def start_live_analysis(req: LiveAnalysisRequest):
             worker.start()
             frame = await asyncio.wait_for(asyncio.to_thread(worker.read_frame), timeout=15)
             if frame is None:
-                raise RuntimeError("Video provided no frames")
-        except (OSError, RuntimeError, TimeoutError, subprocess.SubprocessError):
+                status = 422 if req.source_type == StreamSourceType.LOCAL_VIDEO else 502
+                raise VideoSourceError("The selected source ended before producing a video frame.", status)
+        except (VideoSourceError, TimeoutError, OSError, subprocess.SubprocessError) as error:
             worker.stop()
-            live_error = "Unable to read video frames. Check the source and FFmpeg configuration."
-            logger.warning("Could not start video analysis", exc_info=True)
+            if isinstance(error, VideoSourceError):
+                live_error, status = str(error), error.status_code
+            elif isinstance(error, (TimeoutError, subprocess.TimeoutExpired)):
+                live_error, status = "The video source took too long to respond. Try again or choose another source.", 504
+            else:
+                live_error, status = "The gateway could not launch the video decoder. Check the FFmpeg installation.", 503
+            logger.warning("Could not start %s video analysis: %s", req.source_type.value, live_error)
             await ws_manager.broadcast_json({"type": "LIVE_STOPPED", "error": live_error})
-            raise HTTPException(503, live_error) from None
+            raise HTTPException(status, live_error) from None
         except asyncio.CancelledError:
             worker.stop()
             raise
