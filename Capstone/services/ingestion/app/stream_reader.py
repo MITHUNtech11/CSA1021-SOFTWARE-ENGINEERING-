@@ -1,4 +1,5 @@
 import json
+import logging
 import re
 import subprocess
 import shutil
@@ -70,6 +71,22 @@ class LiveStreamWorker:
         )
         if result.returncode:
             detail = result.stderr.lower()
+            # Report bounded categories only. Extractor diagnostics may contain media URLs.
+            indicators = (
+                "sign in", "not a bot", "timed out", "permission denied", "name resolution",
+                "connection reset", "connection refused", "network is unreachable",
+                "certificate verify failed", "requested format", "no video formats",
+                "javascript runtime", "challenge solving", "no module named", "traceback",
+                "remote end closed connection", "proxy", "unable to download",
+            )
+            upstream_status = re.search(r"http(?: error)?[ :]+([45][0-9]{2})", detail)
+            logging.getLogger(__name__).warning(
+                "YouTube resolution failed: exit=%d http=%s indicators=%s",
+                result.returncode, upstream_status[1] if upstream_status else "none",
+                ", ".join(label for label in indicators if label in detail) or "none",
+            )
+            if upstream_status or "not a bot" in detail:
+                raise VideoSourceError("YouTube rejected the gateway's media request. Use Watch only or choose another source.")
             if "sign in" in detail or "private video" in detail or "members-only" in detail:
                 raise VideoSourceError("YouTube requires sign-in or permission for this video. Try a publicly playable broadcast.")
             if "not available" in detail or "unavailable" in detail:
