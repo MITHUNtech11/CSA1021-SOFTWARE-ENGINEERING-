@@ -93,3 +93,13 @@ def test_private_youtube_rejection_is_actionable(monkeypatch):
     worker = LiveStreamWorker(source_type=StreamSourceType.YOUTUBE_LIVE)
     with pytest.raises(VideoSourceError, match="requires sign-in"):
         worker.prepare()
+
+
+def test_youtube_resolver_rate_limit_on_hosted_gateway(monkeypatch):
+    monkeypatch.setattr(stream_reader.subprocess, "run", lambda *args, **kwargs: subprocess.CompletedProcess(
+        args[0], 1, stdout="", stderr="ERROR: Unable to download API page: HTTP Error 429: Too Many Requests",
+    ))
+    worker = LiveStreamWorker(source_type=StreamSourceType.YOUTUBE_LIVE)
+    with pytest.raises(VideoSourceError, match="rate-limiting this gateway") as error:
+        worker.prepare()
+    assert error.value.status_code == 503

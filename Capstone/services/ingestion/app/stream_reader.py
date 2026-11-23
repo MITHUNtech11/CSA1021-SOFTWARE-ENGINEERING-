@@ -85,6 +85,8 @@ class LiveStreamWorker:
                 result.returncode, upstream_status[1] if upstream_status else "none",
                 ", ".join(label for label in indicators if label in detail) or "none",
             )
+            if upstream_status and upstream_status[1] == "429":
+                raise VideoSourceError("YouTube is rate-limiting this gateway. Use Watch only or try again later.", 503)
             if upstream_status or "not a bot" in detail:
                 raise VideoSourceError("YouTube rejected the gateway's media request. Use Watch only or choose another source.")
             if "sign in" in detail or "private video" in detail or "members-only" in detail:

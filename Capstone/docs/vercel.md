@@ -15,4 +15,8 @@ If the dashboard stays disconnected, check the gateway status in Render and comp
 
 To roll back, restore a known working Vercel deployment and its compatible gateway revision in Render. Restarting the gateway ends active analysis. Keep one gateway instance and one Uvicorn worker for this version.
 
+The current release uses Vercel CLI for frontend deployments. From the linked `Capstone/client` directory on the release branch, run `npx vercel deploy --prod` after the checks pass. Render follows gateway changes on the release branch automatically.
+
+If YouTube rate-limits the gateway, the dashboard reports the upstream restriction. **Watch only** opens the embedded broadcast while server-side YouTube HUD analysis is unavailable. Wait before trying the source again. The built-in replay and synthetic HUD work independently of YouTube.
+
 Provider references: [Vite on Vercel](https://vercel.com/docs/frameworks/frontend/vite), [Render Blueprint fields](https://render.com/docs/blueprint-spec), [Render Free services](https://render.com/docs/free).
