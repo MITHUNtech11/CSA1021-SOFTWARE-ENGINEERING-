@@ -4,8 +4,7 @@ services:
     branch: deploy/esportecho-vercel
     runtime: docker
     plan: free
-    dockerfilePath: ./Capstone/services/gateway/Dockerfile
-    dockerContext: ./Capstone
+    rootDir: Capstone
     healthCheckPath: /health
     buildFilter:
       paths:
@@ -13,6 +12,7 @@ services:
         - Capstone/shared/**
         - Capstone/data/**
         - Capstone/.dockerignore
+        - Capstone/Dockerfile
         - render.yaml
     envVars:
       - key: PORT
