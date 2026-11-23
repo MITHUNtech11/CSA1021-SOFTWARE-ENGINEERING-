@@ -13,7 +13,6 @@ class WebSocketManager:
         self._broadcast_lock = asyncio.Lock()
 
     async def connect(self, websocket: WebSocket, snapshot: Callable[[], dict]):
-        await websocket.accept()
         async with self._broadcast_lock:
             await asyncio.wait_for(websocket.send_json(snapshot()), timeout=2)
             self.active_connections.append(websocket)

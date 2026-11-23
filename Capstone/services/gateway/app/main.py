@@ -4,6 +4,7 @@ import re
 import subprocess
 import json
 import os
+import secrets
 from contextlib import asynccontextmanager
 from pathlib import Path
 import urllib.request
@@ -12,6 +13,7 @@ from typing import Dict, Any, List, Optional
 from pydantic import BaseModel, Field
 from fastapi import FastAPI, HTTPException, Query, Request, WebSocket, WebSocketDisconnect
 from fastapi.responses import JSONResponse
+from fastapi.middleware.cors import CORSMiddleware
 from shared.models.telemetry import TelemetryTick
 from services.ingestion.app.simulator import MatchSimulator
 from services.ingestion.app.stream_reader import LiveStreamWorker, StreamSourceType, VideoSourceError
@@ -53,10 +55,25 @@ app = FastAPI(
     lifespan=lifespan
 )
 
-def same_origin(headers) -> bool:
+DASHBOARD_ORIGIN = os.getenv("ESPORTECHO_DASHBOARD_ORIGIN", "")
+ACCESS_KEY = os.getenv("ESPORTECHO_ACCESS_KEY", "")
+if DASHBOARD_ORIGIN or ACCESS_KEY or os.getenv("RENDER"):
+    if not re.fullmatch(r"https://[A-Za-z0-9.-]+(?::[0-9]+)?", DASHBOARD_ORIGIN):
+        raise RuntimeError("Set ESPORTECHO_DASHBOARD_ORIGIN to the exact HTTPS dashboard origin.")
+    if not re.fullmatch(r"[!-~]{32,256}", ACCESS_KEY):
+        raise RuntimeError("Set ESPORTECHO_ACCESS_KEY to a random 32-256 character ASCII key.")
+
+
+def valid_key(value: str) -> bool:
+    return value.isascii() and secrets.compare_digest(value, ACCESS_KEY)
+
+
+def allowed_origin(headers) -> bool:
     origin = headers.get("origin")
     if not origin:
         return True
+    if DASHBOARD_ORIGIN:
+        return origin == DASHBOARD_ORIGIN
     try:
         parsed = urllib.parse.urlsplit(origin)
         return parsed.scheme in {"http", "https"} and parsed.netloc == headers.get("host")
@@ -66,9 +83,20 @@ def same_origin(headers) -> bool:
 
 @app.middleware("http")
 async def reject_cross_origin_writes(request: Request, call_next):
-    if request.method not in {"GET", "HEAD", "OPTIONS"} and not same_origin(request.headers):
+    if request.method not in {"GET", "HEAD", "OPTIONS"} and not allowed_origin(request.headers):
         return JSONResponse({"detail": "Cross-origin request rejected."}, status_code=403)
+    if ACCESS_KEY and request.url.path != "/health":
+        scheme, _, key = request.headers.get("authorization", "").partition(" ")
+        if scheme.lower() != "bearer" or not valid_key(key):
+            return JSONResponse({"detail": "A valid team access key is required."}, status_code=401)
     return await call_next(request)
+
+
+if DASHBOARD_ORIGIN:
+    app.add_middleware(
+        CORSMiddleware, allow_origins=[DASHBOARD_ORIGIN], allow_methods=["GET", "POST"],
+        allow_headers=["Authorization", "Content-Type"],
+    )
 
 
 ws_manager = WebSocketManager()
@@ -252,6 +280,8 @@ async def _live_analysis_loop(worker: LiveStreamWorker, frame):
 
 @app.get("/health")
 def health():
+    if ACCESS_KEY:
+        return {"status": "healthy", "service": "api-gateway"}
     return {
         "status": "healthy",
         "service": "api-gateway",
@@ -605,10 +635,19 @@ def replay_snapshot(event_type="REPLAY_SNAPSHOT"):
 
 @app.websocket("/ws/live")
 async def websocket_live_stream(websocket: WebSocket):
-    if not same_origin(websocket.headers):
+    if not allowed_origin(websocket.headers):
         await websocket.close(code=1008)
         return
     try:
+        await websocket.accept()
+        if ACCESS_KEY:
+            try:
+                key = await asyncio.wait_for(websocket.receive_text(), timeout=5)
+            except asyncio.TimeoutError:
+                key = ""
+            if not valid_key(key):
+                await websocket.close(code=4401)
+                return
         await ws_manager.connect(websocket, lambda: {
             **replay_snapshot("INITIAL_SNAPSHOT"),
             "live_status": {

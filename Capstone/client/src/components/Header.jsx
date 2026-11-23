@@ -6,7 +6,8 @@ const links = [
   { id: 'analysis', label: 'Analysis', Icon: ChartNoAxesCombined },
 ];
 
-export default function Header({ view, isConnected, isLiveBroadcasting }) {
+export default function Header({ view, isConnected, needsAccessKey, isLiveBroadcasting }) {
+  const connectionLabel = needsAccessKey ? 'Team key required' : isConnected ? 'Gateway connected' : 'Connecting to gateway';
   return (
     <header className="workspace-sidebar">
       <a className="workspace-brand" href="#overview" aria-label="EsportEcho overview">
@@ -28,7 +29,7 @@ export default function Header({ view, isConnected, isLiveBroadcasting }) {
 
       <div role="status" className={`connection-status ${isConnected ? 'is-connected' : ''}`}>
         <span className="connection-dot" aria-hidden="true" />
-        <span>{isConnected ? 'Gateway connected' : 'Connecting to gateway'}</span>
+        <span>{connectionLabel}</span>
       </div>
     </header>
   );

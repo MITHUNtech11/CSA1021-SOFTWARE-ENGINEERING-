@@ -1,0 +1,23 @@
+services:
+  - type: web
+    name: esportecho-gateway
+    branch: deploy/esportecho-vercel
+    runtime: docker
+    plan: free
+    dockerfilePath: ./Capstone/services/gateway/Dockerfile
+    dockerContext: ./Capstone
+    healthCheckPath: /health
+    buildFilter:
+      paths:
+        - Capstone/services/**
+        - Capstone/shared/**
+        - Capstone/data/**
+        - Capstone/.dockerignore
+        - render.yaml
+    envVars:
+      - key: PORT
+        value: "8000"
+      - key: ESPORTECHO_DASHBOARD_ORIGIN
+        sync: false
+      - key: ESPORTECHO_ACCESS_KEY
+        generateValue: true

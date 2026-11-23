@@ -2,9 +2,9 @@ name: Capstone checks
 
 on:
   push:
-    paths: [Capstone/**, .github/workflows/capstone.yml]
+    paths: [Capstone/**, render.yaml, .github/workflows/capstone.yml]
   pull_request:
-    paths: [Capstone/**, .github/workflows/capstone.yml]
+    paths: [Capstone/**, render.yaml, .github/workflows/capstone.yml]
 
 permissions:
   contents: read
@@ -34,8 +34,10 @@ jobs:
           cache-dependency-path: Capstone/client/package-lock.json
       - run: npm ci
         working-directory: Capstone/client
-      - run: npm run build
+      - run: npm run build -- --mode hosted
         working-directory: Capstone/client
+        env:
+          VITE_GATEWAY_ORIGIN: https://gateway.example.org
       - run: docker compose config --quiet
       - run: docker compose up --build --wait --wait-timeout 120
       - name: Smoke-test the deployed dashboard and replay socket

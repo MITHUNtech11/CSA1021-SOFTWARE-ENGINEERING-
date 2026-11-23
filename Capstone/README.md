@@ -39,6 +39,8 @@ Open the dashboard at `http://127.0.0.1:5173` and the API docs at `http://127.0.
 
 ## Deploy with Docker Compose
 
+For a Vercel deployment, follow the [Vercel and Render setup](docs/vercel.md). It runs the dashboard on Vercel and the shared Python gateway in a Docker web service.
+
 ```sh
 docker compose up --build --wait
 docker compose logs gateway
