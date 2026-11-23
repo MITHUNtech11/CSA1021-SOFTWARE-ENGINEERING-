@@ -82,6 +82,14 @@ export function useEsportWebSocket() {
     let heartbeat;
     let reconnectDelay = 1000;
 
+    function rejectKey() {
+      setIsConnected(false);
+      setAccessKey('');
+      setReplay(INITIAL_REPLAY);
+      setLive(INITIAL_LIVE);
+      setError('That access key was rejected. Enter your team access key again.');
+    }
+
     function connect() {
       const ws = new WebSocket(socketUrl);
       wsRef.current = ws;
@@ -101,6 +109,10 @@ export function useEsportWebSocket() {
         if (data === 'pong') return;
         try {
           const event = JSON.parse(data);
+          if (event.type === 'ACCESS_DENIED') {
+            rejectKey();
+            return;
+          }
           applyEvent(event);
           if (event.type === 'INITIAL_SNAPSHOT') {
             setIsConnected(true);
@@ -116,10 +128,7 @@ export function useEsportWebSocket() {
         if (stopped) return;
         setIsConnected(false);
         if (code === 4401) {
-          setAccessKey('');
-          setReplay(INITIAL_REPLAY);
-          setLive(INITIAL_LIVE);
-          setError('That access key was rejected. Enter your team access key again.');
+          rejectKey();
           return;
         }
         reconnectTimer = setTimeout(connect, reconnectDelay);

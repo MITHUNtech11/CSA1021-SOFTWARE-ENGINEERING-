@@ -34,6 +34,7 @@ def test_hosted_dashboard_controls_and_updates(monkeypatch):
                 pytest.fail("Gateway accepted an unexpected origin")
         with client.websocket_connect("/ws/live", headers={"Origin": ORIGIN}) as ws:
             ws.send_text("wrong")
+            assert ws.receive_json() == {"type": "ACCESS_DENIED"}
             with pytest.raises(WebSocketDisconnect) as exc:
                 ws.receive_json()
             assert exc.value.code == 4401

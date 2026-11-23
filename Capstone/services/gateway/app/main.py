@@ -646,6 +646,7 @@ async def websocket_live_stream(websocket: WebSocket):
             except asyncio.TimeoutError:
                 key = ""
             if not valid_key(key):
+                await websocket.send_json({"type": "ACCESS_DENIED"})
                 await websocket.close(code=4401)
                 return
         await ws_manager.connect(websocket, lambda: {
