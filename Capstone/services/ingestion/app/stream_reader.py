@@ -22,6 +22,11 @@ class VideoSourceError(RuntimeError):
         self.status_code = status_code
 
 
+class YouTubeRateLimitError(VideoSourceError):
+    def __init__(self):
+        super().__init__("YouTube is rate-limiting this gateway. Use Watch only or try again later.", 503)
+
+
 # Forward downloader headers required by the media origin. Credentials stay with the extractor.
 MEDIA_HEADERS = {"accept", "accept-language", "origin", "referer", "sec-fetch-mode", "user-agent"}
 YOUTUBE_FORMAT = (
@@ -86,7 +91,7 @@ class LiveStreamWorker:
                 ", ".join(label for label in indicators if label in detail) or "none",
             )
             if upstream_status and upstream_status[1] == "429":
-                raise VideoSourceError("YouTube is rate-limiting this gateway. Use Watch only or try again later.", 503)
+                raise YouTubeRateLimitError()
             if upstream_status or "not a bot" in detail:
                 raise VideoSourceError("YouTube rejected the gateway's media request. Use Watch only or choose another source.")
             if "sign in" in detail or "private video" in detail or "members-only" in detail:
@@ -173,7 +178,7 @@ class LiveStreamWorker:
                 if code in {"404", "410"}:
                     return VideoSourceError("YouTube?s media stream ended or is unavailable. Try starting it again or choose another broadcast.")
                 if code == "429":
-                    return VideoSourceError("YouTube is rate-limiting media requests. Wait a moment and try again.")
+                    return YouTubeRateLimitError()
                 return VideoSourceError(f"YouTube?s media server failed (HTTP {code}). Try again shortly.")
         return VideoSourceError("FFmpeg could not decode video from YouTube. Try another publicly playable broadcast.")
 

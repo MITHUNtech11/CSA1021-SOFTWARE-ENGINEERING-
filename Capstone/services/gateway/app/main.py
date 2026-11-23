@@ -1,5 +1,7 @@
 import asyncio
 import logging
+from math import ceil
+from time import monotonic
 import re
 import subprocess
 import json
@@ -16,7 +18,7 @@ from fastapi.responses import JSONResponse
 from fastapi.middleware.cors import CORSMiddleware
 from shared.models.telemetry import TelemetryTick
 from services.ingestion.app.simulator import MatchSimulator
-from services.ingestion.app.stream_reader import LiveStreamWorker, StreamSourceType, VideoSourceError
+from services.ingestion.app.stream_reader import LiveStreamWorker, StreamSourceType, VideoSourceError, YouTubeRateLimitError
 from services.analytics.app.engine import AnalyticsEngine
 from services.analytics.app.vision.hud_analyzer import ValorantHUDAnalyzer, ValorantHUDState
 from services.prediction.app.service import PredictionEngine
@@ -121,6 +123,14 @@ live_valorant_model = ValorantTacticalWinProbability()
 live_inflection_tagger = ValorantInflectionTagger()
 live_task: Optional[asyncio.Task] = None
 live_control_lock = asyncio.Lock()
+YOUTUBE_BACKOFF_SECONDS = 15 * 60
+youtube_retry_at = 0.0
+
+
+def record_youtube_rate_limit():
+    global youtube_retry_at
+    youtube_retry_at = monotonic() + YOUTUBE_BACKOFF_SECONDS
+
 live_error: Optional[str] = None
 current_live_state: Optional[Dict[str, Any]] = None
 live_history: List[Dict[str, Any]] = []
@@ -263,6 +273,8 @@ async def _live_analysis_loop(worker: LiveStreamWorker, frame):
     except asyncio.CancelledError:
         raise
     except VideoSourceError as error:
+        if isinstance(error, YouTubeRateLimitError):
+            record_youtube_rate_limit()
         live_error = str(error)
         logger.warning("%s video analysis ended: %s", worker.source_type.value, live_error)
     except (TimeoutError, subprocess.TimeoutExpired):
@@ -314,6 +326,11 @@ async def start_live_analysis(req: LiveAnalysisRequest):
     global live_worker, live_task, current_live_state, prev_live_hud_state, prev_prob_blue, live_error
     source = resolve_live_source(req)
     async with live_control_lock:
+        if req.source_type == StreamSourceType.YOUTUBE_LIVE:
+            remaining = ceil(youtube_retry_at - monotonic())
+            if remaining > 0:
+                raise HTTPException(503, f"YouTube rate-limited this gateway. Use Watch only or retry in {remaining} seconds.",
+                                    headers={"Retry-After": str(remaining)})
         await _cancel_live_task()
         current_live_state = prev_live_hud_state = live_error = None
         prev_prob_blue = 0.50
@@ -328,6 +345,10 @@ async def start_live_analysis(req: LiveAnalysisRequest):
                 raise VideoSourceError("The selected source ended before producing a video frame.", status)
         except (VideoSourceError, TimeoutError, OSError, subprocess.SubprocessError) as error:
             worker.stop()
+            headers = None
+            if isinstance(error, YouTubeRateLimitError):
+                record_youtube_rate_limit()
+                headers = {"Retry-After": str(YOUTUBE_BACKOFF_SECONDS)}
             if isinstance(error, VideoSourceError):
                 live_error, status = str(error), error.status_code
             elif isinstance(error, (TimeoutError, subprocess.TimeoutExpired)):
@@ -336,7 +357,7 @@ async def start_live_analysis(req: LiveAnalysisRequest):
                 live_error, status = "The gateway could not launch the video decoder. Check the FFmpeg installation.", 503
             logger.warning("Could not start %s video analysis: %s", req.source_type.value, live_error)
             await ws_manager.broadcast_json({"type": "LIVE_STOPPED", "error": live_error})
-            raise HTTPException(status, live_error) from None
+            raise HTTPException(status, live_error, headers=headers) from None
         except asyncio.CancelledError:
             worker.stop()
             raise
@@ -469,6 +490,13 @@ def youtube_watch_url(value: str) -> str:
 def fetch_youtube_metadata(url: str) -> Dict[str, Any]:
     vid = parse_video_id(url)
     clean_url = f"https://www.youtube.com/watch?v={vid}"
+    fallback = {
+        "video_id": vid, "title": "YouTube reference video", "author": "",
+        "thumbnail_url": f"https://img.youtube.com/vi/{vid}/hqdefault.jpg",
+        "duration": 1440, "is_live": False,
+    }
+    if monotonic() < youtube_retry_at:
+        return fallback
 
     # 1. Attempt extraction via yt-dlp for rich stream & metadata details
     try:
@@ -521,14 +549,7 @@ def fetch_youtube_metadata(url: str) -> Dict[str, Any]:
                 "is_live": False
             }
     except Exception:
-        return {
-            "video_id": vid,
-            "title": "YouTube reference video",
-            "author": "",
-            "thumbnail_url": f"https://img.youtube.com/vi/{vid}/hqdefault.jpg",
-            "duration": 1440,
-            "is_live": False
-        }
+        return fallback
 
 @app.get("/api/v1/broadcast/current")
 def get_current_broadcast():

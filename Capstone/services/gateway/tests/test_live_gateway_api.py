@@ -46,6 +46,41 @@ def test_live_gateway_state_endpoint(client):
     assert "history_count" in data
 
 
+def test_rate_limit_preserves_other_sources_and_expires(client, monkeypatch):
+    from services.gateway.app import main as gateway
+    from services.ingestion.app.stream_reader import LiveStreamWorker, StreamSourceType, YouTubeRateLimitError
+
+    clock = [1000.0]
+    monkeypatch.setattr(gateway, "monotonic", lambda: clock[0])
+    monkeypatch.setattr(gateway, "youtube_retry_at", 0.0)
+    prepare = LiveStreamWorker.prepare
+    attempts = []
+
+    def limited_prepare(worker):
+        if worker.source_type == StreamSourceType.YOUTUBE_LIVE:
+            attempts.append(worker.source)
+            raise YouTubeRateLimitError()
+        prepare(worker)
+
+    monkeypatch.setattr(LiveStreamWorker, "prepare", limited_prepare)
+    path = "/api/v1/live/start"
+    video = {"source": "BaW_jenozKc", "source_type": "YOUTUBE_LIVE"}
+    first = client.post(path, json=video)
+    assert first.status_code == 503
+    assert int(first.headers["Retry-After"]) == gateway.YOUTUBE_BACKOFF_SECONDS
+    client.post(path, json={}).raise_for_status()
+    clock[0] += 30
+    retry = client.post(path, json=video)
+    assert retry.status_code == 503
+    assert int(retry.headers["Retry-After"]) == gateway.YOUTUBE_BACKOFF_SECONDS - 30
+    assert len(attempts) == 1
+    assert client.get("/api/v1/live/status").json()["is_running"]
+    assert gateway.fetch_youtube_metadata(video["source"])["video_id"] == video["source"]
+    clock[0] += gateway.YOUTUBE_BACKOFF_SECONDS
+    assert client.post(path, json=video).status_code == 503
+    assert len(attempts) == 2
+
+
 def test_video_start_failure_is_reported_without_synthetic_fallback(client, monkeypatch, tmp_path):
     from services.ingestion.app import stream_reader
 

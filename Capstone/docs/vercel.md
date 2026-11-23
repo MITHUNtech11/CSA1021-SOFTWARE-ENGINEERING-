@@ -17,6 +17,6 @@ To roll back, restore a known working Vercel deployment and its compatible gatew
 
 The current release uses Vercel CLI for frontend deployments. From the linked `Capstone/client` directory on the release branch, run `npx vercel deploy --prod` after the checks pass. Render follows gateway changes on the release branch automatically.
 
-If YouTube rate-limits the gateway, the dashboard reports the upstream restriction. **Watch only** opens the embedded broadcast while server-side YouTube HUD analysis is unavailable. Wait before trying the source again. The built-in replay and synthetic HUD work independently of YouTube.
+If YouTube rate-limits HUD extraction, the gateway waits 15 minutes before allowing another YouTube analysis attempt. The start endpoint returns HTTP 503 and a `Retry-After` header during this interval. **Watch only** opens the embedded broadcast. Reference videos can still be attached to the replay, and the synthetic HUD remains available.
 
 Provider references: [Vite on Vercel](https://vercel.com/docs/frameworks/frontend/vite), [Render Blueprint fields](https://render.com/docs/blueprint-spec), [Render Free services](https://render.com/docs/free).
