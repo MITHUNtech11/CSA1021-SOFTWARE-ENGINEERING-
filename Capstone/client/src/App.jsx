@@ -28,7 +28,7 @@ function currentView() {
 
 export default function App() {
   const {
-    isConnected, needsAccessKey, connectWithKey, ticks, predictions, changePoints, peltSegments, activeVideo,
+    isConnected, ticks, predictions, changePoints, peltSegments, activeVideo,
     liveSourceType, liveVideoId, liveAnalysisSeconds, error, simulatorStatus, isLiveBroadcasting, liveHudState,
     liveWinProbability, liveInflectionEvents, dismissError, step, play, pause,
     reset, startLiveAnalysis, stopLiveAnalysis, analyzeYouTubeVideo, seekToRound,
@@ -70,7 +70,7 @@ export default function App() {
         event.preventDefault();
         heading.current?.focus();
       }}>Skip to main content</a>
-      <Header view={view} isConnected={isConnected} needsAccessKey={needsAccessKey} isLiveBroadcasting={isLiveBroadcasting} />
+      <Header view={view} isConnected={isConnected} isLiveBroadcasting={isLiveBroadcasting} />
       <main id="main-content" className="workspace-main">
         <div className="workspace-content">
           <div className="page-heading">
@@ -89,17 +89,7 @@ export default function App() {
             )}
           </div>
 
-          {needsAccessKey ? (
-            <form className="connection-notice access-form" onSubmit={(event) => {
-              event.preventDefault();
-              connectWithKey(new FormData(event.currentTarget).get('accessKey'));
-              event.currentTarget.reset();
-            }}>
-              <label htmlFor="access-key">Team access key</label>
-              <input id="access-key" name="accessKey" type="password" autoComplete="current-password" required maxLength={256} />
-              <button type="submit" className="ui-button">Connect</button>
-            </form>
-          ) : !isConnected && <p className="connection-notice" role="status">Waiting for the gateway. Playback and analysis controls will be available once connected.</p>}
+          {!isConnected && <p className="connection-notice" role="status">Connecting to the gateway. Playback and analysis controls will be available once connected.</p>}
           {error && (
             <div className="error-banner">
               <p role="alert">{error}</p>

@@ -6,7 +6,6 @@ import re
 import subprocess
 import json
 import os
-import secrets
 from contextlib import asynccontextmanager
 from pathlib import Path
 import urllib.request
@@ -58,16 +57,9 @@ app = FastAPI(
 )
 
 DASHBOARD_ORIGIN = os.getenv("ESPORTECHO_DASHBOARD_ORIGIN", "")
-ACCESS_KEY = os.getenv("ESPORTECHO_ACCESS_KEY", "")
-if DASHBOARD_ORIGIN or ACCESS_KEY or os.getenv("RENDER"):
+if DASHBOARD_ORIGIN or os.getenv("RENDER"):
     if not re.fullmatch(r"https://[A-Za-z0-9.-]+(?::[0-9]+)?", DASHBOARD_ORIGIN):
         raise RuntimeError("Set ESPORTECHO_DASHBOARD_ORIGIN to the exact HTTPS dashboard origin.")
-    if not re.fullmatch(r"[!-~]{32,256}", ACCESS_KEY):
-        raise RuntimeError("Set ESPORTECHO_ACCESS_KEY to a random 32-256 character ASCII key.")
-
-
-def valid_key(value: str) -> bool:
-    return value.isascii() and secrets.compare_digest(value, ACCESS_KEY)
 
 
 def allowed_origin(headers) -> bool:
@@ -87,17 +79,13 @@ def allowed_origin(headers) -> bool:
 async def reject_cross_origin_writes(request: Request, call_next):
     if request.method not in {"GET", "HEAD", "OPTIONS"} and not allowed_origin(request.headers):
         return JSONResponse({"detail": "Cross-origin request rejected."}, status_code=403)
-    if ACCESS_KEY and request.url.path != "/health":
-        scheme, _, key = request.headers.get("authorization", "").partition(" ")
-        if scheme.lower() != "bearer" or not valid_key(key):
-            return JSONResponse({"detail": "A valid team access key is required."}, status_code=401)
     return await call_next(request)
 
 
 if DASHBOARD_ORIGIN:
     app.add_middleware(
         CORSMiddleware, allow_origins=[DASHBOARD_ORIGIN], allow_methods=["GET", "POST"],
-        allow_headers=["Authorization", "Content-Type"],
+        allow_headers=["Content-Type"],
     )
 
 
@@ -292,7 +280,7 @@ async def _live_analysis_loop(worker: LiveStreamWorker, frame):
 
 @app.get("/health")
 def health():
-    if ACCESS_KEY:
+    if DASHBOARD_ORIGIN:
         return {"status": "healthy", "service": "api-gateway"}
     return {
         "status": "healthy",
@@ -661,15 +649,6 @@ async def websocket_live_stream(websocket: WebSocket):
         return
     try:
         await websocket.accept()
-        if ACCESS_KEY:
-            try:
-                key = await asyncio.wait_for(websocket.receive_text(), timeout=5)
-            except asyncio.TimeoutError:
-                key = ""
-            if not valid_key(key):
-                await websocket.send_json({"type": "ACCESS_DENIED"})
-                await websocket.close(code=4401)
-                return
         await ws_manager.connect(websocket, lambda: {
             **replay_snapshot("INITIAL_SNAPSHOT"),
             "live_status": {

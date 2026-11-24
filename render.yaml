@@ -19,5 +19,3 @@ services:
         value: "8000"
       - key: ESPORTECHO_DASHBOARD_ORIGIN
         sync: false
-      - key: ESPORTECHO_ACCESS_KEY
-        generateValue: true

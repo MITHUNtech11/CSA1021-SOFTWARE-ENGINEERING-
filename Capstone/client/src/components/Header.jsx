@@ -6,8 +6,8 @@ const links = [
   { id: 'analysis', label: 'Analysis', Icon: ChartNoAxesCombined },
 ];
 
-export default function Header({ view, isConnected, needsAccessKey, isLiveBroadcasting }) {
-  const connectionLabel = needsAccessKey ? 'Team key required' : isConnected ? 'Gateway connected' : 'Connecting to gateway';
+export default function Header({ view, isConnected, isLiveBroadcasting }) {
+  const connectionLabel = isConnected ? 'Gateway connected' : 'Connecting to gateway';
   return (
     <header className="workspace-sidebar">
       <a className="workspace-brand" href="#overview" aria-label="EsportEcho overview">

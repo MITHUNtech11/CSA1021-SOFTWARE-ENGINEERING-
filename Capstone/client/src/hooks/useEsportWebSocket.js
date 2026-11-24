@@ -25,7 +25,6 @@ export function useEsportWebSocket() {
   const [replay, setReplay] = useState(INITIAL_REPLAY);
   const [live, setLive] = useState(INITIAL_LIVE);
   const [error, setError] = useState(null);
-  const [accessKey, setAccessKey] = useState('');
   const wsRef = useRef(null);
 
   const dismissError = useCallback(() => {
@@ -77,32 +76,23 @@ export function useEsportWebSocket() {
   }, []);
 
   useEffect(() => {
-    if (gatewayOrigin && !accessKey) return;
     let stopped = false;
     let reconnectTimer;
     let heartbeat;
     let reconnectDelay = 1000;
 
-    function rejectKey() {
-      setIsConnected(false);
-      setAccessKey('');
-      setReplay(INITIAL_REPLAY);
-      setLive(INITIAL_LIVE);
-      setError('That access key was rejected. Enter your team access key again.');
-    }
-
     function connect() {
       const ws = new WebSocket(socketUrl);
       wsRef.current = ws;
-      ws.onopen = () => {
-        if (accessKey && !stopped) ws.send(accessKey);
-      };
       let lastMessage = Date.now();
-
-      heartbeat = setInterval(() => {
-        if (Date.now() - lastMessage > 20000) ws.close();
-        else if (ws.readyState === WebSocket.OPEN) ws.send('ping');
-      }, 8000);
+      ws.onopen = () => {
+        if (stopped) return;
+        lastMessage = Date.now();
+        heartbeat = setInterval(() => {
+          if (Date.now() - lastMessage > 20000) ws.close();
+          else if (ws.readyState === WebSocket.OPEN) ws.send('ping');
+        }, 8000);
+      };
 
       ws.onmessage = ({ data }) => {
         if (stopped) return;
@@ -110,10 +100,6 @@ export function useEsportWebSocket() {
         if (data === 'pong') return;
         try {
           const event = JSON.parse(data);
-          if (event.type === 'ACCESS_DENIED') {
-            rejectKey();
-            return;
-          }
           applyEvent(event);
           if (event.type === 'INITIAL_SNAPSHOT') {
             setIsConnected(true);
@@ -124,14 +110,10 @@ export function useEsportWebSocket() {
         }
       };
 
-      ws.onclose = ({ code }) => {
+      ws.onclose = () => {
         clearInterval(heartbeat);
         if (stopped) return;
         setIsConnected(false);
-        if (code === 4401) {
-          rejectKey();
-          return;
-        }
         reconnectTimer = setTimeout(connect, reconnectDelay);
         reconnectDelay = Math.min(reconnectDelay * 2, 15000);
       };
@@ -147,22 +129,14 @@ export function useEsportWebSocket() {
       wsRef.current?.close();
       wsRef.current = null;
     };
-  }, [applyEvent, accessKey]);
-
-  const connectWithKey = useCallback((key) => {
-    setError(null);
-    setAccessKey(key);
-  }, []);
+  }, [applyEvent]);
 
   const command = useCallback(async (path, body) => {
     setError(null);
     try {
       const response = await fetch(`${gatewayOrigin}/api/v1/${path}`, {
         method: 'POST',
-        headers: {
-          ...(body && { 'Content-Type': 'application/json' }),
-          ...(accessKey && { Authorization: `Bearer ${accessKey}` }),
-        },
+        headers: body ? { 'Content-Type': 'application/json' } : undefined,
         body: body ? JSON.stringify(body) : undefined,
         redirect: 'error',
         signal: AbortSignal.timeout(45000),
@@ -182,7 +156,7 @@ export function useEsportWebSocket() {
       setError(error.name === 'TimeoutError' ? 'The gateway took too long to respond.' : error.message);
       return null;
     }
-  }, [applyEvent, accessKey]);
+  }, [applyEvent]);
 
   const step = useCallback(() => command('simulation/step'), [command]);
   const play = useCallback((speed = 1) => command(`simulation/play?speed=${speed}`), [command]);
@@ -194,8 +168,6 @@ export function useEsportWebSocket() {
   const seekToRound = useCallback((round) => command('simulation/seek', { sequence_id: round }), [command]);
 
   return {
-    needsAccessKey: Boolean(gatewayOrigin && !accessKey),
-    connectWithKey,
     isConnected,
     ticks: replay.ticks,
     predictions: replay.predictions,
