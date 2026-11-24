@@ -1,13 +1,8 @@
 ﻿import { Columns3 } from 'lucide-react';
 
+import { teamMetrics } from '../analytics';
+
 const format = new Intl.NumberFormat();
-const METRICS = [
-  ['Credits', 'total_gold'],
-  ['Eliminations', 'total_kills'],
-  ['Sites won', 'turrets_destroyed'],
-  ['Opening picks', 'dragons'],
-  ['Clutches', 'barons'],
-];
 
 export default function TeamComparisonCards({ currentTick, blueName, redName }) {
   return (
@@ -18,7 +13,7 @@ export default function TeamComparisonCards({ currentTick, blueName, redName }) 
       <table className="comparison-table">
         <thead><tr><th scope="col">Metric</th><th scope="col" className="side-blue">{blueName}</th><th scope="col" className="side-red">{redName}</th></tr></thead>
         <tbody>
-          {METRICS.map(([label, key]) => (
+          {teamMetrics.map(([label, key]) => (
             <tr key={key}>
               <th scope="row">{label}</th>
               <td>{currentTick ? format.format(currentTick.blue_team[key]) : '—'}</td>

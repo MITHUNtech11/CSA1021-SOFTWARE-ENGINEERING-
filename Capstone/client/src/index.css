@@ -176,6 +176,7 @@ h1[tabindex="-1"]:focus { outline: none; }
 .ui-primary:hover:not(:disabled) { background: #cab7ff; color: #160e24; border-color: #d7c6ff; }
 .ui-button:disabled, select:disabled { opacity: .48; cursor: not-allowed; }
 .page-action { margin-bottom: 1px; color: #e2d8ff; }
+.report-actions { display: flex; flex-wrap: wrap; align-items: flex-start; gap: 8px; }
 .icon-button { padding: 6px; border-radius: 6px; }
 .icon-button:hover { background: #ffffff12; }
 
@@ -330,7 +331,7 @@ h1[tabindex="-1"]:focus { outline: none; }
   .workspace-sidebar { padding-inline: 12px; }
   .workspace-nav > a { flex: 1; justify-content: center; padding-inline: 5px; gap: 6px; min-height: 40px; font-size: 12px; }
   .workspace-content { padding-inline: 12px; }
-  .page-heading { margin-bottom: 13px; }
+  .page-heading { margin-bottom: 13px; flex-wrap: wrap; }
   .page-action { padding: 0 8px; }
   .broadcast-action { display: none; }
   .page-action svg:last-child { display: none; }

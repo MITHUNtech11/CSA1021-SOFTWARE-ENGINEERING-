@@ -1,18 +1,11 @@
 import React from 'react';
 import { Compass } from 'lucide-react';
+import { teamBehavior } from '../analytics';
 
 export default function BehaviorRadar({ currentTick, blueName = "Sentinels", redName = "Fnatic" }) {
-  const blue = currentTick?.blue_team;
-  const red = currentTick?.red_team;
-
-  // Radar Axes Metrics normalized to [0.1, 1.0]
-  const axes = [
-    { label: "Aggression", blueVal: Math.min(1.0, 0.2 + (blue?.total_kills || 0) * 0.04), redVal: Math.min(1.0, 0.2 + (red?.total_kills || 0) * 0.04) },
-    { label: "Economy", blueVal: Math.min(1.0, (blue?.total_gold ?? 0) / 55000), redVal: Math.min(1.0, (red?.total_gold ?? 0) / 55000) },
-    { label: "Objectives", blueVal: Math.min(1.0, 0.1 + ((blue?.turrets_destroyed || 0)*0.07) + ((blue?.dragons || 0)*0.1) + ((blue?.barons || 0)*0.25)), redVal: Math.min(1.0, 0.1 + ((red?.turrets_destroyed || 0)*0.07) + ((red?.dragons || 0)*0.1) + ((red?.barons || 0)*0.25)) },
-    { label: "Vision", blueVal: Math.min(1.0, (blue?.vision_score ?? 0) / 100), redVal: Math.min(1.0, (red?.vision_score ?? 0) / 100) },
-    { label: "Structure Pressure", blueVal: Math.min(1.0, 0.15 + (blue?.turrets_destroyed || 0) * 0.08), redVal: Math.min(1.0, 0.15 + (red?.turrets_destroyed || 0) * 0.08) },
-  ];
+  const blue = teamBehavior(currentTick?.blue_team);
+  const red = teamBehavior(currentTick?.red_team);
+  const axes = Object.entries(blue).map(([label, blueVal]) => ({ label, blueVal, redVal: red[label] }));
 
   const size = 260;
   const center = size / 2;

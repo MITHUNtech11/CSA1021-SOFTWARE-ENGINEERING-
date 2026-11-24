@@ -1,17 +1,14 @@
 import { useState } from 'react';
 import { Activity, Play, Radio, Square, Video } from 'lucide-react';
 import YouTubePlayer, { getYouTubeVideoId } from './YouTubePlayer';
+import DownloadAnalytics from './DownloadAnalytics';
+import { formatElapsed } from '../analytics';
 
 const SOURCES = {
   SYNTHETIC: 'Synthetic demo',
   YOUTUBE_LIVE: 'YouTube stream',
   LOCAL_VIDEO: 'Server recording',
 };
-
-function formatElapsed(seconds) {
-  const rounded = Math.floor(seconds);
-  return `${Math.floor(rounded / 60)}:${String(rounded % 60).padStart(2, '0')}`;
-}
 
 export default function LiveHUDOverlay({
   active, isConnected, isLiveBroadcasting, sourceType, videoId, analysisSeconds,
@@ -24,7 +21,8 @@ export default function LiveHUDOverlay({
   const [pending, setPending] = useState(false);
   const isDemo = source === 'SYNTHETIC';
   const youtube = source === 'YOUTUBE_LIVE';
-  const displayedVideoId = videoId || ((!isLiveBroadcasting || sourceType === 'YOUTUBE_LIVE') ? previewId : null);
+  const activeVideoId = isLiveBroadcasting ? videoId : null;
+  const displayedVideoId = activeVideoId || ((!isLiveBroadcasting || sourceType === 'YOUTUBE_LIVE') ? previewId : null);
 
   function previewYouTube() {
     const id = getYouTubeVideoId(input);
@@ -103,14 +101,21 @@ export default function LiveHUDOverlay({
           <div className="broadcast-player">
             <div className="broadcast-player-heading">
               <h3>Broadcast video</h3>
-              {!videoId && <button type="button" className="ui-button" onClick={() => setPreviewId(null)}>Close video</button>}
+              {!activeVideoId && <button type="button" className="ui-button" onClick={() => setPreviewId(null)}>Close video</button>}
             </div>
             <YouTubePlayer videoId={displayedVideoId} title="YouTube broadcast video" autoplay={previewId === displayedVideoId} />
-            {videoId && <p className="subtle">YouTube playback and HUD analysis can run at different delays.</p>}
+            {activeVideoId && <p className="subtle">YouTube playback and HUD analysis can run at different delays.</p>}
           </div>
         )}
         {liveHudState ? (
           <div className="hud-results">
+            <div className="panel-heading">
+              <h3>{isLiveBroadcasting ? 'Latest HUD reading' : 'Last session reading'}</h3>
+              <DownloadAnalytics kind="hud" data={{
+                source: SOURCES[sourceType], videoId, blueName: blueSide, redName: redSide,
+                seconds: analysisSeconds, hud: liveHudState, probability: liveWinProbability, events: liveInflectionEvents,
+              }} />
+            </div>
             {Number.isFinite(analysisSeconds) && <p className="analysis-clock">Analysis time <strong>{formatElapsed(analysisSeconds)}</strong></p>}
             <div className="hud-metrics">
               <div><span className="side-blue">{blueSide} alive</span><strong>{liveHudState.alive_blue}<small>/5</small></strong></div>

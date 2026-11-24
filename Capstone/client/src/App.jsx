@@ -1,6 +1,7 @@
 import { lazy, Suspense, useEffect, useRef, useState } from 'react';
 import { Activity, ArrowRight, ChartNoAxesCombined, Radio, X } from 'lucide-react';
 import Header from './components/Header';
+import DownloadAnalytics from './components/DownloadAnalytics';
 import PlaybackControls from './components/PlaybackControls';
 import WinProbabilityGauge from './components/WinProbabilityGauge';
 import ChangePointTimeline from './components/ChangePointTimeline';
@@ -78,7 +79,14 @@ export default function App() {
               <h1 ref={heading} tabIndex={-1}>{VIEW_TITLES[view]}</h1>
             </div>
             {view === 'overview' && <a className="ui-button page-action broadcast-action" href="#broadcast"><Radio size={16} aria-hidden="true" /> Broadcast <ArrowRight size={15} aria-hidden="true" /></a>}
-            {view === 'analysis' && <a className="ui-button page-action" href="#overview"><Activity size={16} aria-hidden="true" /> Replay controls</a>}
+            {view === 'analysis' && (
+              <div className="report-actions">
+                <a className="ui-button page-action" href="#overview"><Activity size={16} aria-hidden="true" /> Replay controls</a>
+                <DownloadAnalytics kind="replay" disabled={!currentTick} data={{
+                  ticks, predictions, changePoints, peltSegments, totalRounds, blueName: fullBlueName, redName: fullRedName,
+                }} />
+              </div>
+            )}
           </div>
 
           {needsAccessKey ? (

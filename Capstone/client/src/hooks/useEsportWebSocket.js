@@ -68,7 +68,8 @@ export function useEsportWebSocket() {
         }));
         break;
       case 'LIVE_STOPPED':
-        setLive({ ...INITIAL_LIVE, error: event.error });
+        // Keep the final reading available for export until the next source starts.
+        setLive((prev) => ({ ...prev, is_running: false, error: event.error }));
         break;
       default:
         break;
